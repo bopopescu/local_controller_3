@@ -1,0 +1,11 @@
+
+while [ 1 ]
+do
+   echo "executing external interface module"
+   python external_control.py >>  /tmp/external_control.err 2>&1
+   python cloud_event_queue.py "reboot" "external_control"
+   sleep 10
+   echo "dumping error file"
+   mv /tmp/external_control.err /tmp/external_control.errr
+
+done
