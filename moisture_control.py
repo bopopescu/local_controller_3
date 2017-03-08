@@ -36,18 +36,20 @@ class Moisture_Control():
          self.psoc_moisture.make_air_temp_humidity( self.plc_address )
          time.sleep(.3)
          temp = self.psoc_moisture.check_status( self.plc_address )
-         
+         psoc_moisture.force_moisture_reading(40)
+         time.sleep(.3)
+
          
          self.redis_handle.hset("MOISTURE_CONTROL",'ONE_WIRE_DEVICE_FOUND',temp['ONE_WIRE_DEVICE_FOUND'] )
          
          temp =  self.psoc_moisture.read_moisture_control( self.plc_address )
-         
-         redis_handle.hset("MOISTURE_CONTROL",'AIR_HUMIDITY_FLOAT',temp["AIR_HUMIDITY_FLOAT"])
+         print "temp", self.psoc_moisture.read_moisture_resistive_data( self.plc_address )
+         self.redis_handle.hset("MOISTURE_CONTROL",'AIR_HUMIDITY_FLOAT',temp["AIR_HUMIDITY_FLOAT"])
          
          self.redis_handle.hset("MOISTURE_CONTROL",'MOISTURE_SOIL_TEMP_FLOAT',temp["MOISTURE_SOIL_TEMP_FLOAT"])
          self.redis_handle.hset("MOISTURE_CONTROL",'AIR_TEMP_FLOAT',temp["AIR_TEMP_FLOAT"] )
          
-         self.redis_handle.hset("MOISTURE_CONTROL","MOISTURE_CONFIGURATION",json.dumps(self.psoc_moisture.read_moisture_configuration( self.plc_address )))
+         self.redis_handle.hset("MOISTURE_CONTROL","MOISTURE_CONFIGURATION",json.dumps( self.psoc_moisture.read_moisture_configuration( self.plc_address )))
          self.redis_handle.hset("MOISTURE_CONTROL","MOISTURE_DATA",json.dumps(self.psoc_moisture.read_moisture_data( self.plc_address ) ))
          self.redis_handle.hset("MOISTURE_CONTROL","MOISTURE_RESISTIVE_DATA", json.dumps(self.psoc_moisture.read_moisture_resistive_data( self.plc_address )))
          self.redis_handle.hset("MOISTURE_CONTROL","READ_STATUS", "Communication was successful at "+time_stamp)
