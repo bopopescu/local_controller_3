@@ -199,7 +199,7 @@ $(document).ready(
                     contentType: "application/json",
                     error: function () 
 		    {
-                       alert('/ajax/get_all_redis_list'+"  Server Error Change not made");
+                       alert('/ajax/get_all_redis_list'+"  Post Not Made");
 		   
 		       
                     }

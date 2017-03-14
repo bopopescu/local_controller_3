@@ -107,7 +107,7 @@ $(document).ready(
               
                     error: function () 
 		    {
-                       alert('/static/ajax/schedule_data' +"   "+"Server Error Change not made");
+                       alert('/ajax/schedule_data' +"   "+"Server Error Change not made");
 		       
 		       
                     }

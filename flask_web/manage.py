@@ -73,7 +73,7 @@ from flask import request, session
 
 @app.route('/favicon.ico')
 @authDB.requires_auth
-def get_fav(filename):
+def get_fav():
   return app.send_static_file("favicon.ico")
    
   
