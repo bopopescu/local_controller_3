@@ -14,6 +14,7 @@ class Opcodes():
         self.opcodes["SendEvent"]         =    self.send_event_code 
         self.opcodes["WaitTod" ]          =    self.wait_tod_code  
         self.opcodes["WaitEvent"]         =    self.wait_event_code
+        self.opcodes["WaitEventCount"]    =    self.wait_event_count_code
         self.opcodes["WaitTime" ]         =    self.wait_time_code       
         self.opcodes["Wait"]              =    self.wait_condition_code  
         self.opcodes["WaitTod_Reset" ]    =    self.wait_tod_code_reset 
@@ -75,6 +76,19 @@ class Opcodes():
     
     return returnValue
 
+
+  def wait_event_count_code( self, cf_handle, chainObj, parameters, event ):
+    
+    returnValue = "HALT"
+    if event["name"] == "INIT" :
+          parameters[2] = 0
+    else:
+       if event["name"] == parameters[0] :
+          parameters[2] = parameters[2]+1
+          if parameters[2] >= int(parameters[1]) :
+               returnValue = "DISABLE"
+    
+    return returnValue
 
   def  wait_event_code_reset( self, cf_handle,chainObj,parameters,event ):
     returnValue = "RESET"
