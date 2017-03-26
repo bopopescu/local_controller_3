@@ -5,7 +5,7 @@ do
        echo "executing moisture monitoring $i"
        /usr/bin/python moisture_monitoring.py  >>  /tmp/moisture_monitoring.err   2>&1
      
-        mv /tmp/moisture_control.err /tmp/moisture_monitoring.errr
+        mv /tmp/moisture_monitoring.err /tmp/moisture_monitoring.errr
         sleep 5
    done
    python cloud_event_queue.py "reboot" "moisture_monitorin"
