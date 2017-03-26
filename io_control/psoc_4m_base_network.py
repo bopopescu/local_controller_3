@@ -93,7 +93,9 @@ class PSOC_BASE_4M():
      
        
        
- 
+        
+   def set_instrument( self, instrument ):
+       self.instrument = instrument
 
 
    # 

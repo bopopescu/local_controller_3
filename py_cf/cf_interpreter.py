@@ -81,15 +81,12 @@ class CF_Interpreter(chain_flow.CF_Base_Interpreter ):
      self.insert_link( link ,"Wait",[function, parameters] )
     
    
-  def  wait_tod_reset( self, link):
-     self.opcodes["WaitTod_Reset" ]   =  self.wait_tod_code_reset 
    
-  def  wait_event_reset( self, link, event_name):
-    self.insert_link( link ,"WaitEvent_Reset",[event_name] )
-   
-   #note python dow is Monday 0  Sunday 6  -- fix later ? 
-  def  wait_time_reset( self, link,dow,hour,minute,second ):  
-      self.insert_link( link ,"WaitTime_Reset",[dow,hour,minute,second] )
+  def  wait_event_reset( self, link, event_name, time_count):
+    self.insert_link( link ,"WaitEvent_Reset",[event_name,time_count,0] )
+
+  def wait_event_count( self, link, event_name, count ):
+    self.insert_link( link ,"WaitEvent_Reset",[event_name, count,0] )
       
   def  wait_condition( self, link,function,parameters ):
      self.insert_link( link ,"Wait_Reset",[function, parameters] )

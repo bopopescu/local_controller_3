@@ -62,6 +62,7 @@ class Redis_Graph_Common:
 
    def delete_all(self): #tested
        keys = self.redis.keys(self.sep+"*")
+ 
        for i in keys:
           self.redis.delete(i)
 

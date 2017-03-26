@@ -97,7 +97,20 @@ class PSOC_BASE_4M():
        
        
  
+   def set_ip( self, ip ):
+      self.ip = ip
 
+   def set_port( self, port ):
+       self.port = port
+
+   def set_modbus_address( self, address ):
+       self.modbus_address = address
+
+   def set_instrument( self, instrument ):
+       self.instrument = instrument
+
+   def set_system_id( self, system_id ):
+        self.system_id = system_id
 
    # 
    #

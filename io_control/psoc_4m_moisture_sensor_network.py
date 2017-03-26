@@ -125,6 +125,7 @@ class PSOC_4M_MOISTURE_UNIT(PSOC_BASE_4M):
    def make_soil_temperature ( self, address): #sampling rate is in minutes
          self.instrument.write_registers(address, self.make_soil_temperature_addr, [0] )
          
+         
    def make_air_temp_humidity( self, address): #sampling rate is in minutes
          self.instrument.write_registers(address, self.make_air_temp_humidity_addr, [0] )
 

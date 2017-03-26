@@ -9,20 +9,20 @@ import json
 import redis
 from redis_graph.redis_graph_common   import Redis_Graph_Common
 from redis_graph.redis_graph_populate import Build_Configuration
-from redis_graph.redis_graph_common   import Redis_Graph_Common
 from farm_template        import Construct_Farm
 from redis_graph.redis_graph_query   import Query_Configuration
 import copy
  
 class Graph_Management():
 
-   def __init__( self , controller_name, io_server_name ):
+   def __init__( self , controller_name, io_server_name, data_store_name ):
       self.redis_handle  = redis.StrictRedis( host = "localhost", port=6379, db = 15 )   
       self.common = Redis_Graph_Common( self.redis_handle)
       self.qc = Query_Configuration( self.redis_handle, self.common )
       
       self.controller_name = controller_name
       self.io_server_name  = io_server_name
+      self.data_store_name = data_store_name
 
    def find_remotes( self  ):
       keys = self.qc.match_label_property_generic( "UDP_IO_SERVER", "name", self.io_server_name, "REMOTE" )
@@ -41,9 +41,40 @@ class Graph_Management():
           return_value[data["name"]]= data
        return return_value
 
-     
+   def find_data_store_by_function(self, function):
+      keys = self.qc.match_label_property_generic( "DATA_STORE", "name", self.data_store_name, function )
+      return_value = {}
+      for i in keys:
+         data = self.redis_handle.hgetall(i)
+         return_value[data["name"]]= data
+      return return_value
+
+   def find_data_stores( self ):
+       keys = self.qc.match_relationship("DATA_STORE")
+       return_value = {}
+       for i in keys:
+           data = self.redis_handle.hgetall(i)
+           return_value[data["name"]] = data
+       return return_value 
+
+   def find_io_servers( self ):
+       keys = self.qc.match_relationship("UDP_IO_SERVER")
+       return_value = {}
+       for i in keys:
+           data = self.redis_handle.hgetall(i)
+           return_value[data["name"]] = data
+       return return_value 
 
 
+   def get_value( self, key ):
+      return self.redis_handle.hgetall(key["namespace"])
+
+   def convert_namespace( self, name ):
+       name = name.replace(chr(0x82),"[")
+       name = name.replace(chr(0x83),"~")
+       name = name.replace(chr(0x84),"]")
+       name = name.replace(chr(0x85),":")
+       return name
 
 if __name__ == "__main__" :
    redis_handle  = redis.StrictRedis( host = "localhost", port=6379, db = 15 )   
@@ -71,6 +102,19 @@ if __name__ == "__main__" :
 
    # we are going to construct the data store here
    cf.add_redis_data_store(name="LaCima_DataStore", ip="192.168.1.84" )  # want a fresh data store
+ 
+   cf.start_moisture_store()
+   description_map = ["Bank 10 Watermark 8 inch","Bank 10 Resistive 8 inch", "Bank 10 Resistive 18 inch", "empty",
+                      "Bank 6 Watermark 8 inch", "Bank 10 Resistive 8 inch","Bank 10 Resistive 18 inch","empty"]
+   depth_map = [8,8,18,0,8,8,16,0]
+   cf.add_moisture_sensor_store( "moisture_1", "Moisture Sensor for Irrigation Banks 10 and 6", description_map=description_map, 
+                                  depth_map= depth_map, update_time= 15 )
+
+   cf.end_moisture_store()
+      
+
+
+
    cf.end_redis_data_store()
 
    cf.add_udp_io_sever(name="main_remote", ip = "192.168.1.82", remote_type= "UDP", port=5005   )

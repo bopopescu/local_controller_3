@@ -17,9 +17,9 @@ class Opcodes():
         self.opcodes["WaitEventCount"]    =    self.wait_event_count_code
         self.opcodes["WaitTime" ]         =    self.wait_time_code       
         self.opcodes["Wait"]              =    self.wait_condition_code  
-        self.opcodes["WaitTod_Reset" ]    =    self.wait_tod_code_reset 
+
         self.opcodes["WaitEvent_Reset"]   =    self.wait_event_code_reset
-        self.opcodes["WaitTime_Reset" ]   =    self.wait_time_code_reset       
+       
         self.opcodes["Wait_Reset"]        =    self.wait_condition_code_reset  
         self.opcodes["Verify"]            =    self.verify_condition_code 
         self.opcodes["Nop"]               =    self.nop  
@@ -78,7 +78,7 @@ class Opcodes():
 
 
   def wait_event_count_code( self, cf_handle, chainObj, parameters, event ):
-    
+
     returnValue = "HALT"
     if event["name"] == "INIT" :
           parameters[2] = 0
@@ -115,17 +115,6 @@ class Opcodes():
 
        return returnValue
 
-
-  def  wait_time_code_reset( self, cf_handle,chainObj,parameters,event ):
-       returnValue = "RESET"
-       if event["name"] == "INIT":
-          parameters[1] = 0
-       if event["name"] == "TIME_TICK" :
-          #print "Time Tick",parameters[0],parameters[1]
-          parameters[1] = parameters[1] + int(event["data"])
-       if parameters[0] <= parameters[1] :
-	 returnValue = "DISABLE"
-       return returnValue
 
 
 
@@ -195,36 +184,6 @@ class Opcodes():
     return "DISABLE"
 
 
-
-  def wait_tod_code_reset(  self, cf_handle, chainObj,parameters, event ):
-    returnValue = "RESET"
-    dow = parameters[0]
-    hour = parameters[1]
-    minute = parameters[2]
-    second = parameters[3]
-
-    time_stamp = datetime.datetime.today()
-   
-    if ( ( dow == time_stamp.weekday()) or
-	 ( dow == "*" ) ) == False: 
-	return returnValue
-   
-
-    if ( ( hour == time_stamp.hour) or
-	 ( hour == "*" ) ) == False: 
-	return returnValue
-   
-
-    if ( ( minute == time_stamp.minute ) or
-	 ( minute == "*" ) ) == False:
-	return returnValue
-    
-    if ( ( second == time_stamp.second ) or
-	 ( second == "*" ) ) == False: 
-	return returnValue
-   
-
-    return "DISABLE"
 
 
 
