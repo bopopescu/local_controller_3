@@ -12,15 +12,22 @@ import py_cf
 import os
 import copy
 import load_files
+import rabbit_cloud_status_publish
 
 
 
 
 class Moisture_Control():
-   def __init__(self, redis_handle  ): 
+   def __init__(self, redis_handle , status_queue ): 
        self.redis_handle           = redis_handle
        self.redis_handle.hset("MOISTURE_CONTROL","MANUAL_UPDATE",0 )
        self.moisture_length = 1000 # 10 days @ 15 minute interval
+       self.status_queue  = status_queue
+
+ 
+        
+
+
 
    def make_measurements( self, modbus_address,   driver_class ):
        measure_properties = {}
@@ -75,6 +82,7 @@ class Moisture_Control():
            redis_handle.ltrim( namespace, 0, self.moisture_length )
            print redis_handle.llen(namespace)
            print redis_handle.lindex(namespace,0)
+           self.status_queue.queue_message("moisture_measurement", properties )
 
 
    def check_update_flag( self,chainFlowHandle, chainOjb, parameters, event ):
@@ -151,7 +159,13 @@ if __name__ == "__main__":
   
    #psoc_moisture = moisture.psoc_4m_moisture_sensor_network.PSOC_4M_MOISTURE_UNIT( new_instrument )
 
-   moisture = Moisture_Control( redis_handle )
+   status_stores = graph_management.match_relationship("STATUS_STORE")
+   print "status_stores",status_stores
+   status_store  = status_stores[0]
+   queue_name    = status_store["queue_name"]
+
+   status_queue = rabbit_cloud_status_publish.Status_Queue(redis_handle, queue_name )
+   moisture = Moisture_Control( redis_handle , status_queue)
    moisture.moisture_stations = moisture_stations
    moisture.moisture_stores = moisture_data_stores
    moisture.remote_classes = remote_classes

@@ -50,7 +50,12 @@ class Construct_Farm():
        self.bc.construct_node( push_namespace=True,relationship="MOISTURE_DATA", label="MOISTURE_DATA", name=name,
                                properties= properties )
    
- 
+   def add_status_store( self, name, queue_name):
+       properties = {}
+       properties["queue_name"] = queue_name
+       self.bc.construct_node( push_namespace=True,relationship="STATUS_STORE", label="STATUS_STORE", name=name,
+                               properties= properties )
+
    def end_redis_data_store( self):
        self.bc.pop_namespace()
 
@@ -126,6 +131,19 @@ class Construct_Farm():
        properties["name"]  = "EVENT_QUEUE"
        
        self.bc.construct_node(  push_namespace=False,relationship="RABBITMQ_EVENT_QUEUE", label="RABBITMQ_EVENT_QUEUE", 
+                                name=name, properties = properties)
+
+
+
+   def add_rabbitmq_status_queue( self,name,vhost,queue,port,server  ):
+       properties          = {}
+       properties["name"]  = "STATUS_QUEUE"
+       properties["vhost"]    = vhost
+       properties["queue"]    = queue
+       properties["port"]     = port
+       properties["server"]   = server
+       
+       self.bc.construct_node(  push_namespace=False,relationship="RABBITMQ_STATUS_QUEUE", label="RABBITMQ_STATUS_QUEUE", 
                                 name=name, properties = properties)
 
 

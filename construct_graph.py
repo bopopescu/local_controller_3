@@ -24,6 +24,15 @@ class Graph_Management():
       self.io_server_name  = io_server_name
       self.data_store_name = data_store_name
 
+   def match_relationship( self, query_string, json_flag = True ):
+      keys =  self.qc.match_relationship( query_string ) 
+      return_value = []
+      for i in keys:
+         data = self.redis_handle.hgetall(i)
+
+         return_value.append(data)
+      return return_value
+
    def find_remotes( self  ):
       keys = self.qc.match_label_property_generic( "UDP_IO_SERVER", "name", self.io_server_name, "REMOTE" )
       return_value = {}
@@ -64,6 +73,7 @@ class Graph_Management():
            data = self.redis_handle.hgetall(i)
            return_value[data["name"]] = data
        return return_value 
+
 
 
    def get_value( self, key ):
@@ -110,6 +120,7 @@ if __name__ == "__main__" :
    cf.add_moisture_sensor_store( "moisture_1", "Moisture Sensor for Irrigation Banks 10 and 6", description_map=description_map, 
                                   depth_map= depth_map, update_time= 15 )
 
+   cf.add_status_store( "status_store", "status_store" )
    cf.end_moisture_store()
       
 
@@ -130,18 +141,23 @@ if __name__ == "__main__" :
 
 
    cf.construct_controller(  name="PI_1", ip = "192.168.1.82",type="PI")
+   cf.end_controller()
+
    cf.construct_web_server( name="main_web_server",url="https://192.168.1.84" )
   
    cf.add_rabbitmq_command_rpc_queue("LaCima" )
    cf.add_rabbitmq_web_rpc_queue("LaCima")
    cf.add_rabbitmq_event_queue("LaCima")
+
+
+   cf.add_rabbitmq_status_queue( "LaCima",vhost="LaCima",queue="status_queue",port=5671,server = 'lacimaRanch.cloudapp.net' )
+
    cf.add_eto_server("LaCima")
    cf.add_ntpd_server("LaCima")
    cf.add_moisture_monitoring("LaCima")
    cf.irrigation_monitoring("LaCima")
    cf.add_device_monitoring("LaCima")
    cf.add_watch_dog_monitoring("LaCima")
-   cf.end_controller()
    cf.end_site()
    cf.end_system()
 
@@ -194,7 +210,8 @@ if __name__ == "__main__" :
    print "general match", len(temp) ,temp
 
    print "testing class functions"
-   graph_management = Graph_Management("PI_1","main_remote")
+
+   graph_management = Graph_Management("PI_1","main_remote","LaCima_DataStore" )
    print graph_management.find_remotes()
    print len(graph_management.find_remotes_by_function( "moisture" ))
    print len(graph_management.find_remotes_by_function( "irrigation"  ))
