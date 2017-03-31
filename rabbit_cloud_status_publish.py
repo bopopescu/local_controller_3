@@ -23,7 +23,7 @@ class Status_Queue():
 
 
    def free_messages( self ):
-       print self.redis_handle.llen( self.status_queue)
+ 
        if self.redis_handle.llen( self.status_queue ) > 0:
            return_value = True
        else:
@@ -56,15 +56,15 @@ if __name__ == "__main__":
 
    graph_management = construct_graph.Graph_Management("PI_1","main_remote","LaCima_DataStore")
    status_servers = graph_management.match_relationship("RABBITMQ_STATUS_QUEUE")
-   print "status_servers",status_servers
+   #print "status_servers",status_servers
    status_server  = status_servers[0]
 
    vhost     = status_server["vhost"]
    queue     = status_server[ "queue"]
    port      = int(status_server[ "port" ])
    server    = status_server["server"]    
-   print "user_name",rabbit_user_name
-   print "password",rabbit_password
+   #print "user_name",rabbit_user_name
+   #print "password",rabbit_password
    credentials = pika.PlainCredentials( rabbit_user_name, rabbit_password )
    parameters = pika.ConnectionParameters(     server,
                                                 port,  #ssl port
@@ -87,13 +87,13 @@ if __name__ == "__main__":
    redis_handle = redis.StrictRedis( host = data_server_ip, port=data_server_port, db = 12 )
 
    status_stores = graph_management.match_relationship("STATUS_STORE")
-   print "status_stores",status_stores
+   #print "status_stores",status_stores
    status_store  = status_stores[0]
    queue_name    = status_store["queue_name"]
 
    status_queue = Status_Queue( redis_handle, queue_name )
  
-   status_queue.queue_message( "moisture_data", { "test":"test data" }  )
+   
 
    while True:
        time.sleep(1.0)
@@ -105,7 +105,7 @@ if __name__ == "__main__":
           channel.basic_publish(exchange=queue,
                                 routing_key=routing_key,
                                 body=data_json)
-          print(" [x] Sent %r" % "test message")
+          #print(" [x] Sent %r" % "test message")
    connection.close()
   
    

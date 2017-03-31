@@ -7,5 +7,5 @@ do
       mv /tmp/rabbit_cloud_status_publish.err /tmp/rabbit_cloud_status_publish.errr
       sleep 5
    done
-   python cloud_event_queue.py "reboot" "rabbit_cloud_status_publish
+   python cloud_event_queue.py "reboot" "rabbit_cloud_status_publish"
 done

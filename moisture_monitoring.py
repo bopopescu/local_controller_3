@@ -52,12 +52,13 @@ class Moisture_Control():
          measure_properties["sensor_data"]               =     driver_class.read_moisture_data(  modbus_address ) 
          measure_properties["resistive_data"]            =     driver_class.read_moisture_resistive_data( modbus_address )
          measure_properties["read_status"]               =     "Communication was successful at "+time_stamp
-
+         measure_properties["measurement_status"]        =     1
           
        except:
           #raise
           print "exception handler"
           measure_properties["read_status"]  = "Communications problems with moisture plc at "+time_stamp
+          measure_properties["measurement_status"]        =     0
        return measure_properties
        
 
@@ -72,6 +73,8 @@ class Moisture_Control():
            driver_class = self.remote_classes.find_class( type )
            properties = copy.deepcopy( value)
            measurement_properties = self.make_measurements( int(modbus_address), driver_class )
+           if measurement_properties["measurement_status"] == 0:
+               continue
            properties["measurements"] = measurement_properties
            #
            # Now Store Data
