@@ -44,9 +44,9 @@ class Construct_Farm():
    def add_moisture_sensor_store( self, name, description, description_map, depth_map, update_time ):
        properties = {}
        properties["description"] = description
-       properties["description_map"] = description_map
+       properties["description_map"] = json.dumps(description_map)
        properties["update_time"] = update_time
-       properties["depth_map"] = depth_map
+       properties["depth_map"] = json.dumps(depth_map)
        self.bc.construct_node( push_namespace=True,relationship="MOISTURE_DATA", label="MOISTURE_DATA", name=name,
                                properties= properties )
    

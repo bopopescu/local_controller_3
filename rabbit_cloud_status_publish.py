@@ -34,8 +34,8 @@ class Status_Queue():
    def dequeue_message( self ):
        return self.redis_handle.lpop(self.status_queue )
 
-
-          
+   def get_message( self ):
+       return self.redis_handle.lindex(self.status_queue, -1)          
 
 
 if __name__ == "__main__":
@@ -98,7 +98,7 @@ if __name__ == "__main__":
    while True:
        time.sleep(1.0)
        if status_queue.free_messages() :
-          data_json  = status_queue.dequeue_message()
+          data_json  = status_queue.get_message()
           data       = json.loads(data_json)
           routing_key = data["routing_key"]
   
@@ -106,6 +106,8 @@ if __name__ == "__main__":
                                 routing_key=routing_key,
                                 body=data_json)
           #print(" [x] Sent %r" % "test message")
+          status_queue.dequeue_message()
+
    connection.close()
   
    

@@ -1,6 +1,7 @@
 import redis
 from redis_graph_common import Redis_Graph_Common
 import copy
+import json
 
 class Build_Configuration():
 
@@ -27,7 +28,7 @@ class Build_Configuration():
        
        redis_key, new_name_space = self.common.construct_node( self.namespace, relationship,label,name ) 
        for i in properties.keys():
-           self.redis.hset(redis_key, i,properties[i] )
+           self.redis.hset(redis_key, i, properties[i] )
        
        
        if push_namespace == True:

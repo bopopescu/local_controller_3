@@ -114,10 +114,13 @@ if __name__ == "__main__" :
    cf.add_redis_data_store(name="LaCima_DataStore", ip="192.168.1.84" )  # want a fresh data store
  
    cf.start_moisture_store()
-   description_map = ["Bank 10 Watermark 8 inch","Bank 10 Resistive 8 inch", "Bank 10 Resistive 18 inch", "empty",
-                      "Bank 6 Watermark 8 inch", "Bank 10 Resistive 8 inch","Bank 10 Resistive 18 inch","empty"]
-   depth_map = [8,8,18,0,8,8,16,0]
-   cf.add_moisture_sensor_store( "moisture_1", "Moisture Sensor for Irrigation Banks 10 and 6", description_map=description_map, 
+   description_map = ["Bank 10A Watermark 8 inch","Bank 10A Resistive 8 inch", "Bank 10A Resistive 18 inch", "empty",
+                      "Bank 10B Watermark 8 inch", "Bank 10B Resistive 8 inch","Bank 10B Resistive 18 inch","empty",
+                      "empty", "empty","empty","empty",
+                      "empty", "empty","empty","empty"]
+
+   depth_map = [8,8,18,0,8,8,18,0,0,0,0,0,0,0,0,0]
+   cf.add_moisture_sensor_store( "moisture_1", "Moisture Sensor for Irrigation Bank10", description_map=description_map, 
                                   depth_map= depth_map, update_time= 15 )
 
    cf.add_status_store( "status_store", "status_store" )
