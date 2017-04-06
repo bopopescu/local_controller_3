@@ -140,7 +140,7 @@ $(document).ready(
 	switch( temp_index)
 	{
 	    
-	  case  0:  // Offline
+	  case  0:  // CLEAR
 	      $("#schedule_div").hide()
               $("#manual_div").hide()
               $("#run_div").hide()
@@ -154,41 +154,20 @@ $(document).ready(
 
 	    break;
 	    
-	    
-	    
 
-	  case 3:  // Clean Filter
+          case 2:  // open Master Valve
 	      $("#schedule_div").hide()
               $("#manual_div").hide()
               $("#run_div").hide()
 	    break;
 
-          case 4:  // open Master Valve
-	      $("#schedule_div").hide()
-              $("#manual_div").hide()
-              $("#run_div").hide()
-	    break;
-
-          case 5: // Close Master Valve
+          case 3: // Close Master Valve
 	      $("#schedule_div").hide()
               $("#manual_div").hide()
               $("#run_div").hide()
 	    break;
 
           
-
-          case 6: // suspend
-	      $("#schedule_div").hide()
-              $("#manual_div").hide()
-              $("#run_div").hide()
-	    break;
-
-          case 7: // resume
-	      $("#schedule_div").hide()
-              $("#manual_div").hide()
-              $("#run_div").hide()
-	    break;
-
           
    
 

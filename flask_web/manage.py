@@ -23,6 +23,8 @@ redis_password_port = redis_config.get("PASSWORD_SERVER_PORT")
 
 redis_startup         = redis.StrictRedis( redis_password_ip, redis_password_port, redis_password_db )
 startup_dict          = redis_startup.hgetall("web")
+
+
 app = Flask(__name__)
 
 from io_control.io_controller_class import Build_Controller_Classes
@@ -347,7 +349,7 @@ def update_resistance_limit():
 @authDB.requires_auth
 def index_a():
   filename = "control"
-  return render_template("control",filename=filename)
+  return render_template("diagnostics",filename=="schedule_control")
 
 
 
@@ -355,7 +357,7 @@ def index_a():
 @authDB.requires_auth
 def index():
   filename = "control"
-  return render_template("control",filename=filename)
+  return render_template("diagnostics",filename="schedule_control")
 
  
 @app.route('/control/<filename>')

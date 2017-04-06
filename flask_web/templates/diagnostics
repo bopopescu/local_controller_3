@@ -50,13 +50,10 @@
        
         <h4>Select Operating Function</h4> 
 	<select id="op_mode">
-	    <option value="OFFLINE">Empty Irrigation Queue</option>
+	    <option value="CLEAR">Clear</option>
 	    <option value="NATIVE_SCHEDULE">Queue Schedule Step Time</option>
-	    <option value="CLEAN_FILTER">Clean Filter</option> 
 	    <option value="OPEN_MASTER_VALVE">Open Master Valve</option>
 	    <option value="CLOSE_MASTER_VALVE">Close Master Valve</option>
-            <option value="SUSPEND">Suspend Operation </option> 
-            <option value="RESUME">Resume Operation  </option>         
 	</select>
 
   
@@ -85,13 +82,11 @@
       
         <h4>Select Operating Function</h4> 
 	<select id="op_mode">
-	    <option value="OFFLINE">Empty Irrigation Queue</option>
-	    <option value="NATIVE_SPRINKLER">Queue Controller Pin</option>
-	    <option value="CLEAN_FILTER">Clean Filter</option> 
+	    <option value="CLEAR">Clear</option>
+	    <option value="NATIVE_SPRINKLER">Queue Controller Pin</option> 
 	    <option value="OPEN_MASTER_VALVE">Open Master Valve</option>
 	    <option value="CLOSE_MASTER_VALVE">Close Master Valve</option>
-            <option value="SUSPEND">Suspend Operation </option> 
-            <option value="RESUME">Resume Operation  </option>         
+          
 	</select>
            <div id = "schedule_div">
            <h4 id="schedule_controller">Select Controller</h4> 
