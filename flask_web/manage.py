@@ -349,7 +349,7 @@ def update_resistance_limit():
 @authDB.requires_auth
 def index_a():
   filename = "control"
-  return render_template("diagnostics",filename=="schedule_control")
+  return render_template("diagnostics",filename="schedule_control")
 
 
 
@@ -357,6 +357,7 @@ def index_a():
 @authDB.requires_auth
 def index():
   filename = "control"
+  print "made it here"
   return render_template("diagnostics",filename="schedule_control")
 
  
