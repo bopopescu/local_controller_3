@@ -44,6 +44,47 @@ flow_rate_functions = FlowRateFunctions(redis_handle  )
 system_status          = System_Status( redis_handle )
 statistics_module      = Statistics_Module(redis_handle)
 template_support       = template_support(redis_handle,statistics_module)
+
+#  get handle to graphical data base
+#  
+#
+#
+#
+#  
+     
+import construct_graph
+graph_management = construct_graph.Graph_Management("PI_1","main_remote","LaCima_DataStore")
+data_store_nodes = graph_management.find_data_stores()
+data_values = data_store_nodes.values()
+data_server_ip = data_values[0]["ip"]
+data_server_port = data_values[0]["port"]
+
+redis_data_handle = redis.StrictRedis( host = data_server_ip, port=data_server_port, db = 12 )
+
+moisture_data_start = graph_management.find_data_store_by_function("MOISTURE_STORE")
+moisture_data_stores = graph_management.find_data_store_by_function("MOISTURE_DATA")
+moisture_stores     = set( moisture_data_stores.keys() )
+
+print moisture_data_start
+web_moisture_trigger_key = graph_management.convert_namespace(moisture_data_start["MOISTURE_STORE"]["namespace"])+"trigger_key" 
+
+
+web_moisture_names = []
+web_moisture_data = []
+for key, value in moisture_data_stores.items():
+
+    namespace = graph_management.convert_namespace(value["namespace"] )
+    web_moisture_data.append(namespace)
+    web_moisture_names.append(key)
+   
+   
+ 
+
+
+
+
+
+
   
 class FlaskRealmDigestDB(authdigest.RealmDigestDB):
     def requires_auth(self, f):
@@ -435,14 +476,33 @@ def get_flow_sensor_names():
    temp = flow_rate_functions.get_flow_rate_sensor_names()
    return temp
 
+
+@app.route('/ajax/start_moisture_conversion',methods=["POST"] )
+@authDB.requires_auth
+def start_moisture_conversion():
+     param              = request.get_json() 
+     index              = int(param["index"])
+     
+     print "event received",param,key
+     redis_data_handle.lpush(web_moisture_trigger_key,web_moisture_names[index] )
+
+     return json.dumps(json.dumps(param))
+
+
 @app.route('/ajax/soil_moisture_update',methods=["POST"] )
 @authDB.requires_auth
-def update_moisture_data():
-     #print "moisture update",redis_handle.hget("MOISTURE_CONTROL","MANUAL_UPDATE")
-     redis_handle.hset("MOISTURE_CONTROL","MANUAL_UPDATE",1 )
-     #print "moisture update",redis_handle.hget("MOISTURE_CONTROL","MANUAL_UPDATE")
+def soil_moisture_update():
+     param              = request.get_json() 
+     print param["index"], type( param["index"] )
+     key = web_moisture_data[param["index"]]
+     print( key)
+     print ( redis_data_handle.keys("*"))
+     print ( redis_data_handle.type(key))
+     temp_data = redis_data_handle.lindex(key,0)
 
-     return json.dumps('SUCCESS')
+     return json.dumps(json.dumps(temp_data))
+
+
 
 @app.route('/ajax/sel_strip_chart/<queue>',methods=["POST"])
 @authDB.requires_auth
@@ -720,6 +780,11 @@ def eto_raw_data():
 
 @app.route('/soil_moisture_data',methods=["GET"])
 @authDB.requires_auth
+def soil_moisture_raw_data():
+        return render_template( "soil_moisture_data", web_moisture_names=web_moisture_names )
+
+@app.route('/soil_moisture_data_a',methods=["GET"])
+@authDB.requires_auth
 def soil_moisture_raw_data_a():
         moisture_resistive_data = json.loads(redis_handle.hget("MOISTURE_CONTROL",'MOISTURE_RESISTIVE_DATA'))
         air_temp               = redis_handle.hget("MOISTURE_CONTROL",'AIR_TEMP_FLOAT')
@@ -742,7 +807,7 @@ def soil_moisture_raw_data_a():
              moisture_configuration.append("Water Mark")
 
  
-        return render_template( "soil_moisture_data", moisture_resistive_data=moisture_resistive_data,air_temp=air_temp, 
+        return render_template( "soil_moisture_data_a", moisture_resistive_data=moisture_resistive_data,air_temp=air_temp, 
                                air_humidity=air_humidity, read_status=read_status, moisture_data=moisture_data,one_wire_device=one_wire_device,
                                moisture_temp=moisture_temp, moisture_configuration = moisture_configuration ) 
 

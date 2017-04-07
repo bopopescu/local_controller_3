@@ -67,6 +67,9 @@ class Moisture_Control():
          return "CONTINUE"
        #print self.moisture_stores
        for key, value in self.moisture_stores.items():
+           self.update_a_reading(key,value)
+
+   def update_a_reading(self, key,value):
            io_device = self.moisture_stations[key]
            type = io_device["type"]
            modbus_address = io_device["modbus_address"]
@@ -74,34 +77,35 @@ class Moisture_Control():
            properties = copy.deepcopy( value)
            measurement_properties = self.make_measurements( int(modbus_address), driver_class )
            if measurement_properties["measurement_status"] == 0:
-               continue
+               return
            properties["measurements"] = measurement_properties
            #
            # Now Store Data
            #
            namespace = self.graph_management.convert_namespace( properties["namespace"] )
            properties["namespace"] = namespace
+
            redis_handle.lpush( namespace, json.dumps(properties) )
            redis_handle.ltrim( namespace, 0, self.moisture_length )
            print redis_handle.llen(namespace)
            print redis_handle.lindex(namespace,0)
            self.status_queue.queue_message("moisture_measurement", properties )
 
+       
 
    def check_update_flag( self,chainFlowHandle, chainOjb, parameters, event ):
 
        if event == "INIT":
          return "CONTINUE"
-
-       update_flag = self.redis_handle.hget("MOISTURE_CONTROL","MANUAL_UPDATE")
-       update_flag = int(update_flag)
+       if self.redis_handle.llen( web_moisture_trigger_key ) > 0:
        
-       if update_flag == 0:
-           return "RESET"
-       else:
-           print "update flag is not zero"
-           self.redis_handle.hset("MOISTURE_CONTROL","MANUAL_UPDATE",0)
-           return "DISABLE"
+          key = self.redis_handle.rpop(web_moisture_trigger_key)
+          if key != None:
+              self.update_a_reading(key, self.moisture_stores[key])
+       
+
+       return "DISABLE"
+ 
 
 
      
@@ -139,6 +143,11 @@ if __name__ == "__main__":
   
    #
    # Find data Stores
+   moisture_data_start = graph_management.find_data_store_by_function("MOISTURE_STORE")
+   web_moisture_trigger_key = graph_management.convert_namespace(moisture_data_start["MOISTURE_STORE"]["namespace"])+"trigger_key" 
+
+
+
    moisture_data_stores = graph_management.find_data_store_by_function("MOISTURE_DATA")
    moisture_stores     = set( moisture_data_stores.keys() )
    moisture_remotes = set ( moisture_stations.keys() )
@@ -152,8 +161,9 @@ if __name__ == "__main__":
 
    # 
    #  
-   
+   print data_server_ip
    redis_handle = redis.StrictRedis( host = data_server_ip, port=data_server_port, db = 12 )
+   redis_handle.delete(web_moisture_trigger_key)
    #import moisture.new_instrument_network
    #import moisture.psoc_4m_moisture_sensor_network 
    
@@ -192,7 +202,7 @@ if __name__ == "__main__":
    cf.define_chain("check_for_moisture_update",True)
    cf.insert_link( "link_1", "WaitEvent",    [ "TIME_TICK" ] )
    cf.insert_link( "link_2", "Code",         [ moisture.check_update_flag ] )
-   cf.insert_link( "link_3", "One_Step",      [ moisture.update_moisture_readings ] )
+ 
    cf.insert_link( "link_4", "Reset", [] )
 
 
