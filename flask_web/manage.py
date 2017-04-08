@@ -495,12 +495,37 @@ def soil_moisture_update():
      param              = request.get_json() 
      print param["index"], type( param["index"] )
      key = web_moisture_data[param["index"]]
-     print( key)
-     print ( redis_data_handle.keys("*"))
-     print ( redis_data_handle.type(key))
-     temp_data = redis_data_handle.lindex(key,0)
-
-     return json.dumps(json.dumps(temp_data))
+     temp_json = redis_data_handle.lindex(key,0)
+     output_data = ""
+     temp_data = json.loads(temp_json)
+     print "temp_data",temp_data
+     print "temp_data",temp_data.keys()
+     print "temp_data_meas",temp_data["measurements"].keys()
+     temp_data_meas = temp_data["measurements"]
+     output_data ="<h3> Output Data for Controller: "+temp_data["name"]
+     output_data = output_data + " "+temp_data["description"]+" </h3>"
+     output_data = output_data +"<h4><ul>"
+     output_data = output_data +"<li> Read Status      : "+str(temp_data_meas["read_status"]) +" </li> "
+     output_data = output_data +"<li> Time Stamp       : "+str(temp_data_meas["time_stamp"]) +" </li> "
+     output_data = output_data +"<li> Air Temperature  : "+str(temp_data_meas["air_temperature"]) +" Deg F </li> "
+     output_data = output_data +"<li> Air Humidity     : "+str(temp_data_meas["air_humidity"]) +"  %</li>"
+     output_data = output_data +"<li> Soil Temperature : "+str(temp_data_meas["soil_temperature"]) +"  Deg F</li>"
+     output_data = output_data +"</ul></h4>"
+     description_map = json.loads(temp_data["description_map"] )
+     depth_map = json.loads(temp_data["depth_map"])
+     for i in range( len(description_map)):
+        if description_map[i] != "empty":
+           units = "ohms"
+           if int( temp_data_meas["sensor_configuration"][i]) == 2:
+              units = "cb"
+           output_data = output_data + "<h3> sensor: "+str(i)+" description: "+description_map[i]+" </h3>"
+           output_data = output_data+"<h4><ul>"
+           output_data = output_data +"<li> sensor configuration: "+str(temp_data_meas["sensor_configuration"][i]) +" </li> " 
+           output_data = output_data +"<li> sensor depth        : "+str(depth_map[i]) +"  inches </li> " 
+           output_data = output_data +"<li> sensor data         : "+str(temp_data_meas["sensor_data"][i]) +"  "+units+" </li> " 
+           output_data = output_data +"<li> raw resistance data : "+str(temp_data_meas["resistive_data"][i]) +" ohm </li> "
+           output_data = output_data + "</ul></h4>"
+     return json.dumps(output_data)
 
 
 

@@ -34,6 +34,7 @@ $(document).ready(
                          success: function () 
 		         {
                              $("#data").empty();
+                             $("#data").html("<center><h1>Waiting For New Measurements</h1></center>")
                              setTimeout(get_data, 8000)
                          },
                          error: function () 

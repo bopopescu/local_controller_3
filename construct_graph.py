@@ -116,10 +116,10 @@ if __name__ == "__main__" :
    cf.start_moisture_store()
    description_map = ["Bank 10A Watermark 8 inch","Bank 10A Resistive 8 inch", "Bank 10A Resistive 18 inch", "empty",
                       "Bank 10B Watermark 8 inch", "Bank 10B Resistive 8 inch","Bank 10B Resistive 18 inch","empty",
-                      "empty", "empty","empty","empty",
-                      "empty", "empty","empty","empty"]
+                      "Bank 10C Watermark 8 inch","Bank 10C Resistive 8 inch", "Bank 10C Resistive 18 inch", "empty",
+                      "Bank 10D Watermark 8 inch", "Bank 10D Resistive 8 inch","Bank 10D Resistive 18 inch","empty" ]
 
-   depth_map = [8,8,18,0,8,8,18,0,0,0,0,0,0,0,0,0]
+   depth_map = [8,8,18,0,8,8,18,0,8,8,18,0,8,8,18,0]
    cf.add_moisture_sensor_store( "moisture_1", "Moisture Sensor for Irrigation Bank10", description_map=description_map, 
                                   depth_map= depth_map, update_time= 15 )
 

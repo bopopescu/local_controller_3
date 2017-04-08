@@ -160,6 +160,8 @@ if __name__ == "__main__":
        new_instrument.set_ip(ip= "192.168.1.82", port = 5005)       
        
        psoc_moisture = PSOC_4M_MOISTURE_UNIT( new_instrument )
+
+       '''
        #psoc_moisture.update_current_time( 40 )
        print psoc_moisture.clear_new_moisture_data_flag(40)
        print psoc_moisture.check_status(40)
@@ -190,7 +192,8 @@ if __name__ == "__main__":
        
        
 
-       '''             
+       ''' 
+       '''            
        # test directed actions
   
        #psoc_moisture.check_one_wire_presence(40)
@@ -203,12 +206,13 @@ if __name__ == "__main__":
        print psoc_moisture.read_moisture_control( 40 )
        print psoc_moisture.read_moisture_configuration( 40 )
        psoc_moisture.change_capacitance_sensor_mask( 40, 0xf)
-       psoc_moisture. update_moisture_sensor_configuration ( 40,[ 2,1,1,1,1,0,0,0] )
-       psoc_moisture.update_flash(40)
-       print "capacitance_mask", psoc_moisture.read_capacitor_mask(40)
-       print psoc_moisture.read_moisture_control( 40 )
+       '''
+       psoc_moisture.update_moisture_sensor_configuration ( 40,[ 2,1,1,0,2,1,1,0,2,1,1,0,2,1,1,0] )
+       #psoc_moisture.update_flash(40)
+       #print "capacitance_mask", psoc_moisture.read_capacitor_mask(40)
+       #print psoc_moisture.read_moisture_control( 40 )
        print psoc_moisture.read_moisture_configuration( 40 )
-
+       '''
        print "force moisture measurement", psoc_moisture.force_moisture_reading(40)
        quit()
        print psoc_moisture.read_moisture_data(40)
