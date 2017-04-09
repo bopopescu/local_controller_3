@@ -78,7 +78,7 @@ $(document).ready(
                     url: '/ajax/controller_pin_turn_on.html',
 	            contentType: "application/json",
                     dataType: 'json',
-                    async: false,
+                    async: true,
                     //json object to sent to the authentication url
                     data: json_string,
                     success: function () 
@@ -144,7 +144,7 @@ $(document).ready(
                     type: "GET",
                     url: '/ajax/get_system_file/controller_cable_assignment.json',
                     dataType: 'json',
-                    async: false,
+                    async: true,
                     //json object to sent to the authentication url
                     success: controller_pins_success,
               
@@ -215,7 +215,7 @@ $(document).ready(
                     url: "/ajax/native_mode_change",
                     dataType: 'json',
 	            contentType: "application/json",
-                    async: false,
+                    async: true,
                     //json object to sent to the authentication url
                     data: json_string,
                     success: function () 

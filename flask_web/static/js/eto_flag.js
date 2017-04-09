@@ -23,7 +23,7 @@ $(document).ready(
                     type: "POST",
                     url: '/ajax/set_redis_hkeys',
                     dataType: 'json',
-                    async: false,
+                    async: true,
                     //json object to sent to the authentication url
                     data: json_string,
 	            contentType: "application/json",
@@ -74,7 +74,7 @@ $(document).ready(
                     type: "POST",
                     url: '/ajax/get_redis_hkeys',
                     dataType: 'json',
-                    async: false,
+                    async: true,
                     //json object to sent to the authentication url
                     success: ajax_eto_flag_success,
                     data: json_string,

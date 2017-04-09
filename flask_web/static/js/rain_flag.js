@@ -24,7 +24,7 @@ function rain_day_functions()
                     type: "POST",
                     url: '/ajax/set_redis_hkeys',
                     dataType: 'json',
-                    async: false,
+                    async: true,
                     contentType: "application/json",
                     data: json_string,
                     success: function () 
@@ -74,7 +74,7 @@ function rain_day_functions()
                     type: "POST",
                     url: '/ajax/get_redis_hkeys',
                     dataType: 'json',
-                    async: false,
+                    async: true,
                     contentType: "application/json",
                     data: json_string,
 

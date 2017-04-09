@@ -75,7 +75,7 @@ $(document).ready(
                     type: "POST",
                     url: '/ajax/get_all_redis_list',
                     dataType: 'json',
-                    async: false,
+                    async: true,
                     data: json_string,
                     success: getQueueEntries, 
                     contentType: "application/json",

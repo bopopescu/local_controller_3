@@ -50,7 +50,7 @@ $(document).ready(
                     type: "POST",
                     url: '/ajax/set_redis_hkeys',
                     dataType: 'json',
-                    async: false,
+                    async: true,
                     //json object to sent to the authentication url
                     data: json_string,
 	            contentType: "application/json",
@@ -319,7 +319,7 @@ function display_data(  )
                     type: "POST",
                     url: '/ajax/get_redis_all_hkeys',
                     dataType: 'json',
-                    async: false,
+                    async: true,
                     data: json_string,
                     success: getQueueEntries, 
                     contentType: "application/json",

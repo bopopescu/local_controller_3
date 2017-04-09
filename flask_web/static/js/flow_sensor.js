@@ -99,7 +99,7 @@ $(document).ready(
                     type: "GET",
                     url: '/ajax/get_flow_queue_data',
                     dataType: 'json',
-                    async: false,
+                    async: true,
                     //json object to sent to the authentication url
                     data: data_string,
                     success: ajax_success,
@@ -156,7 +156,7 @@ $(document).ready(
                     type: "GET",
                     url: '/ajax/flow_sensor_names',
                     dataType: 'json',
-                    async: false,
+                    async: true,
                     //json object to sent to the authentication url
                     data: [],
                     success: flow_sensor_success,

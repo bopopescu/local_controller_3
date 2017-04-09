@@ -109,7 +109,7 @@ $(document).ready(
                     type: "POST",
                     url:  path+ref_flow_meter,
                     dataType: 'json',
-                    async: false,
+                    async: true,
                     //json object to sent to the authentication url
                     data: [],
                     success: ajax_success,
@@ -166,7 +166,7 @@ $(document).ready(
                     type: "GET",
                     url: sel_function,
                     dataType: 'json',
-                    async: false,
+                    async: true,
                     //json object to sent to the authentication url
                     data: [],
                     success: flow_sensor_success,

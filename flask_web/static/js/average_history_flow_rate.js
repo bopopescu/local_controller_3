@@ -174,7 +174,7 @@ Generate Graph
 	            type: "GET",
                     dataType: 'json',
 	            contentType: "application/json",
-                    async: false,
+                    async: true,
                     //json object to sent to the authentication url
                     data: json_string,
                     success: filter_graph_data,
@@ -405,7 +405,7 @@ Flow Sensor Stuff
 	            type: "GET",
                     dataType: 'json',
 	            contentType: "application/json",
-                    async: false,
+                    async: true,
                     //json object to sent to the authentication url
                     data: [],
                     success: flow_sensor_success,

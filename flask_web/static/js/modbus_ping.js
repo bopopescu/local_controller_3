@@ -48,7 +48,7 @@ $(document).ready(
                     url: '/ajax/ping_modbus_device',
 	            contentType: "application/json",
                     dataType: 'json',
-                    async: false,
+                    async: true,
                     //json object to sent to the authentication url
                     data: json_string,
                     success: display_results,

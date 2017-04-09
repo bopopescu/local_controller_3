@@ -89,7 +89,7 @@ $(document).ready(
                     url: '/ajax/delete_element',
 	            contentType: "application/json",
                     dataType: 'json',
-                    async: false,
+                    async: true,
                     //json object to sent to the authentication url
                     data: json_string,
                     success: function () 
@@ -173,7 +173,7 @@ $(document).ready(
                     type: "POST",
                     url: '/ajax/get_redis_all_hkeys',
                     dataType: 'json',
-                    async: false,
+                    async: true,
                     //json object to sent to the authentication url
                     
                     success: modbus_statistics_success, 

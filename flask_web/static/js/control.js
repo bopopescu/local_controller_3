@@ -101,7 +101,7 @@ $(document).ready(
                     type: "GET",
                     url: '/ajax/schedule_data',
                     dataType: 'json',
-                    async: false,
+                    async: true,
                     //json object to sent to the authentication url
                     success: ajax_schedule_success,
               
@@ -274,7 +274,7 @@ $(document).ready(
                     url: '/ajax/mode_change',
                     dataType: 'json',
 	            contentType: "application/json",
-                    async: false,
+                    async: true,
                     //json object to sent to the authentication url
                     data: json_string,
                     success: function () 

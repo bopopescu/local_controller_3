@@ -73,7 +73,7 @@ $(document).ready(
                     type: "GET",
                     url: '/ajax/get_recent_plc',
                     dataType: 'json',
-                    async: false,
+                    async: true,
                     //json object to sent to the authentication url
                     data: [],
                     success: ajax_success,

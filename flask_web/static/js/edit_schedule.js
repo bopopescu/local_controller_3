@@ -173,7 +173,7 @@ function make_change(action,schedule)
                     type: "POST",
                     url: '/ajax/update_schedule',
                     dataType: 'json',
-                    async: false,
+                    async: true,
                     contentType: "application/json",
                     data: json_string,
                     success: function () 

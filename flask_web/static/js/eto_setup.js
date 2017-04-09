@@ -99,7 +99,7 @@ $(document).ready(
                     type: "POST",
                     url: '/ajax/save_app_file/eto_site_setup.json',
                     dataType: 'json',
-                    async: false,
+                    async: true,
                     contentType: "application/json",
                     data: json_string,
                     success: function () 
@@ -222,7 +222,7 @@ $(document).ready(
                     type: "POST",
                     url: '/ajax/save_app_file/eto_site_setup.json',
                     dataType: 'json',
-                    async: false,
+                    async: true,
                     contentType: "application/json",
                     data: json_string,
                     success: function () 

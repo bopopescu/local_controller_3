@@ -131,7 +131,7 @@ function make_change()
                     type: "POST",
                     url: '/ajax/save_app_file/system_actions.json',
                     dataType: 'json',
-                    async: false,
+                    async: true,
                     contentType: "application/json",
                     data: json_string,
                     success: function () 

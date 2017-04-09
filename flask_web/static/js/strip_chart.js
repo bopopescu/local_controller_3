@@ -81,7 +81,7 @@ $(document).ready(
                     type:               "POST",
                     url:                path,
                     dataType:           'json',
-                    async:              false,
+                    async:              true,
                     success:            ajax_success,
                     error: function () 
 		    {

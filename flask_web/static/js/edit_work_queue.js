@@ -58,7 +58,7 @@ $(document).ready(
                     type: "POST",
                     url: '/ajax/delete_redis_list',
                     dataType: 'json',
-                    async: false,
+                    async: true,
 	            contentType: "application/json",
                     //json object to sent to the authentication url
                     data: json_string,
@@ -146,7 +146,7 @@ $(document).ready(
                     type: "POST",
                     url: '/ajax/get_all_redis_list',
                     dataType: 'json',
-                    async: false,
+                    async: true,
                     data: json_string,
                     success: getQueueEntries, 
                     contentType: "application/json",
