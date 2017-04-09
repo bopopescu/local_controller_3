@@ -124,8 +124,15 @@ if __name__ == "__main__" :
                                   depth_map= depth_map, update_time= 15 )
 
    cf.add_status_store( "status_store", "status_store" )
+   
    cf.end_moisture_store()
-      
+
+
+   cf.start_info_store()
+   cf.add_eto_store()
+   cf.add_air_temperature_humidity_store()
+   cf.add_air_temperature_humidity_daily_log()
+   cf.end_info_store()   
 
 
 

@@ -56,6 +56,32 @@ class Construct_Farm():
        self.bc.construct_node( push_namespace=True,relationship="STATUS_STORE", label="STATUS_STORE", name=name,
                                properties= properties )
 
+   def start_info_store( self ):
+       self.bc.construct_node( push_namespace=True,relationship="INFO_STORE", label="INFO_STORE", name="INFO_STORE",
+                               properties= {} )
+
+  
+   def add_eto_store(self ):
+       self.bc.construct_node( push_namespace=False,relationship="ETO_STORE", label="ETO_STORE", name="ETO_STORE",
+                               properties= {} )
+
+
+   def add_air_temperature_humidity_store(self):
+       self.bc.construct_node( push_namespace=False,relationship="TEMP_HUMIDITY", label="TEMP_HUMIDITY", name="TEMP_HUMIDITY",
+                               properties= {} )
+
+   def add_air_temperature_humidity_daily_log(self):
+       self.bc.construct_node( push_namespace=False,relationship="TEMP_HUMIDITY_DAILY", label="TEMP_HUMIDITY_DAILY", name="TEMP_HUMIDITY_DAILY",
+                               properties= {} )
+       self.bc.construct_node( push_namespace=False,relationship="TEMP_HUMIDITY_DAILY_ETO", label="TEMP_HUMIDITY_DAILY_ETO", name="TEMP_HUMIDITY_DAILY_ETO",
+                               properties= {} )
+
+
+   def end_info_store(self):   
+       self.bc.pop_namespace()
+
+
+
    def end_redis_data_store( self):
        self.bc.pop_namespace()
 

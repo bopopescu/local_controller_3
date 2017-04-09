@@ -9,6 +9,7 @@ class Execute_Cf_Environment():
 
   def execute(self):
      time_stamp = datetime.datetime.today()
+     old_day  = time_stamp.day
      old_hour = time_stamp.hour
      old_minute = time_stamp.minute
      old_second = time_stamp.second
@@ -20,15 +21,20 @@ class Execute_Cf_Environment():
        hour = time_stamp.hour
        minute = time_stamp.minute
        second = time_stamp.second
+       day    = time_stamp.day
        if old_second != second :
          self.cf.queue_event( "TIME_TICK", second )
        if old_minute != minute :
          self.cf.queue_event( "MINUTE_TICK", minute )
        if old_hour != hour :
          self.cf.queue_event( "HOUR_TICK", minute )
+       if old_day != day :
+         self.cf.queue_event( "DAY_TICK", day )
+
        old_hour    = hour
        old_minute  = minute
        old_second  = second
+       old_day     = day
        try:
           self.cf.execute(  ) 
        except:

@@ -29,12 +29,13 @@ class Moisture_Control():
 
 
 
-   def make_measurements( self, modbus_address,   driver_class ):
+   def make_measurements( self, modbus_address,   driver_class , list_data):
        measure_properties = {}
        time_stamp = time.strftime( "%b %d %Y %H:%M:%S",time.localtime(time.time()))
        measure_properties["time_stamp"] = time_stamp
+       
        try:
-         
+         item = {}
          driver_class.make_soil_temperature( modbus_address )
          time.sleep(1.0)
          driver_class.make_air_temp_humidity( modbus_address )
@@ -45,6 +46,9 @@ class Moisture_Control():
          time.sleep(1.0)
 
          temp =  driver_class.read_moisture_control( modbus_address )
+         item["humidity"] = temp["AIR_HUMIDITY_FLOAT"]
+         item["temperature"] =temp["AIR_TEMP_FLOAT"]
+         list_data.append(item)
          measure_properties["air_humidity"]              =     temp["AIR_HUMIDITY_FLOAT"]
          measure_properties["soil_temperature"]          =     temp["MOISTURE_SOIL_TEMP_FLOAT"]
          measure_properties["air_temperature"]           =     temp["AIR_TEMP_FLOAT"]
@@ -53,7 +57,7 @@ class Moisture_Control():
          measure_properties["resistive_data"]            =     driver_class.read_moisture_resistive_data( modbus_address )
          measure_properties["read_status"]               =     "Communication was successful at "+time_stamp
          measure_properties["measurement_status"]        =     1
-          
+
        except:
           #raise
           print "exception handler"
@@ -66,16 +70,18 @@ class Moisture_Control():
        if event == "INIT":
          return "CONTINUE"
        #print self.moisture_stores
+       list_data = []
        for key, value in self.moisture_stores.items():
-           self.update_a_reading(key,value)
+           self.update_a_reading(key,value,list_data)
+       redis_handle.set(temp_humidity_store,list_data)
 
-   def update_a_reading(self, key,value):
+   def update_a_reading(self, key,value,list_data):
            io_device = self.moisture_stations[key]
            type = io_device["type"]
            modbus_address = io_device["modbus_address"]
            driver_class = self.remote_classes.find_class( type )
            properties = copy.deepcopy( value)
-           measurement_properties = self.make_measurements( int(modbus_address), driver_class )
+           measurement_properties = self.make_measurements( int(modbus_address), driver_class,list_data )
            if measurement_properties["measurement_status"] == 0:
                return
            properties["measurements"] = measurement_properties
@@ -104,6 +110,32 @@ class Moisture_Control():
               self.update_a_reading(key, self.moisture_stores[key])
        
 
+       return "DISABLE"
+ 
+
+
+ 
+
+   def hour_update( self,chainFlowHandle, chainOjb, parameters, event ):
+
+       if event == "INIT":
+         return "CONTINUE"
+       print "hour tick"
+       data = redis_handle.get(temp_humidity_store)
+       redis_handle.lpush( temp_humidity_log, data)
+       redis_handle.ltrim(temp_humidity_log,0,23)
+       print "len",redis_handle.llen(temp_humidity_log)
+       return "DISABLE" 
+       
+ 
+   def day_update( self,chainFlowHandle, chainOjb, parameters, event ):
+
+       if event == "INIT":
+         return "CONTINUE"
+
+       redis_handle.delete(temp_humidity_eto)
+       redis_handle.rename(temp_humidity_log, temp_humidity_eto)
+       print "len",redis_handle.llen(temp_humidity_eto)
        return "DISABLE"
  
 
@@ -155,8 +187,12 @@ if __name__ == "__main__":
    
    if len( results ) != 0:
       raise ValueError("Imbalance in setup graph")
+
+   temp_humidity_store =  graph_management.convert_namespace(graph_management.find_data_store_by_function("TEMP_HUMIDITY")["TEMP_HUMIDITY"]["namespace"])
+   temp_humidity_log   =  graph_management.convert_namespace(graph_management.find_data_store_by_function("TEMP_HUMIDITY_DAILY")["TEMP_HUMIDITY_DAILY"]["namespace"])
+   temp_humidity_eto   =  graph_management.convert_namespace(graph_management.find_data_store_by_function("TEMP_HUMIDITY_DAILY_ETO")["TEMP_HUMIDITY_DAILY_ETO"]["namespace"])
    
-   
+  
   
 
    # 
@@ -191,7 +227,12 @@ if __name__ == "__main__":
    # Adding chains
    #
    cf = py_cf.CF_Interpreter()
-  
+   
+   #cf.define_chain("test",True)
+   #cf.insert_link( "link_1", "SendEvent",    [ "HOUR_TICK",1 ] )
+   #cf.insert_link( "link_2", "WaitEvent", ["TIME_TICK"])
+   #cf.insert_link( "link_3", "SendEvent",    [ "DAY_TICK", 1] )
+   
 
    cf.define_chain("update_moisture_readings",True)
    cf.insert_link( "link_1", "WaitEventCount",    [ "MINUTE_TICK",15,0 ] )
@@ -206,7 +247,18 @@ if __name__ == "__main__":
    cf.insert_link( "link_4", "Reset", [] )
 
 
+   cf.define_chain("update_hour_readings",True)
+   cf.insert_link( "link_1", "WaitEvent",    [ "HOUR_TICK" ] )
+   cf.insert_link( "link_2", "One_Step",         [ moisture.hour_update ] )
+   cf.insert_link( "link_4", "Reset", [] )
 
+
+  
+   cf.define_chain("update_day_readings",True)
+   cf.insert_link( "link_1", "WaitEvent",    [ "DAY_TICK" ] )
+   cf.insert_link( "link_2", "One_Step",         [ moisture.day_update ] )
+   cf.insert_link( "link_4", "Reset", [] )
+ 
  
  
  
@@ -221,6 +273,8 @@ if __name__ == "__main__":
   #
   # Executing chains
   #
+
+ 
    cf_environ = py_cf.Execute_Cf_Environment( cf )
    cf_environ.execute()
 
