@@ -24,7 +24,9 @@ class Query_Configuration():
        return return_value
 
    def match_relationship( self, relationship, starting_path = None):
+       #print "relationship",relationship
        temp_list =  self.common.match( relationship, "*", "*", starting_path  )
+       #print "temp_list",temp_list
        return_value = []
        for i in temp_list:
            

@@ -366,13 +366,13 @@ if __name__ == "__main__":
   cf.insert_link( "link_6", "Reset", [] )
 
 
-  cf.define_chain("delete_cimis_email_data",True)
+  #cf.define_chain("delete_cimis_email_data",True)
  
-  cf.insert_link( "link_1","WaitTod",["*",9,"*","*" ])
-  cf.insert_link( "link_2","One_Step",[etm.clear_flag])
-  cf.insert_link( "link_3","One_Step",[etm.delete_email_files])
-  cf.insert_link( "link_4","WaitTod",["*",10,"*","*" ])
-  cf.insert_link( "link_5","Reset",[])  
+  #cf.insert_link( "link_1","WaitTod",["*",9,"*","*" ])
+  #cf.insert_link( "link_2","One_Step",[etm.clear_flag])
+  #cf.insert_link( "link_3","One_Step",[etm.delete_email_files])
+  #cf.insert_link( "link_4","WaitTod",["*",10,"*","*" ])
+  #cf.insert_link( "link_5","Reset",[])  
 
 
   cf.define_chain( "plc_auto_mode", True )

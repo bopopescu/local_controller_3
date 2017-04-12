@@ -3,13 +3,13 @@ from redis_graph_common import Redis_Graph_Common
 import copy
 import json
 
-class Build_Configuration():
+class Build_Configuration(object):
 
-   def __init__( self, redis, redis_graph_common ):
+   def __init__( self, redis_handle, redis_graph_common ):
       self.common = redis_graph_common
       self.common.delete_all()
       self.namespace     = []
-      self.redis        = redis
+      self.redis        = redis_handle
  
    def build_namespace( self,name ):
        return_value = copy.deepcopy(self.namespace) 
@@ -21,14 +21,21 @@ class Build_Configuration():
        del self.namespace[-1]    
 
 
+   def add_info_node( self, label,name, properties = {}, json_flag= False ):
+     self.construct_node( False, label, label, name, properties, json_flag )
+
    # concept of namespace name is a string which ensures unique name
    # the name is essentially the directory structure of the tree
-   def construct_node(self, push_namespace,relationship, label, name, properties ):
+   def construct_node(self, push_namespace,relationship, label, name, properties, json_flag = False ):
  
        
        redis_key, new_name_space = self.common.construct_node( self.namespace, relationship,label,name ) 
        for i in properties.keys():
-           self.redis.hset(redis_key, i, properties[i] )
+           if json_flag == True:
+              temp = json.dumps(properties[i] )
+           else:
+              temp = properties[i]
+           self.redis.hset(redis_key, i, temp )
        
        
        if push_namespace == True:

@@ -24,14 +24,28 @@ class Graph_Management():
       self.io_server_name  = io_server_name
       self.data_store_name = data_store_name
 
-   def match_relationship( self, query_string, json_flag = True ):
+   def match_relationship( self, query_string, json_flag = False ):
       keys =  self.qc.match_relationship( query_string ) 
       return_value = []
       for i in keys:
          data = self.redis_handle.hgetall(i)
-
-         return_value.append(data)
+         print "data",data
+         temp = {}
+         for j in data.keys():
+            print j, data[j]
+            try:
+               if json_flag == True:
+	            temp[j] = json.loads(data[j])
+               else:
+                 temp[j] = data[j]
+            except:
+               temp[j] = data[j]
+         return_value.append(temp)
       return return_value
+
+   def find_relationship_keys( self, query_string, json_flag = True ):
+      return self.qc.match_relationship( query_string ) 
+
 
    def find_remotes( self  ):
       keys = self.qc.match_label_property_generic( "UDP_IO_SERVER", "name", self.io_server_name, "REMOTE" )
@@ -40,6 +54,7 @@ class Graph_Management():
          data = self.redis_handle.hgetall(i)
          return_value[data["name"]]= data
       return return_value
+
 
 
    def find_remotes_by_function( self,  function ):
@@ -93,7 +108,7 @@ if __name__ == "__main__" :
 
    qc = Query_Configuration( redis_handle, common )
    bc = Build_Configuration(redis_handle,common)
-   cf = Construct_Farm(bc)
+   cf = Construct_Farm(redis_handle,common)
    
    #
    #
@@ -131,7 +146,7 @@ if __name__ == "__main__" :
    cf.start_info_store()
    cf.add_eto_store()
    cf.add_air_temperature_humidity_store()
-   cf.add_air_temperature_humidity_daily_log()
+   cf.add_air_temperature_humidity_daily_log() 
    cf.end_info_store()   
 
 
@@ -162,15 +177,29 @@ if __name__ == "__main__" :
 
    cf.add_rabbitmq_status_queue( "LaCima",vhost="LaCima",queue="status_queue",port=5671,server = 'lacimaRanch.cloudapp.net' )
 
-   cf.add_eto_server("LaCima")
+   cf.start_eto_server("LaCima")
+   
+   access_codes = {
+      "messo_eto": {"api-key":"8b165ee73a734f379a8c91460afc98a1"  ,"url":"http://api.mesowest.net/v2/stations/timeseries?" ,  "station":"SRUC1" },
+      "messo_precp":{"api-key":"8b165ee73a734f379a8c91460afc98a1"  ,"url":"http://api.mesowest.net/v2/stations/precip?" ,  "station":"SRUC1" },
+      "cimis_eto":{ "api-key":"e1d03467-5c0d-4a9b-978d-7da2c32d95de"  , "url":"http://et.water.ca.gov/api/data"     , "station":179 },
+      "cimis_spatial":{ "api-key":"e1d03467-5c0d-4a9b-978d-7da2c32d95de"  , "url":"http://et.water.ca.gov/api/data"     , "longitude":  -117.299459  ,"latitude":33.578156  }
+      }
+
+   altitude = 2400
+   cf.add_eto_setup_code(access_codes = access_codes, altitude = altitude)
+   cf.end_eto_server()
+
    cf.add_ntpd_server("LaCima")
+   cf.add_info_node( "CIMIS_EMAIL", "CIMIS_EMAIL",properties =  { "imap_username" :'lacima.ranch@gmail.com',"imap_password" : 'Gr1234gfd'} , json_flag = True)
+
+
    cf.add_moisture_monitoring("LaCima")
    cf.irrigation_monitoring("LaCima")
    cf.add_device_monitoring("LaCima")
    cf.add_watch_dog_monitoring("LaCima")
    cf.end_site()
    cf.end_system()
-
    '''
    keys = redis_handle.keys("*")
    
