@@ -58,7 +58,7 @@ class Delete_Cimis_Email():
            self.imap.select('Inbox')
            status, data = self.imap.search(None, 'ALL')
            count = sum(1 for num in data[0].split())
-           #print "count",count
+           print "count",count
            if count > 0 :
               self.imap.select('Inbox')
               status, data = self.imap.search(None, 'ALL')

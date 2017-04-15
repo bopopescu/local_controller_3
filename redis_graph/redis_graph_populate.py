@@ -20,7 +20,14 @@ class Build_Configuration(object):
    def pop_namespace( self ):
        del self.namespace[-1]    
 
+   def add_header_node( self, label, properties = {}, json_flag= False ):
+     self.construct_node( True, label, label, label, properties, json_flag )
 
+   def end_header_node( self ):
+       del self.namespace[-1]    
+
+
+   
    def add_info_node( self, label,name, properties = {}, json_flag= False ):
      self.construct_node( False, label, label, name, properties, json_flag )
 

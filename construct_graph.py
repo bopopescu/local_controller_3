@@ -29,10 +29,10 @@ class Graph_Management():
       return_value = []
       for i in keys:
          data = self.redis_handle.hgetall(i)
-         print "data",data
+         #print "data",data
          temp = {}
          for j in data.keys():
-            print j, data[j]
+            #print j, data[j]
             try:
                if json_flag == True:
 	            temp[j] = json.loads(data[j])
@@ -141,15 +141,106 @@ if __name__ == "__main__" :
    cf.add_status_store( "status_store", "status_store" )
    
    cf.end_moisture_store()
+   '''
+   access_codes = {
+      "messo_eto": {"api-key":"8b165ee73a734f379a8c91460afc98a1"  ,"url":"http://api.mesowest.net/v2/stations/timeseries?" ,  "station":"SRUC1" },
+      "messo_precp":{"api-key":"8b165ee73a734f379a8c91460afc98a1"  ,"url":"http://api.mesowest.net/v2/stations/precip?" ,  "station":"SRUC1" },
+      "cimis_eto":{ "api-key":"e1d03467-5c0d-4a9b-978d-7da2c32d95de"  , "url":"http://et.water.ca.gov/api/data"     , "station":179 },
+      "cimis_spatial":{ "api-key":"e1d03467-5c0d-4a9b-978d-7da2c32d95de"  , "url":"http://et.water.ca.gov/api/data"     , "longitude":  -117.299459  ,"latitude":33.578156  }
+      }
+   '''
+   #altitude = 2400
+   #cf.add_eto_setup_code(access_codes = access_codes, altitude = altitude)
+   #cf.start_info_store()
+   #cf.add_eto_store()
+   #cf.add_header_node( "ETO_STORES")
+
+   properties = { "api-key":"e1d03467-5c0d-4a9b-978d-7da2c32d95de"  , "url":"http://et.water.ca.gov/api/data"     , "longitude":  -117.299459  ,"latitude":33.578156  }
+   properties["altitude"] = 2400
+   properties["measurement_tag"] = "CIMIS_SATELLITE_ETO"
+
+   cf.add_info_node( "ETO_ENTRY","ETO_CIMIS_SATELLITE",properties=properties, json_flag=True)
+
+   properties = { "api-key":"e1d03467-5c0d-4a9b-978d-7da2c32d95de"  , "url":"http://et.water.ca.gov/api/data"     , "station":62 }
+   properties["altitude"]        = 2400
+   properties["measurement_tag"] = "CIMIS_ETO"
+   properties["list_length"]     = 100
+   cf.add_info_node( "ETO_ENTRY","ETO_CIMIS",properties=properties, json_flag=True)
+
+   properties = {"api-key":"8b165ee73a734f379a8c91460afc98a1"  ,"url":"http://api.mesowest.net/v2/stations/timeseries?" ,  "station":"SRUC1" }
+   properties["altitude"] = 2400
+   properties["measurement_tag"] = "CIMIS_MESO"
+   properties["list_length"]     = 100
+
+   cf.add_info_node( "ETO_ENTRY","Santa_Rosa_RAWS",properties=properties, json_flag=True)
+   
+
+   properties = {"api-key":"8b165ee73a734f379a8c91460afc98a1"  ,"url":"http://api.mesowest.net/v2/stations/timeseries?" ,  "station":"SRUC1" }
+   properties["altitude"] = 2400
+   properties["measurement_tag"] = "HYBRID_SITE"
+   properties["list_length"]     = 100
+
+   cf.add_info_node( "ETO_ENTRY","LaCima_Ranch",properties=properties, json_flag=True)
+   cf.end_header_node()
+
+   cf.add_header_node("DAILY_RAIN_STORES")
+
+   properties = { "api-key":"e1d03467-5c0d-4a9b-978d-7da2c32d95de"  , "url":"http://et.water.ca.gov/api/data"     , "station":62 }
+   properties["measurement_tag"] = "CIMIS_RAIN"
+   properties["list_length"]     = 100
+
+   cf.add_info_node( "RAIN_ENTRY","CIMIS_RAIN",properties=properties, json_flag=True)
+
+   properties = {"api-key":"8b165ee73a734f379a8c91460afc98a1"  ,"url":"http://api.mesowest.net/v2/stations/precip?" ,  "station":"SRUC1" }
+   properties["measurement_tag"] = "MESO_RAIN"
+   properties["list_length"]     = 100
+
+   cf.add_info_node( "RAIN_ENTRY","MESO_RAIN",properties=properties, json_flag=True)
+
+   cf.end_header_node()
+   cf.add_info_node("INTEGRATED_RAIN_ESTIMATE","INTEGRATED_RAIN_ESTIMATE",properties={"list_length":300},json_flag = True)
+   cf.add_info_node("INTEGRATED_ETO_ESTIMATE","INTEGRATED_ETO_ESTIMATE",properties={"list_length":300},json_flag = True )
+
+ 
+   cf.add_header_node( "DATA_ACQUISITION")
 
 
-   cf.start_info_store()
-   cf.add_eto_store()
-   cf.add_air_temperature_humidity_store()
-   cf.add_air_temperature_humidity_daily_log() 
+    ###### need to add function_key
+   cf.add_header_node( "MINUTE_ACQUISITION")
+   cf.add_info_node( "MINUTE_DATA","CONTROLLER_CURRENT",properties={"units":"mAmps"}, json_flag=True)
+   cf.add_info_node( "MINUTE_ELEMENT","IRRIGATION_VALVE_CURRENT",properties={"units":"mAmps"}, json_flag=True)
+   cf.add_header_node("FLOW_METER_LIST")
+   cf.add_info_node( "FLOW_METER","MAIN_FLOW_METER",properties={"units":"GPM" }, json_flag=True)
+   cf.end_header_node()
+   cf.add_info_node( "MINUTE_ELEMENT","WELL_CONTROLLER_OUTPUT",properties={"units":"AMPS"}, json_flag = True )
+   cf.add_info_node( "MINUTE_ELEMENT","WELL_CONTROLLER_INPUT", properties={"units":"AMPS" }, json_flag = True)
+   cf.add_info_node( "MINUTE_ELEMENT","FILTER_PRESSURE", properties = { "units":"PSI" }, json_flag = True )
+   cf.add_info_node( "MINUTE_ELEMENT", "WELL_PRESSURE", properties = {"units":"PSI" }, json_flag = True )
+   cf.add_info_node( "MINUTE_VALUE", "MINUTE_VALUE", properties = {} , json_flag= True)
+   cf.add_info_node( "MINUTE_LIST", "MINUTE_LIST",properties =  { "LIST_LENGTH" :10000} , json_flag = True) # about 1 week of data
+   cf.end_header_node()
+
+
+   cf.add_header_node( "HOUR_ACQUISTION")
+   cf.add_info_node( "HOUR_ELEMENT","MODBUS_STATISTICS",properties={"units":"Counts"},json_flag=True )
+   cf.add_info_node( "HOUR_ELEMENT","PI_TEMPERATURE",properties={"units":"Deg F" }, json_flag = True )
+   cf.add_info_node( "HOUR_VALUE", "HOUR_VALUE", properties = {} , json_flag= True)
+   cf.add_info_node( "HOUR_LIST", "MINUTE_LIST",properties =  { "LIST_LENGTH" :300} , json_flag = True) # about 1 week of data
+   cf.end_header_node()
+
+
+   cf.add_header_node( "DAILY_ACQUISTION")
+   cf.add_info_node( "HOUR_VALUE", "HOUR_VALUE", properties = {} , json_flag= True)
+   cf.add_info_node( "HOUR_LIST", "HOUR_LIST",properties =  { "LIST_LENGTH" :100} , json_flag = True) # about 3 months of data
+   cf.end_header_node()
+
+
+
+
+   cf.end_header_node()
    cf.end_info_store()   
 
-
+  
 
    cf.end_redis_data_store()
 
@@ -177,21 +268,9 @@ if __name__ == "__main__" :
 
    cf.add_rabbitmq_status_queue( "LaCima",vhost="LaCima",queue="status_queue",port=5671,server = 'lacimaRanch.cloudapp.net' )
 
-   cf.start_eto_server("LaCima")
-   
-   access_codes = {
-      "messo_eto": {"api-key":"8b165ee73a734f379a8c91460afc98a1"  ,"url":"http://api.mesowest.net/v2/stations/timeseries?" ,  "station":"SRUC1" },
-      "messo_precp":{"api-key":"8b165ee73a734f379a8c91460afc98a1"  ,"url":"http://api.mesowest.net/v2/stations/precip?" ,  "station":"SRUC1" },
-      "cimis_eto":{ "api-key":"e1d03467-5c0d-4a9b-978d-7da2c32d95de"  , "url":"http://et.water.ca.gov/api/data"     , "station":179 },
-      "cimis_spatial":{ "api-key":"e1d03467-5c0d-4a9b-978d-7da2c32d95de"  , "url":"http://et.water.ca.gov/api/data"     , "longitude":  -117.299459  ,"latitude":33.578156  }
-      }
-
-   altitude = 2400
-   cf.add_eto_setup_code(access_codes = access_codes, altitude = altitude)
-   cf.end_eto_server()
 
    cf.add_ntpd_server("LaCima")
-   cf.add_info_node( "CIMIS_EMAIL", "CIMIS_EMAIL",properties =  { "imap_username" :'lacima.ranch@gmail.com',"imap_password" : 'Gr1234gfd'} , json_flag = True)
+   cf.add_info_node( "CIMIS_EMAIL","CIMIS_EMAIL",properties =  { "imap_username" :'lacima.ranch@gmail.com',"imap_password" : 'Gr1234gfd'} , json_flag = True)
 
 
    cf.add_moisture_monitoring("LaCima")
