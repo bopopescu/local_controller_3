@@ -20,15 +20,25 @@ class Build_Configuration(object):
    def pop_namespace( self ):
        del self.namespace[-1]    
 
-   def add_header_node( self, label, properties = {}, json_flag= False ):
-     self.construct_node( True, label, label, label, properties, json_flag )
+   def add_header_node( self, label,name=None, properties = {}, json_flag= False ):
+     if name == None:
+        name = label
+     properties["name"] = name
+     self.construct_node( True, label, label, name, properties, json_flag )
 
-   def end_header_node( self ):
+   def end_header_node( self, assert_namespace ):
+       #print self.namespace
+       assert (assert_namespace == self.namespace[-1][0]) ,"miss match namespace  got  "+assert_namespace+" expected "+self.namespace[-1][0]
        del self.namespace[-1]    
 
 
-   
+   def check_namespace( self ):
+       assert len(self.namespace) == 0, "unbalanced name space, current namespace: "+ json.dumps(self.namespace)
+       print "name space is in balance"
+      
    def add_info_node( self, label,name, properties = {}, json_flag= False ):
+     properties["name"] = name
+     
      self.construct_node( False, label, label, name, properties, json_flag )
 
    # concept of namespace name is a string which ensures unique name

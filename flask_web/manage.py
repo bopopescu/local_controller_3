@@ -54,28 +54,28 @@ template_support       = template_support(redis_handle,statistics_module)
      
 import construct_graph
 graph_management = construct_graph.Graph_Management("PI_1","main_remote","LaCima_DataStore")
-data_store_nodes = graph_management.find_data_stores()
-data_values = data_store_nodes.values()
-data_server_ip = data_values[0]["ip"]
-data_server_port = data_values[0]["port"]
+#data_store_nodes = graph_management.find_data_stores()
+#data_values = data_store_nodes.values()
+#data_server_ip = data_values[0]["ip"]
+#data_server_port = data_values[0]["port"]
 
-redis_data_handle = redis.StrictRedis( host = data_server_ip, port=data_server_port, db = 12 )
+#redis_data_handle = redis.StrictRedis( host = data_server_ip, port=data_server_port, db = 12 )
 
-moisture_data_start = graph_management.find_data_store_by_function("MOISTURE_STORE")
-moisture_data_stores = graph_management.find_data_store_by_function("MOISTURE_DATA")
-moisture_stores     = set( moisture_data_stores.keys() )
+#moisture_data_start = graph_management.find_data_store_by_function("MOISTURE_STORE")
+#moisture_data_stores = graph_management.find_data_store_by_function("MOISTURE_DATA")
+#moisture_stores     = set( moisture_data_stores.keys() )
 
-print moisture_data_start
-web_moisture_trigger_key = graph_management.convert_namespace(moisture_data_start["MOISTURE_STORE"]["namespace"])+"trigger_key" 
+#print moisture_data_start
+#web_moisture_trigger_key = graph_management.convert_namespace(moisture_data_start["MOISTURE_STORE"]["namespace"])+"trigger_key" 
 
 
-web_moisture_names = []
-web_moisture_data = []
-for key, value in moisture_data_stores.items():
+#web_moisture_names = []
+#web_moisture_data = []
+#for key, value in moisture_data_stores.items():
 
-    namespace = graph_management.convert_namespace(value["namespace"] )
-    web_moisture_data.append(namespace)
-    web_moisture_names.append(key)
+#    namespace = graph_management.convert_namespace(value["namespace"] )
+#    web_moisture_data.append(namespace)
+#    web_moisture_names.append(key)
    
    
  

@@ -2,11 +2,12 @@
 import redis
 import redis_graph_common
 import re
+import json
 
 class Query_Configuration():
 
-   def __init__( self, redis, redis_graph_common):
-        self.redis   = redis
+   def __init__( self, redis_handle, redis_graph_common):
+        self.redis_handle   = redis_handle
         self.common  = redis_graph_common
 
       
@@ -38,15 +39,16 @@ class Query_Configuration():
        return return_value
 
 
-
    def match_label_property( self, label, prop_key, prop_value, starting_path = None):
        return_value = []
        results = self.match_labels( label, starting_path  )
+       #print results
        
        for i in results:
           
-          if self.redis.hexists(i,prop_key) == True:
-              if self.redis.hget(i,prop_key) == prop_value:
+          if self.redis_handle.hexists(i,prop_key) == True:
+              #print "prop_value",prop_value == json.loads(self.redis_handle.hget(i,prop_key))
+              if json.loads(self.redis_handle.hget(i,prop_key)) == prop_value:
                   return_value.append(i)
 
        return return_value
@@ -56,7 +58,7 @@ class Query_Configuration():
 
    def modify_properties( self, redis_key, new_properties):
        for i in new_properties.keys():
-         redis.hset(redis_key,i, new_properties[i] )
+         redis_handle.hset(redis_key,i, new_properties[i] )
      
 
    def match_label_property_specific( self, label_name, property_name, property_value, label, return_name, return_prop_value):
@@ -73,6 +75,7 @@ class Query_Configuration():
        return_value = []
        # first step
        first_step = self.match_label_property( label_name, property_name, property_value)
+       #print "first step",first_step
        for i in first_step:
            results = self.match_labels( label,i)
            return_value.extend(results)
@@ -83,11 +86,12 @@ class Query_Configuration():
    def match_relationship_property( self, relationship, prop_key, prop_value, starting_path = None):
        return_value = []
        results = self.match_relationship( relationship, starting_path  )
-       
+
        for i in results:
           
-          if self.redis.hexists(i,prop_key) == True:
-              if self.redis.hget(i,prop_key) == prop_value:
+          if self.redis_handle.hexists(i,prop_key) == True:
+              
+              if json.loads(self.redis_handle.hget(i,prop_key)) == prop_value:
                   return_value.append(i)
 
        return return_value
@@ -95,8 +99,8 @@ class Query_Configuration():
 
    def match_relationship_property_specific( self, relationship, property_name, property_value, label, return_name, return_prop_value):
        return_value = []
-       # first step
        first_step = self.match_relationship_property( relationship, property_name, property_value)
+       #print "first step",first_step
        for i in first_step:
            
            results = self.match_label_property( label, return_name, return_prop_value,i)
@@ -111,6 +115,15 @@ class Query_Configuration():
            results = self.match_labels( label,i)
            return_value.extend(results)
        return return_value
+
+   def fetch_key_value( self, key, json_flag = True ):
+      data = self.redis_handle.getall(i)
+      return_value = {}
+      if json_flag == True:
+         for i, value in data.items():
+              return_value[i] = json.loads(value)
+      return return_value
+
        
 '''
 nicole = graph.merge_one('Person', 'name', 'Nicole')

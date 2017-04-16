@@ -161,7 +161,7 @@ if __name__ == "__main__":
        
        psoc_moisture = PSOC_4M_MOISTURE_UNIT( new_instrument )
 
-       '''
+       
        #psoc_moisture.update_current_time( 40 )
        print psoc_moisture.clear_new_moisture_data_flag(40)
        print psoc_moisture.check_status(40)
@@ -190,31 +190,31 @@ if __name__ == "__main__":
        print psoc_moisture.read_moisture_data(40)
        print psoc_moisture.check_status(40)
        
-       
+       quit()
 
-       ''' 
+        
        '''            
        # test directed actions
   
        #psoc_moisture.check_one_wire_presence(40)
        #psoc_moisture.make_soil_temperature(40)
-       psoc_moisture.force_moisture_reading(40)
+       #psoc_moisture.force_moisture_reading(40)
        '''       
        '''
-       print "new_data_flag",psoc_moisture.check_new_data_flag( 40)
-       print "capacitance_mask", psoc_moisture.read_capacitor_mask(40)
-       print psoc_moisture.read_moisture_control( 40 )
-       print psoc_moisture.read_moisture_configuration( 40 )
-       psoc_moisture.change_capacitance_sensor_mask( 40, 0xf)
+       #print "new_data_flag",psoc_moisture.check_new_data_flag( 40)
+       #print "capacitance_mask", psoc_moisture.read_capacitor_mask(40)
+       #print psoc_moisture.read_moisture_control( 40 )
+       #print psoc_moisture.read_moisture_configuration( 40 )
+       #psoc_moisture.change_capacitance_sensor_mask( 40, 0xf)
        '''
-       psoc_moisture.update_moisture_sensor_configuration ( 40,[ 2,1,1,0,2,1,1,0,2,1,1,0,2,1,1,0] )
+       #psoc_moisture.update_moisture_sensor_configuration ( 40,[ 2,1,1,0,2,1,1,0,2,1,1,0,2,1,1,0] )
        #psoc_moisture.update_flash(40)
        #print "capacitance_mask", psoc_moisture.read_capacitor_mask(40)
        #print psoc_moisture.read_moisture_control( 40 )
        print psoc_moisture.read_moisture_configuration( 40 )
        '''
        print "force moisture measurement", psoc_moisture.force_moisture_reading(40)
-       quit()
+       q
        print psoc_moisture.read_moisture_data(40)
        '''
        

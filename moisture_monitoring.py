@@ -175,7 +175,9 @@ if __name__ == "__main__":
   
    #
    # Find data Stores
-   moisture_data_start = graph_management.find_data_store_by_function("MOISTURE_STORE")
+   moisture_data_start =  graph_management.graph_management.match_relationship("MOISTURE_STORE")[0]
+
+graph_management.find_data_store_by_function("MOISTURE_STORE")
    web_moisture_trigger_key = graph_management.convert_namespace(moisture_data_start["MOISTURE_STORE"]["namespace"])+"trigger_key" 
 
 
