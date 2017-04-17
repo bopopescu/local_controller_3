@@ -53,32 +53,60 @@ template_support       = template_support(redis_handle,statistics_module)
 #  
      
 import construct_graph
-graph_management = construct_graph.Graph_Management("PI_1","main_remote","LaCima_DataStore")
-#data_store_nodes = graph_management.find_data_stores()
-#data_values = data_store_nodes.values()
-#data_server_ip = data_values[0]["ip"]
-#data_server_port = data_values[0]["port"]
-
-#redis_data_handle = redis.StrictRedis( host = data_server_ip, port=data_server_port, db = 12 )
-
-#moisture_data_start = graph_management.find_data_store_by_function("MOISTURE_STORE")
-#moisture_data_stores = graph_management.find_data_store_by_function("MOISTURE_DATA")
-#moisture_stores     = set( moisture_data_stores.keys() )
-
-#print moisture_data_start
-#web_moisture_trigger_key = graph_management.convert_namespace(moisture_data_start["MOISTURE_STORE"]["namespace"])+"trigger_key" 
+gm = construct_graph.Graph_Management("PI_1","main_remote","LaCima_DataStore")
 
 
-#web_moisture_names = []
-#web_moisture_data = []
-#for key, value in moisture_data_stores.items():
+#
+#  Set up redis data source
+#
+#
+data_stores = gm.find_data_stores()
+data_server_ip   = data_stores[0]["ip"]
+data_server_port = data_stores[0]["port"]
+#print "data_stores",data_stores, data_server_ip,data_server_port
+redis_data_handle = redis.StrictRedis( host = data_server_ip, port=data_server_port, db = 12 )
 
-#    namespace = graph_management.convert_namespace(value["namespace"] )
-#    web_moisture_data.append(namespace)
-#    web_moisture_names.append(key)
-   
-   
- 
+
+#
+#
+# Setting up moisture controllers
+#
+#
+
+#
+#  Find moisture trigger ket
+#
+#
+
+
+
+temp = gm.match_relationship("MOISTURE_MANUAL_UPDATE_FLAG")[0]
+moisture_update_flag = temp["name"]
+
+print moisture_update_flag
+
+#moisture controllers
+moisture_controllers = gm.assemble_name_list("name",gm.match_relationship("MOISTURE_CTR"))
+
+moisture_data_sources = gm.form_dict_from_keys("name","queue_name", gm.match_relationship("MOISTURE_DATA"))
+
+
+
+print moisture_controllers, moisture_data_sources
+
+#
+#
+# Now see if moisture controllers have data sources
+#
+#
+
+moisture_data_keys = gm.assemble_name_list("name",gm.match_relationship("MOISTURE_DATA"))
+
+assert set(moisture_controllers).intersection(moisture_data_keys) != [], "problem in graphical data base"
+
+print "db ok"
+  
+
 
 
 
@@ -483,20 +511,25 @@ def start_moisture_conversion():
      param              = request.get_json() 
      index              = int(param["index"])
      
-     print "event received",param,key
-     redis_data_handle.lpush(web_moisture_trigger_key,web_moisture_names[index] )
+     print "event received",param,index
+     print moisture_update_flag
+
+
+     redis_data_handle.lpush( moisture_update_flag ,moisture_controllers[index] )
 
      return json.dumps(json.dumps(param))
-
+     return "SUCCESS"
 
 @app.route('/ajax/soil_moisture_update',methods=["POST"] )
 @authDB.requires_auth
 def soil_moisture_update():
      param              = request.get_json() 
      print param["index"], type( param["index"] )
-     key = web_moisture_data[param["index"]]
+     key_name = moisture_controllers[param["index"]]
+     print moisture_data_sources
+     key = moisture_data_sources[key_name]
+
      temp_json = redis_data_handle.lindex(key,0)
-     output_data = ""
      temp_data = json.loads(temp_json)
      print "temp_data",temp_data
      print "temp_data",temp_data.keys()
@@ -511,8 +544,8 @@ def soil_moisture_update():
      output_data = output_data +"<li> Air Humidity     : "+str(temp_data_meas["air_humidity"]) +"  %</li>"
      output_data = output_data +"<li> Soil Temperature : "+str(temp_data_meas["soil_temperature"]) +"  Deg F</li>"
      output_data = output_data +"</ul></h4>"
-     description_map = json.loads(temp_data["description_map"] )
-     depth_map = json.loads(temp_data["depth_map"])
+     description_map = temp_data["description_map"] 
+     depth_map = temp_data["depth_map"]
      for i in range( len(description_map)):
         if description_map[i] != "empty":
            units = "ohms"
@@ -806,7 +839,7 @@ def eto_raw_data():
 @app.route('/soil_moisture_data',methods=["GET"])
 @authDB.requires_auth
 def soil_moisture_raw_data():
-        return render_template( "soil_moisture_data", web_moisture_names=web_moisture_names )
+        return render_template( "soil_moisture_data", web_moisture_names=moisture_controllers )
 
 @app.route('/soil_moisture_data_a',methods=["GET"])
 @authDB.requires_auth

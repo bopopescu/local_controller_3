@@ -71,14 +71,14 @@ class Graph_Management():
       return return_value
 
    def find_data_stores( self ):
-       keys = self.match_relationship("DATA_STORE")
-       return keys
+       data = self.match_relationship("DATA_STORE")
+       return data
 
    def find_io_servers( self ):
        keys = self.match_relationship("UDP_IO_SERVER")
        return keys
 
-   def get_data( self, key):
+   def get_data( self, key,json_flag = True):
        data = self.redis_handle.hgetall(key)
        #print "data",key,data
        temp = {}
@@ -104,6 +104,30 @@ class Graph_Management():
        name = name.replace(chr(0x84),"]")
        name = name.replace(chr(0x85),":")
        return name
+
+   def assemble_name_list( self,key, property_array):
+       return_value = []
+       for i in property_array:
+          return_value.append(i[key])
+       return return_value
+
+   def form_list_dict_from_keys( self, key, value_list, property_array):
+       return_value = []
+       for i in property_array:
+          print i.keys()
+          temp = {}
+          for j  in value_list:
+             temp[i[key]] = i[j]
+          return_value.append(temp)
+       return return_value
+
+   def form_dict_from_keys( self, key, value, property_array):
+       return_value = {}
+       for i in property_array:
+          print i.keys()
+          return_value[i[key]] = i[value]
+       return return_value
+
 
 if __name__ == "__main__" :
    redis_handle  = redis.StrictRedis( host = "localhost", port=6379, db = 15 )   
