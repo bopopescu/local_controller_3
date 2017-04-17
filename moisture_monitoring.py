@@ -13,27 +13,92 @@ import os
 import copy
 import load_files
 import rabbit_cloud_status_publish
+import io_control
 
 
 
 
-class Moisture_Control():
-   def __init__(self, redis_handle , status_queue ): 
-       self.redis_handle           = redis_handle
-       self.redis_handle.hset("MOISTURE_CONTROL","MANUAL_UPDATE",0 )
-       self.moisture_length = 1000 # 10 days @ 15 minute interval
-       self.status_queue  = status_queue
+class Moisture_Control(object):
+   def __init__(self, redis_handle , graph_management,io_control_class, status_queue_classes, moisture_app_classes, moisture_remote_classes, remote_classes):
+       self.redis_handle            = redis_handle
+       self.gm                      = graph_management 
+       self.status_queue_class      = status_queue_classes
+       self.moisture_app_classes    = moisture_app_classes
+       self.moisture_remote_classes = moisture_remote_classes   
+       self.remote_classes          = remote_classes
+       self.io_control_class        = io_control_class
+       self.unpack_graph()
+       self.clear_update_flag()
+      
 
+
+   def unpack_graph( self ):
+       self.update_flag = self.gm.match_relationship("MOISTURE_MANUAL_UPDATE_FLAG" )[0]
+       self.web_moisture_trigger_key = self.update_flag["name"]
+       #print self.web_moisture_trigger_key
+       self.store_data_list = {}
+       self.store_air_list  = {}
+       self.rollover_list   = {}
+       for i in moisture_app_classes:
+          self.store_data_list[i["name"] ] = self.gm.get_data(self.gm.qc.match_label_property("MOISTURE_DATA","name", "moisture_1" )[0])
+          self.store_air_list[i["name"]]   = self.gm.get_data(self.gm.qc.match_label_property("MOISTURE_AIR_TEMP_LIST","name", "moisture_1" )[0])
+          self.rollover_list[i["name"]]    = self.gm.get_data(self.gm.qc.match_label_property("MOISTURE_ROLLOVER","name","moisture_1")[0])
+      
+
+
+   def clear_update_flag( self ):
+      list = self.update_flag["name"]
+      self.redis_handle.delete(list)
+
+   def find_driver( self, port ):
+       for i in self.moisture_remote_classes:
+           
+           if i["modbus_address"] == port:
+               return i
+       raise ValueError("Cannot find device at specified port")
+
+
+   def update_moisture_readings( self,chainFlowHandle, chainOjb, parameters, event ):
+       if event == "INIT":
+         return "CONTINUE"
+       
+       list_data = []
+       
+       for value in self.moisture_app_classes:
+           modbus_address = value["slave_controller_address"]
+           driver = self.find_driver( modbus_address )
+           self.update_a_reading( value, driver, list_data )
+           
+
+
+          
+
+   def update_a_reading(self, value, driver, list_data ):
+          
+           properties = copy.deepcopy( value)
+           modbus_address = driver["modbus_address"]
+           measurement_properties = self.make_measurements( int(modbus_address), driver,list_data )
+           if measurement_properties["measurement_status"] == 0:
+               return
+           properties["measurements"] = measurement_properties
+           properties["namespace"] = self.gm.convert_namespace(properties["namespace"])
+           name = properties["name"]
+           #print measurement_properties.keys()
+           redis_key = self.store_data_list[name]["queue_name"]
+           redis_length = self.store_data_list[name]["list_length"]
+           self.redis_handle.lpush(redis_key,json.dumps(properties))
+           self.redis_handle.ltrim(redis_key,0,redis_length)
  
-        
+           self.status_queue_class.queue_message("moisture_measurement", properties )
 
 
 
-   def make_measurements( self, modbus_address,   driver_class , list_data):
+   def make_measurements( self, modbus_address,   io_wrapper , list_data):
+       type = io_wrapper["type"]
+       driver_class = remote_classes.find_class(type)
        measure_properties = {}
        time_stamp = time.strftime( "%b %d %Y %H:%M:%S",time.localtime(time.time()))
        measure_properties["time_stamp"] = time_stamp
-       
        try:
          item = {}
          driver_class.make_soil_temperature( modbus_address )
@@ -66,46 +131,14 @@ class Moisture_Control():
        return measure_properties
        
 
-   def update_moisture_readings( self,chainFlowHandle, chainOjb, parameters, event ):
-       if event == "INIT":
-         return "CONTINUE"
-       #print self.moisture_stores
-       list_data = []
-       for key, value in self.moisture_stores.items():
-           self.update_a_reading(key,value,list_data)
-       redis_handle.set(temp_humidity_store,list_data)
-
-   def update_a_reading(self, key,value,list_data):
-           io_device = self.moisture_stations[key]
-           type = io_device["type"]
-           modbus_address = io_device["modbus_address"]
-           driver_class = self.remote_classes.find_class( type )
-           properties = copy.deepcopy( value)
-           measurement_properties = self.make_measurements( int(modbus_address), driver_class,list_data )
-           if measurement_properties["measurement_status"] == 0:
-               return
-           properties["measurements"] = measurement_properties
-           #
-           # Now Store Data
-           #
-           namespace = self.graph_management.convert_namespace( properties["namespace"] )
-           properties["namespace"] = namespace
-
-           redis_handle.lpush( namespace, json.dumps(properties) )
-           redis_handle.ltrim( namespace, 0, self.moisture_length )
-           print redis_handle.llen(namespace)
-           print redis_handle.lindex(namespace,0)
-           self.status_queue.queue_message("moisture_measurement", properties )
 
        
 
    def check_update_flag( self,chainFlowHandle, chainOjb, parameters, event ):
 
-       if event == "INIT":
-         return "CONTINUE"
-       if self.redis_handle.llen( web_moisture_trigger_key ) > 0:
+       if self.redis_handle.llen( self.web_moisture_trigger_key ) > 0:
        
-          key = self.redis_handle.rpop(web_moisture_trigger_key)
+          key = self.redis_handle.rpop(self.web_moisture_trigger_key)
           if key != None:
               self.update_a_reading(key, self.moisture_stores[key])
        
@@ -121,10 +154,16 @@ class Moisture_Control():
        if event == "INIT":
          return "CONTINUE"
        print "hour tick"
-       data = redis_handle.get(temp_humidity_store)
-       redis_handle.lpush( temp_humidity_log, data)
-       redis_handle.ltrim(temp_humidity_log,0,23)
-       print "len",redis_handle.llen(temp_humidity_log)
+       for  i in self.moisture_app_classes:
+           name = i["name"]
+           redis_key = self.store_data_list[name]["queue_name"]
+           data_json  = redis_handle.lindex( redis_key, 0)
+           data   = json.loads(data_json)          
+           temp = {"air_temperature": data["measurements"]["air_temperature"],"air_humidity": data["measurements"]["air_humidity"]}
+           redis_key = self.store_air_list[name]["queue_name"]
+           redis_length = self.store_air_list[name]["list_length"]
+           self.redis_handle.lpush(redis_key,json.dumps(temp))
+           self.redis_handle.ltrim(redis_key,0,redis_length)
        return "DISABLE" 
        
  
@@ -132,11 +171,22 @@ class Moisture_Control():
 
        if event == "INIT":
          return "CONTINUE"
+       for  i in self.moisture_app_classes:
+           name = i["name"]
+           hour_redis_key = self.store_air_list[name]["queue_name"]
+           print "hour_redis_key",hour_redis_key
+           print "hour_redis_key",self.redis_handle.llen(hour_redis_key)
+           rollover_redis_key = self.rollover_list[name]["queue_name"]
+           print "rollover",self.rollover_list[name]["name"]
+           print "--->", self.redis_handle.llen(rollover_redis_key)
+           if self.redis_handle.llen(rollover_redis_key) > 0:
+                  print "---"
+                  self.redis_handle.delete(rollover_redis_key)
+           print "++++",self.redis_handle.llen(hour_redis_key)
 
-       redis_handle.delete(temp_humidity_eto)
-       redis_handle.rename(temp_humidity_log, temp_humidity_eto)
-       print "len",redis_handle.llen(temp_humidity_eto)
-       return "DISABLE"
+           self.redis_handle.rename( hour_redis_key , rollover_redis_key)
+           print "len",self.redis_handle.llen(rollover_redis_key)
+           return "DISABLE"
  
 
 
@@ -144,87 +194,53 @@ class Moisture_Control():
 if __name__ == "__main__":
    import time
    import construct_graph 
-   import io_control.construct_classes
+   import io_control
    import io_control.new_instrument
+   import io_control.io_controller_class
+   import io_control.construct_classes
 
    graph_management = construct_graph.Graph_Management("PI_1","main_remote","LaCima_DataStore")
    moisture_stations = graph_management.find_remotes_by_function("moisture")
    data_store_nodes = graph_management.find_data_stores()
    io_server_nodes  = graph_management.find_io_servers()
-   
-   data_values = data_store_nodes.values()
-   io_values   = io_server_nodes.values()
-
+  
    # find ip and port for redis data store
-   data_server_ip = data_values[0]["ip"]
-   data_server_port = data_values[0]["port"]
-   io_server_ip =   io_values[0]["ip"]
-   io_server_port = io_values[0]["port"]
-
-   
+   data_server_ip   = data_store_nodes[0]["ip"]
+   data_server_port = data_store_nodes[0]["port"]
+   io_server_ip     = io_server_nodes[0]["ip"]
+   io_server_port   = io_server_nodes[0]["port"]
    # find ip and port for ip server
 
    instrument  =  io_control.new_instrument.Modbus_Instrument()
 
    instrument.set_ip(ip= io_server_ip, port = int(io_server_port))     
-
+   io_control_class =  io_control.io_controller_class.Build_Controller_Classes(instrument)
    remote_classes = io_control.construct_classes.Construct_Access_Classes(instrument)
-  
-   #driver_class = remote_classes.find_class( "PSOC_4_Moisture" )
-   #driver_class.make_soil_temperature( 40 )
-  
-   #
-   # Find data Stores
-   moisture_data_start =  graph_management.graph_management.match_relationship("MOISTURE_STORE")[0]
 
-graph_management.find_data_store_by_function("MOISTURE_STORE")
-   web_moisture_trigger_key = graph_management.convert_namespace(moisture_data_start["MOISTURE_STORE"]["namespace"])+"trigger_key" 
-
-
-
-   moisture_data_stores = graph_management.find_data_store_by_function("MOISTURE_DATA")
-   moisture_stores     = set( moisture_data_stores.keys() )
-   moisture_remotes = set ( moisture_stations.keys() )
-   results = moisture_remotes ^ moisture_stores
+   moisture_app_classes = graph_management.match_relationship("MOISTURE_CTR")
+   moisture_remote_classes = graph_management.find_remotes_by_function("moisture")
+     
    
-   if len( results ) != 0:
+   if len(moisture_app_classes) > len(moisture_remote_classes):
       raise ValueError("Imbalance in setup graph")
 
-   temp_humidity_store =  graph_management.convert_namespace(graph_management.find_data_store_by_function("TEMP_HUMIDITY")["TEMP_HUMIDITY"]["namespace"])
-   temp_humidity_log   =  graph_management.convert_namespace(graph_management.find_data_store_by_function("TEMP_HUMIDITY_DAILY")["TEMP_HUMIDITY_DAILY"]["namespace"])
-   temp_humidity_eto   =  graph_management.convert_namespace(graph_management.find_data_store_by_function("TEMP_HUMIDITY_DAILY_ETO")["TEMP_HUMIDITY_DAILY_ETO"]["namespace"])
    
-  
-  
-
-   # 
-   #  
-   print data_server_ip
    redis_handle = redis.StrictRedis( host = data_server_ip, port=data_server_port, db = 12 )
-   redis_handle.delete(web_moisture_trigger_key)
-   #import moisture.new_instrument_network
-   #import moisture.psoc_4m_moisture_sensor_network 
+   status_stores = graph_management.match_relationship("CLOUD_STATUS_STORE")
+
+
+   queue_name    = status_stores[0]["queue_name"]
+
+   status_queue_class = rabbit_cloud_status_publish.Status_Queue(redis_handle, queue_name )
+
    
-   #new_instrument  =  moisture.new_instrument_network.new_instrument_network()
-   #new_instrument.set_ip(ip= "192.168.1.82", port = 5005)     
-  
-   #psoc_moisture = moisture.psoc_4m_moisture_sensor_network.PSOC_4M_MOISTURE_UNIT( new_instrument )
 
-   status_stores = graph_management.match_relationship("STATUS_STORE")
-   print "status_stores",status_stores
-   status_store  = status_stores[0]
-   queue_name    = status_store["queue_name"]
+   moisture_class = Moisture_Control( redis_handle , graph_management, io_control_class,
+                    status_queue_class, moisture_app_classes, moisture_remote_classes , remote_classes )
+   
 
-   status_queue = rabbit_cloud_status_publish.Status_Queue(redis_handle, queue_name )
-   moisture = Moisture_Control( redis_handle , status_queue)
-   moisture.moisture_stations = moisture_stations
-   moisture.moisture_stores = moisture_data_stores
-   moisture.remote_classes = remote_classes
-   moisture.graph_management = graph_management
-  
+   moisture_class.update_moisture_readings(None,None,None, None ) #populate data
 
-   moisture.update_moisture_readings(None,None,None, None ) #populate data
- 
    #
    # Adding chains
    #
@@ -238,27 +254,27 @@ graph_management.find_data_store_by_function("MOISTURE_STORE")
 
    cf.define_chain("update_moisture_readings",True)
    cf.insert_link( "link_1", "WaitEventCount",    [ "MINUTE_TICK",15,0 ] )
-   cf.insert_link( "link_2", "One_Step",     [  moisture.update_moisture_readings ] )
+   cf.insert_link( "link_2", "One_Step",     [  moisture_class.update_moisture_readings ] )
    cf.insert_link( "link_3", "Reset", [] )
 
 
    cf.define_chain("check_for_moisture_update",True)
    cf.insert_link( "link_1", "WaitEvent",    [ "TIME_TICK" ] )
-   cf.insert_link( "link_2", "Code",         [ moisture.check_update_flag ] )
+   cf.insert_link( "link_2", "One_Step",         [ moisture_class.check_update_flag ] )
  
    cf.insert_link( "link_4", "Reset", [] )
 
 
    cf.define_chain("update_hour_readings",True)
    cf.insert_link( "link_1", "WaitEvent",    [ "HOUR_TICK" ] )
-   cf.insert_link( "link_2", "One_Step",         [ moisture.hour_update ] )
+   cf.insert_link( "link_2", "One_Step",         [ moisture_class.hour_update ] )
    cf.insert_link( "link_4", "Reset", [] )
 
 
   
    cf.define_chain("update_day_readings",True)
    cf.insert_link( "link_1", "WaitEvent",    [ "DAY_TICK" ] )
-   cf.insert_link( "link_2", "One_Step",         [ moisture.day_update ] )
+   cf.insert_link( "link_2", "One_Step",         [ moisture_class.day_update ] )
    cf.insert_link( "link_4", "Reset", [] )
  
  

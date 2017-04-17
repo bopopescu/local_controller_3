@@ -79,14 +79,14 @@ if __name__ == "__main__":
                              type='fanout')
  
    data_store_nodes = graph_management.find_data_stores()
-   data_values = data_store_nodes.values()
-
+   
+  
    # find ip and port for redis data store
-   data_server_ip = data_values[0]["ip"]
-   data_server_port = data_values[0]["port"]
+   data_server_ip   = data_store_nodes[0]["ip"]
+   data_server_port = data_store_nodes[0]["port"]
    redis_handle = redis.StrictRedis( host = data_server_ip, port=data_server_port, db = 12 )
 
-   status_stores = graph_management.match_relationship("STATUS_STORE")
+   status_stores = graph_management.match_relationship("CLOUD_STATUS_STORE")
    #print "status_stores",status_stores
    status_store  = status_stores[0]
    queue_name    = status_store["queue_name"]

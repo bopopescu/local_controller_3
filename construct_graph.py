@@ -24,7 +24,7 @@ class Graph_Management():
       self.io_server_name  = io_server_name
       self.data_store_name = data_store_name
 
-   def match_relationship( self, query_string, json_flag = False ):
+   def match_relationship( self, query_string, json_flag = True ):
       keys =  self.qc.match_relationship( query_string ) 
       return_value = []
       for i in keys:
@@ -48,28 +48,18 @@ class Graph_Management():
 
 
    def find_remotes( self  ):
-      keys = self.qc.match_label_property_generic( "UDP_IO_SERVER", "name", self.io_server_name, "REMOTE_UNIT" )
-      return_value = {}
-      for i in keys:
-         data = self.redis_handle.hgetall(i)
-         return_value[data["name"]]= data
-      return return_value
+      keys = self.match_relationship("REMOTE_UNIT")
+      return keys
 
 
 
    def find_remotes_by_function( self,  function ):
-       keys = self.qc.match_relationship( "REMOTE_UNIT" )
-       
+       keys = self.keys = self.match_relationship("REMOTE_UNIT")
        return_value = []
        for i in keys:
-          
-          data = self.redis_handle.hgetall(i)
-         
-          
-          data["function"] = set( json.loads( data["function"] ) )
-          if function in data["function"] :
+           if function in set(i["function"]) :
               return_value.append(i)
-          
+       
        return return_value
 
    def find_data_store_by_function(self, function):
@@ -81,20 +71,27 @@ class Graph_Management():
       return return_value
 
    def find_data_stores( self ):
-       keys = self.qc.match_relationship("DATA_STORE")
-       return_value = {}
-       for i in keys:
-           data = self.redis_handle.hgetall(i)
-           return_value[data["name"]] = data
-       return return_value 
+       keys = self.match_relationship("DATA_STORE")
+       return keys
 
    def find_io_servers( self ):
-       keys = self.qc.match_relationship("UDP_IO_SERVER")
-       return_value = {}
-       for i in keys:
-           data = self.redis_handle.hgetall(i)
-           return_value[data["name"]] = data
-       return return_value 
+       keys = self.match_relationship("UDP_IO_SERVER")
+       return keys
+
+   def get_data( self, key):
+       data = self.redis_handle.hgetall(key)
+       #print "data",key,data
+       temp = {}
+       for j in data.keys():
+           #print j, data[j]
+           try:
+             if json_flag == True:
+	        temp[j] = json.loads(data[j])
+             else:
+                 temp[j] = data[j]
+           except:
+               temp[j] = data[j]
+       return temp
 
 
 
@@ -135,7 +132,13 @@ if __name__ == "__main__" :
    # we are going to construct the data store here
    cf.add_header_node("APPLICATION_SUPPORT")
 
-   cf.add_header_node( "MOISTURE_CONTROLLERS","MOISTURE_CONTROLLERS", properties = {}, json_flag= True )
+   cf.add_header_node( "UTILITY_MODULE", properties = {}, json_flag= True )
+   cf.add_info_node( "CIMIS_EMAIL","CIMIS_EMAIL",properties =  { "imap_username" :'lacima.ranch@gmail.com',"imap_password" : 'Gr1234gfd'} , json_flag = True)
+   cf.end_header_node("UTILITY_MODULE")
+
+   cf.add_header_node( "MOISTURE_CONTROLLERS", properties = {}, json_flag= True )
+   
+   cf.add_info_node("MOISTURE_MANUAL_UPDATE_FLAG","MANUAL_UPDATE_FLAG",properties = {},json_flag = True)
 
    description_map = ["Bank 10A Watermark 8 inch","Bank 10A Resistive 8 inch", "Bank 10A Resistive 18 inch", "empty",
                       "Bank 10B Watermark 8 inch", "Bank 10B Resistive 8 inch","Bank 10B Resistive 18 inch","empty",
@@ -151,6 +154,7 @@ if __name__ == "__main__" :
    properties["moisture_list_store"]         =   "MOISTURE_1_DATA_STORE"
    properties["air_temp_list_store"]         =   "MOISTURE_1_AIR_TEMP_LIST_STORE"
    properties["roll_over_list_store"]        =   "MOISTURE_1_ROLL_OVER_LIST_STORE"
+   properties["slave_controller_address"]    =    40
    cf.add_info_node( "MOISTURE_CTR","moisture_1", properties = properties, json_flag= True )
  
    cf.end_header_node("MOISTURE_CONTROLLERS")
@@ -283,9 +287,9 @@ if __name__ == "__main__" :
 
    cf.add_header_node("MOISTURE_SENSOR_DATA")
    cf.add_header_node("moisture_1")
-   cf.add_info_node("MOISTURE_1_DATA_STORE","MOISTURE_1_DATA_STORE",properties={"list_length":300},json_flag = True)
-   cf.add_info_node("MOISTURE_1_AIR_TEMP_LIST_STORE","MOISTURE_1_AIR_TEMP_LIST_STORE",properties={"list_length":300},json_flag = True)
-   cf.add_info_node("MOISTURE_1_ROLL_OVER_LIST_STORE","MOISTURE_1_ROLL_OVER_LIST_STORE",properties={"list_length":300},json_flag = True)
+   cf.add_info_node("MOISTURE_DATA",          "moisture_1",properties={"queue_name":"moisture_1_data","list_length":300},json_flag = True)
+   cf.add_info_node("MOISTURE_AIR_TEMP_LIST", "moisture_1",properties={"queue_name":"moisture_1_list","list_length":24},json_flag = True)
+   cf.add_info_node("MOISTURE_ROLLOVER",      "moisture_1",properties={"queue_name":"moisture_1_rollover","list_length":24},json_flag = True)
 
  
    
@@ -342,7 +346,9 @@ if __name__ == "__main__" :
    cf.end_header_node("UDP_IO_SERVER")
   
 
-
+   cf.add_header_node("RABBITMQ_CLIENTS")
+   cf.add_rabbitmq_status_queue( "LaCima",vhost="LaCima",queue="status_queue",port=5671,server = 'lacimaRanch.cloudapp.net' )
+   cf.end_header_node("RABBITMQ_CLIENTS")
 
 
    #cf.construct_controller(  name="PI_1", ip = "192.168.1.82",type="PI")
@@ -369,6 +375,15 @@ if __name__ == "__main__" :
    cf.end_site()
    cf.end_system()
    cf.check_namespace()
+
+
+   #
+   #  Test code
+   #
+   #
+   #
+   #
+
 
    keys = redis_handle.keys("*")
    print "len of keys",len(keys)
