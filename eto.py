@@ -31,7 +31,7 @@ import load_files
 
 from cloud_event_queue import Cloud_Event_Queue
 #from watch_dog         import Watch_Dog_Client
-
+'''
 class Eto_Management(object):
    def __init__( self, redis_handle, eto_stores, rain_stores, status_queue,eto_measurement_handlers ):
        self.redis_handle            = redis_handle
@@ -115,7 +115,7 @@ class ETO_Calculators( object ):
    def check_computation_tags( self, tag_list ):
       pass  
        
-
+'''
      
 if __name__ == "__main__":
 
@@ -124,58 +124,68 @@ if __name__ == "__main__":
    import io_control.construct_classes
    import io_control.new_instrument
 
-   graph_management = construct_graph.Graph_Management("PI_1","main_remote","LaCima_DataStore")
+   gm = construct_graph.Graph_Management("PI_1","main_remote","LaCima_DataStore")
    #
    # Now Find Data Stores
    #
    #
    #
-   data_store_nodes = graph_management.find_data_stores()
-   
-   data_values = data_store_nodes.values()
-   # At present we limit the data stores to only one value
+   data_store_nodes = gm.find_data_stores()
    # find ip and port for redis data store
-   data_server_ip = data_values[0]["ip"]
-   data_server_port = data_values[0]["port"]
-   # Getting redis handle to data server
-   redis_handle = redis.StrictRedis( host = data_server_ip, port=data_server_port, db = 12 )
-  
-   # we need the ETO
-   eto_stores  = graph_management.match_relationship( "ETO_ENTRY", json_flag = True )
-   rain_stores = graph_management.match_relationship( "RAIN_ENTRY", json_flag = True )
-   print len(eto_stores), len( rain_stores)
-   tag_set = set()
-   for i in eto_stores:   
-       namespace                 = graph_management.convert_namespace( i["namespace"] )
-       i["namespace"]        = namespace
-       tag_set.add(i["measurement_tag"])
-
-  
-  
-   for i in rain_stores:   
-       namespace                 = graph_management.convert_namespace( i["namespace"] )
-       i["namespace"]        = namespace
-       tag_set.add(i["measurement_tag"])
+   data_server_ip   = data_store_nodes[0]["ip"]
+   data_server_port = data_store_nodes[0]["port"]
+   # find ip and port for ip server
    
-   status_store = graph_management.match_relationship("STATUS_STORE")[0]
-   queue_name    = status_store["queue_name"]
-   status_queue = rabbit_cloud_status_publish.Status_Queue(redis_handle, queue_name )
+   redis_handle = redis.StrictRedis( host = data_server_ip, port=data_server_port, db = 12 )
+
+   #
+   #
+   # find eto sources
+   #
+   #
+   eto_sources = gm.match_relationship("ETO_ENTRY")
+   #
+   # find eto data stores
+   eto_data_stores = gm.match_relationship("ETO_STORE")
+   #
+   #  Make sure that there is a data store for every eto_source
+   #
+   #
+   eto_source_temp_list  = gm.form_key_list( "measurement", eto_sources )
+   eto_store_temp_list   = gm.form_key_list( "name", eto_data_stores )
+   assert len(set(eto_source_temp_list)^set(eto_store_temp_list)) == 0, "graphical data base error"
+     
+   #
+   # find rain sources
+   # 
+   rain_sources = gm.match_relationship("RAIN_ENTRY")
+   #
+   # find rain stores
+   #
+   rain_data_stores = gm.match_relationship( "RAIN_STORE" )
+
+   rain_source_temp_list  = gm.form_key_list( "measurement", rain_sources )
+   rain_store_temp_list   = gm.form_key_list( "name", rain_data_stores )
+   #print set(rain_source_temp_list)^set(rain_store_temp_list)
+   assert len(set(rain_source_temp_list)^set(rain_store_temp_list)) == 0, "graphical data base error"
+
+   #
+   #
+   #
+   status_stores = gm.match_relationship("CLOUD_STATUS_STORE")
 
 
+   queue_name    = status_stores[0]["queue_name"]
+
+   status_queue_class = rabbit_cloud_status_publish.Status_Queue(redis_handle, queue_name )
+  
+  
   
 
 
    quit()
    '''
-           namespace = self.graph_management.convert_namespace( properties["namespace"] )
-           properties["namespace"] = namespace
 
-           redis_handle.lpush( namespace, json.dumps(properties) )
-           redis_handle.ltrim( namespace, 0, self.moisture_length )
-           print redis_handle.llen(namespace)
-           print redis_handle.lindex(namespace,0)
-           self.status_queue.queue_message("moisture_measurement", properties )
-   '''
    eto_calc  =  ETO_Calculators()
    eto = Eto_Management( redis_handle       = redis_handle  ,
                          status_store      = status_store, 
@@ -202,7 +212,7 @@ if __name__ == "__main__":
    cf.insert_link("link_2","One_Step",  [ eto.update_bins ] )
         
  
-
+   '''
 
  
 

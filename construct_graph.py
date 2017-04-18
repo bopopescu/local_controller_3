@@ -111,6 +111,13 @@ class Graph_Management():
           return_value.append(i[key])
        return return_value
 
+   def form_key_list( self,key, property_array ):
+       return_value = []
+       for i in property_array:
+          return_value.append(i[key])
+       return return_value   
+
+
    def form_list_dict_from_keys( self, key, value_list, property_array):
        return_value = []
        for i in property_array:
@@ -236,8 +243,7 @@ if __name__ == "__main__" :
    properties = {"api-key":"8b165ee73a734f379a8c91460afc98a1"  ,"url":"http://api.mesowest.net/v2/stations/precip?" ,  "station":"SRUC1" }
    properties["measurement_tag"] ="SRUC1"
    properties["list_length"]     = 100
-   properties["measurement"]     = "SRUC1_STORE"
-
+   properties["measurement"]     = "SRCU1_RAIN_STORE"
    cf.add_info_node( "RAIN_ENTRY","SRUC1_RAIN",properties=properties, json_flag=True)
    cf.end_header_node("RAIN_SOURCES")
 
