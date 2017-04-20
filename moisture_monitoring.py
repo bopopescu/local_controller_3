@@ -140,7 +140,7 @@ class Moisture_Control(object):
        
           key = self.redis_handle.rpop(self.web_moisture_trigger_key)
           if key != None:
-              self.update_a_reading(key, self.moisture_stores[key])
+             self.update_moisture_readings( None, None, None, None )             
        
 
        return "DISABLE"

@@ -58,7 +58,7 @@ class Delete_Cimis_Email():
            self.imap.select('Inbox')
            status, data = self.imap.search(None, 'ALL')
            count = sum(1 for num in data[0].split())
-           print "count",count
+           print ("count",count)
            if count > 0 :
               self.imap.select('Inbox')
               status, data = self.imap.search(None, 'ALL')
@@ -76,11 +76,6 @@ if __name__ == "__main__":
    import io_control.new_instrument
 
    graph_management = construct_graph.Graph_Management("PI_1","main_remote","LaCima_DataStore") 
-   data_store_nodes = graph_management.find_data_stores()  
-   data_values = data_store_nodes.values()
-   # find ip and port for redis data store
-   data_server_ip = data_values[0]["ip"]
-   data_server_port = data_values[0]["port"]
    
 
     

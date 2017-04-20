@@ -17,6 +17,7 @@ $(document).ready(
     {   var soil_index
        
         local_data["soil_type_index"]  = $("#soil_type_id")[0].selectedIndex;
+        
         calculate_data();
      });
 

@@ -34,8 +34,8 @@
    
         <label for="soil_type" class="select">Select Soil Type:</label>
         <select  name="soil_type"  id ="soil_type_id">
-        <option   selected value=0>Sand               .5-.7   in/foot </option>
-        <option            value=1>Fine Sand          .7-.9   in/foot </option>
+        <option            value=0>Sand               .5-.7   in/foot </option>
+        <option selected   value=1>Fine Sand          .7-.9   in/foot </option>
         <option            value=2>Loamy Sand         .9-1.1  in/foot </option>
         <option            value=3>Loamy Fine Sand    1.1-1.2 in/foot </option>
         <option            value=4>Loam               1.2-1.4 in/foot </option>
@@ -53,15 +53,24 @@
         <option            value=2>  1.5 feet      </option>
         <option   selected value=3>  2.0 feet      </option>
         <option            value=4>  2.5 feet      </option>
+        <option            value=5>  3.0 feet      </option>
+        <option            value=6>  3.5 feet      </option>
+        <option            value=7>  4.0 feet      </option>
        </select>
 
         
         <label for="recharge_ratio" class="select">Select Recharge Ratio:</label>
         <select name="recharge_ratio"    id ="recharge_ratio_id">
-        <option            value=0>  20 %       </option>
-        <option selected   value=1>  30 % This is the general recomemdation      </option>
-        <option            value=2>  40 %       </option>
-        <option            value=3>  50 %      </option>
+        <option            value=0>   5 %       </option>
+        <option            value=1>  10 %       </option>
+        <option            value=2>  15 %       </option>
+        <option            value=3>  20 %       </option>
+        <option            value=4>  25 %       </option>
+        <option  selected  value=5>  30 %  This is the general recomemdation          </option>
+        <option            value=6>  35 %       </option>
+        <option            value=7>  40 %      </option>
+        <option            value=8>  45 %       </option>
+        <option            value=9>  50 %      </option>
        </select>
        
         

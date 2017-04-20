@@ -4,18 +4,16 @@ local_data = 0;
 
 
     
-
- 
-
 function calculate_data()
 {
         var soil_array = [.6,.8,1.0,1.15,1.3, 1.4,1.7,2.0,2.25 ]
-        var soil_depth_array = [.5,1.0,1.5,2.0,2.5]
-        var recharge_ratio_array = [ .2,.3,.4,.5]
+        var soil_depth_array = [.5,1.0,1.5,2.0,2.5,3.0,3.5,4.0]
+        var recharge_ratio_array = [.05,.10,.15 ,.2,.25, .3,.35, .4,.45,.5]
         var sprinkler_efficiency_array = [ 1.0, .95, .90, .85, .80, .75, .70 ]
         var salt_flush_array           = [ 1.0, .95, .90, .85, .80 ]
         var crop_utilization_array      = [ 1.0, .95, .90, .85, .80, .75, .70, .65, .60 ]
 
+  
 
         var soil_ref 
         var soil_depth 
@@ -39,9 +37,13 @@ function calculate_data()
       
        
         soil_ref = soil_array[ local_data["soil_type_index" ] ]
+        
         soil_depth = soil_depth_array[ local_data["soil_depth_index" ] ]
+        
         soil_moisture = soil_ref*soil_depth
+        
         recharge_ratio = recharge_ratio_array[ local_data["recharge_ratio_index"] ]
+        
         local_data["recharge_eto"] = soil_moisture*recharge_ratio
         
         
