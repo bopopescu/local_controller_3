@@ -228,6 +228,7 @@ if __name__ == "__main__" :
    properties["measurement_tag"] = "HYBRID_SITE"
    properties["list_length"]     = 100
    properties["measurement"]    = "HYBRID_SITE_STORE"
+   properties["rollover"]       = "MOISTURE_ROLLOVER"
    cf.add_info_node( "ETO_ENTRY","LaCima_Ranch",properties=properties, json_flag=True)
    cf.end_header_node("ETO_SITES")
 
@@ -298,6 +299,7 @@ if __name__ == "__main__" :
    
 
    cf.add_header_node("RAIN_MEASUREMENTS")
+   
    cf.add_info_node("RAIN_STORE","CIMIS_RAIN_STORE",properties={"list_length":300},json_flag = True)
    cf.add_info_node("RAIN_STORE","SRCU1_RAIN_STORE",properties={"list_length":300},json_flag = True)
    cf.end_header_node("RAIN_MEASUREMENTS")

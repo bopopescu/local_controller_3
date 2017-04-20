@@ -27,18 +27,23 @@ from   eto.cimis_request import *
 import load_files
 
 
-
-
 from cloud_event_queue import Cloud_Event_Queue
 #from watch_dog         import Watch_Dog_Client
 '''
 class Eto_Management(object):
-   def __init__( self, redis_handle, eto_stores, rain_stores, status_queue,eto_measurement_handlers ):
-       self.redis_handle            = redis_handle
-       self.eto_stores              = eto_stores
-       self.rain_stores             = rain_stores
-       self.status_queue            = status_queue_name
-       self.eto_measurement_handler = eto_measurement_handler
+   def __init__( self, redis_handle, status_queue_class, eto_sources, eto_data_stores,rain_sources,rain_data_stores,eto_calc ):
+        self.redis_handle                  = redis_handle
+        self.status_queue_class            = status_queue_class
+        self.eto_sources                   = eto_sources
+        self.eto_data_stores               = eto_data_stores
+        self.rain_sources                  = rain_sources
+        self.rain_data_stores              = rain_data_stores
+        self.eto_calc                      = eto_calc
+
+#eto.make_measurement
+#eto.verify_empty_queue
+#eto.update_eto_bins 
+
 
    def determine_to_measure(self, name_space ):
        if self.redis_handle.llen(name_space) == 0:
@@ -180,39 +185,45 @@ if __name__ == "__main__":
    status_queue_class = rabbit_cloud_status_publish.Status_Queue(redis_handle, queue_name )
   
   
+   eto_calc  =  ETO_Calculators()
+   eto = Eto_Management( redis_handle            = redis_handle,
+                         status_queue_class      = status_queue_class,
+                         eto_sources             = eto_sources, 
+                         eto_data_stores         = eto_data_stores,
+                         rain_sources            = rain_sources,
+                         rain_data_stores        = rain_data_stores,
+                         eto_calc                = eto_calc          )
+
+
   
 
 
-   quit()
-   '''
-
-   eto_calc  =  ETO_Calculators()
-   eto = Eto_Management( redis_handle       = redis_handle  ,
-                         status_store      = status_store, 
-                         eto_step_up_data  = eto_step_up_data, 
-                         humidity_eto      = humidity_eto,
-                         eto_data_store    = eto_data_store )
 
 
+   cf.define_chain("eto_time_window",True)
+   cf.insert_link( "link_1","WaitTod",["*",8,"*","*" ])    
+   cf.insert_link( "link_2","Enable_Chain",["update_eto"])
+   cf.insert_link( "link_3","WaitTod",["*",23,"*","*" ]) 
+   cf.insert_link( "link_4", "Disable_Chain",["update_eto"])
+   cf.insert_link( "link_5", "Reset", [] )
 
 
-   cf.define_chain("get_current_eto",True)
-   cf.insert_link( "link_1", "WaitEvent",    [ "HOUR_TICK" ] )
-   cf.insert_link( "link_3", "Code",         [ etm.verify_eto_resource_updated ] )
-   cf.insert_link( "link_4", "Code",         [ etm.verify_empty_queue ] )
-   cf.insert_link( "link_5", "One_Step",     [ etm.calculate_daily_eto ] )
-   cf.insert_link( "link_6", "Reset", [] )
+   cf.define_chain("eto_time_window",True)
+   cf.insert_link( "link_1", "One_Step",     [ eto.make_measurement ]
+   cf.insert_link( "link_2", "WaitEvent",    [ "HOUR_TICK" ] )
+   cf.insert_link( "link_3", "Reset",[])
 
-   # eto roll over is 6 PM
-   eto_rollover = 12 +6
-   cf.define_chain("intergrate_eto_data",True )
-   cf.insert_link("link_1","WaitEvent", ["HOUR_TICK"] )
-   cf.insert_link("link_2","Code",      [ eto.integrate_data, eto_roll_over ] )
-   cf.insert_link "link_1","WaitTod",   ["*",eto_roll_over,"*","*" ])
-   cf.insert_link("link_2","One_Step",  [ eto.update_bins ] )
+
+   cf.define_chain("update_eto_bins",True)
+   cf.insert_link( "link_1","WaitEvent", [ "UPDATE_ETO_BINS"] )
+   cf.insert_link( "link_2","Code",      [ eto.verify_empty_queue] )
+   cf.insert_link( "link_3","One_Step",  [ eto.update_eto_bins ] )
+   cf.insert_link( "link_4", "Terminate", [] )
+  
+
         
  
-   '''
+
 
  
 
