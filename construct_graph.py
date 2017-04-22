@@ -197,7 +197,8 @@ if __name__ == "__main__" :
    #cf.start_info_store()
    #cf.add_eto_store()
    
-   cf.add_header_node( "ETO_SITES")
+   cf.add_header_node( "ETO_SITES", properties = {"measurement":"LACIMA_INTEGRATED_ETO_ESTIMATE" } )
+
    properties = { "api-key":"e1d03467-5c0d-4a9b-978d-7da2c32d95de"  , "url":"http://et.water.ca.gov/api/data"     , "longitude":  -117.299459  ,"latitude":33.578156  }
    properties["altitude"] = 2400
    properties["measurement_tag"] = "CIMIS_SATELLITE_ETO"
@@ -232,7 +233,7 @@ if __name__ == "__main__" :
    cf.add_info_node( "ETO_ENTRY","LaCima_Ranch",properties=properties, json_flag=True)
    cf.end_header_node("ETO_SITES")
 
-   cf.add_header_node("RAIN_SOURCES")
+   cf.add_header_node("RAIN_SOURCES",properties = {"measurement":"LACIMA_INTEGRATED_RAIN_ESTIMATE" } )
 
    properties = { "api-key":"e1d03467-5c0d-4a9b-978d-7da2c32d95de"  , "url":"http://et.water.ca.gov/api/data"     , "station":62 }
    properties["measurement_tag"] = "CIMIS_RAIN"
@@ -303,11 +304,11 @@ if __name__ == "__main__" :
    cf.add_info_node("RAIN_STORE","CIMIS_RAIN_STORE",properties={"list_length":300},json_flag = True)
    cf.add_info_node("RAIN_STORE","SRCU1_RAIN_STORE",properties={"list_length":300},json_flag = True)
    cf.end_header_node("RAIN_MEASUREMENTS")
-   cf.add_info_node("INTEGRATED_RAIN_ESTIMATE","INTEGRATED_RAIN_ESTIMATE",properties={},json_flag = True )
+   cf.add_info_node("INTEGRATED_RAIN_ESTIMATE","LACIMA_INTEGRATED_RAIN_ESTIMATE",properties={},json_flag = True )
 
 
    
-   cf.add_info_node("INTEGRATED_ETO_ESTIMATE","INTEGRATED_ETO_ESTIMATE",properties={"list_length":300},json_flag = True )
+   cf.add_info_node("INTEGRATED_ETO_ESTIMATE","LACIMA_INTEGRATED_ETO_ESTIMATE",properties={"list_length":300},json_flag = True )
 
    cf.add_header_node("ETO_MEASUREMENTS")
    cf.add_info_node("ETO_STORE","CIMIS_SATELLITE_ETO_STORE",properties={"list_length":300},json_flag = True)
