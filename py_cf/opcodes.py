@@ -136,7 +136,7 @@ class Opcodes():
   
 
   def send_event_code(  self, cf_handle, chainObj,parameters, event ):
-      print "send event ",parameters[0]
+      #print "send event ",parameters[0]
       event_name = parameters[0]
       if len(parameters)  > 1 :
          event_data = parameters[1]
@@ -234,7 +234,7 @@ class Opcodes():
      chains = parameters[0]
      
      for j in chains:
-       
+        print "enable", j
         cf_handle.enable_chain_base( j)
      return "DISABLE"
 
@@ -243,6 +243,7 @@ class Opcodes():
   def disable_chain(  self, cf_handle, chainObj,parameters, event ):
      chains = parameters[0]
      for j in chains:
+        print "disable ",j
 	cf_handle.disable_chain_base( j)
   
      return "DISABLE"

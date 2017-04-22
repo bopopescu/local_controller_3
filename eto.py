@@ -38,7 +38,7 @@ class Eto_Management(object):
         self.eto_data_stores               = eto_data_stores
         self.rain_sources                  = rain_sources
         self.rain_data_stores              = rain_data_stores
-        self.eto_calc                      = eto_calc
+        self.eto_calculators               = eto_calc
         self.redis_old                     = redis.StrictRedis( host = '192.168.1.82', port=6379, db = 0 )
 
 
@@ -60,14 +60,14 @@ class Eto_Management(object):
        if event == "INIT":
          return "CONTINUE"
 
-
-       return_value = "CONTINE"
+       print "make measurements"
+       return_value = "DISABLE"
        count = 0
        for i in self.eto_sources:
            data_store = i["measurement"]
            data_value = redis_handle.lindex( data_store,0)
            if type(data_value) == type(str()):
-               flag, data = self.eto_calc( i )
+               flag, data = self.eto_calculators.eto_calc( i )
                if flag == True:
                    count = count + 1
                    redis_handle.lset( data_store, 0, json.dumps(data_value ))
@@ -79,7 +79,7 @@ class Eto_Management(object):
            data_store = i["measurement"]
            data_value = redis_handle.lindex( data_store,0)
            if data_value == "EMPTY":
-               flag, data = self.rain_calc( i )
+               flag, data = self.eto_calculators.rain_calc( i )
                if flag == True:
                    redis_handle.lset( data_store, 0, json.dumps(data_value ))
                else:
@@ -88,16 +88,21 @@ class Eto_Management(object):
                pass
        
        
-       print "count",count
+       #print "count",count
        if count >= 2:
            eto_data = self.integrate_data()
            self.update_eto_bins(eto_data)
            self.update_eto_old_bins(eto_data)
            return_value = "TERMINATE"
+       #print "return_value",return_value
        return return_value             
+
+   def integrate_data( self ):
+       pass
 
    def update_eto_bins( self, eto_data ):
        pass
+
 
    def update_sprinklers_time_bins_old( self, eto_data ): 
         keys = self.redis.hkeys( "ETO_RESOURCE" )
@@ -152,11 +157,11 @@ class ETO_Calculators( object ):
      #register_handlers
      pass
 
-   def eto_calc( eto_store ):
-      pass
+   def eto_calc( self, eto_store ):
+      return False,0
 
-   def rain_calc( eto_store ):
-      pass
+   def rain_calc(self, rain_store ):
+      return False,0
        
 
      
@@ -248,21 +253,29 @@ if __name__ == "__main__":
 
    cf.define_chain("test_generator",True)
    cf.insert_link( "link_1","SendEvent", ["DAY_TICK",0] )
-   cf.insert_link( "link_2","WaitEvent", ["TIME_TICK"] )
-   cf.insert_link( "link_3","One_Step",[eto.print_result_1] )
+   cf.insert_link( "link_2","WaitEvent", ["TIME_TICK"] ) 
+   cf.insert_link( "link_3","Enable_Chain",[["eto_make_measurements"]])
+   cf.insert_link( "link_6", "SendEvent",    [ "HOUR_TICK",0 ] )
+   cf.insert_link( "link_4","WaitEventCount", ["TIME_TICK",2,0] )
+   cf.insert_link( "link_5", "Disable_Chain",[["eto_make_measurements"]])
+   
+   cf.insert_link( "link_7","One_Step",[eto.print_result_1] )
+   cf.insert_link( "link_8", "SendEvent",    [ "HOUR_TICK",0 ] )
 
+   cf.insert_link( "link_9","Halt",[])
 
    cf.define_chain("eto_time_window",True)
    cf.insert_link( "link_1","WaitEvent", ["DAY_TICK"] )
    cf.insert_link( "link_2","One_Step", [ eto.generate_new_sources ])
    cf.insert_link( "link_1","WaitTod",["*",8,"*","*" ])    
-   cf.insert_link( "link_2","Enable_Chain",["eto_time_window"])
+   cf.insert_link( "link_2","Enable_Chain",[["eto_time_window"]])
    cf.insert_link( "link_3","WaitTod",["*",23,"*","*" ]) 
-   cf.insert_link( "link_4", "Disable_Chain",["eto_time_window"])
+   cf.insert_link( "link_4", "Disable_Chain",[["eto_time_window"]])
    cf.insert_link( "link_5", "Reset", [] )
 
 
-   cf.define_chain("eto_time_window",False)
+   cf.define_chain("eto_make_measurements",False)
+   cf.insert_link( "link_0", "Log",          ["Enabling chain"] )
    cf.insert_link( "link_1", "Code",         [ eto.make_measurement ] )
    cf.insert_link( "link_2", "WaitEvent",    [ "HOUR_TICK" ] )
    cf.insert_link( "link_3", "Reset",[])
