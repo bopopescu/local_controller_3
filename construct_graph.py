@@ -216,7 +216,7 @@ if __name__ == "__main__" :
 
    properties = {"api-key":"8b165ee73a734f379a8c91460afc98a1"  ,"url":"http://api.mesowest.net/v2/stations/timeseries?" ,  "station":"SRUC1" }
    properties["altitude"] = 2400
-   properties["measurement_tag"] = "CIMIS_MESO"
+   properties["measurement_tag"] = "SRUC1_ETO"  
    properties["list_length"]     = 100
    properties["measurement"]    = "CIMIS_MESO_STORE"
 
@@ -229,7 +229,7 @@ if __name__ == "__main__" :
    properties["measurement_tag"] = "HYBRID_SITE"
    properties["list_length"]     = 100
    properties["measurement"]    = "HYBRID_SITE_STORE"
-   properties["rollover"]       = "MOISTURE_ROLLOVER"
+   properties["rollover"]       = "moisture_1_rollover"
    cf.add_info_node( "ETO_ENTRY","LaCima_Ranch",properties=properties, json_flag=True)
    cf.end_header_node("ETO_SITES")
 
@@ -243,7 +243,7 @@ if __name__ == "__main__" :
    cf.add_info_node( "RAIN_ENTRY","MESO_RAIN",properties=properties, json_flag=True)
 
    properties = {"api-key":"8b165ee73a734f379a8c91460afc98a1"  ,"url":"http://api.mesowest.net/v2/stations/precip?" ,  "station":"SRUC1" }
-   properties["measurement_tag"] ="SRUC1"
+   properties["measurement_tag"] ="SRUC1_RAIN"
    properties["list_length"]     = 100
    properties["measurement"]     = "SRCU1_RAIN_STORE"
    cf.add_info_node( "RAIN_ENTRY","SRUC1_RAIN",properties=properties, json_flag=True)
