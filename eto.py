@@ -32,18 +32,17 @@ from cloud_event_queue import Cloud_Event_Queue
 
 ONE_DAY = 24*3600
 
-
 class Eto_Management(object):
    def __init__( self, redis_handle):
         self.redis_handle                  = redis_handle
         self.redis_old                     = redis.StrictRedis( host = '192.168.1.82', port=6379, db = 0 )
-        self.eto_update                    = False
+        self.eto_update_flag               = False
         
 
 
    def check_for_eto_update( self, chainFlowHandle, chainObj, parameters, event ):
        print "check_for_eto_update"
-       if self.eto_update == False:
+       if self.eto_update_flag == False:
            self.update_all_bins( self, self.get_eto_integration_data())
            
        return "DISABLE"
@@ -51,7 +50,7 @@ class Eto_Management(object):
   
 
    def generate_new_sources( self, chainFlowHandle, chainObj, parameters, event ):
-       print "generate_new_sources"
+       print "generate_new_sources", event
        for i in self.eto_sources:
            data_store = i["measurement"]
            self.redis_handle.lpush(data_store, "EMPTY")
@@ -117,20 +116,21 @@ class Eto_Management(object):
            eto_data = self.get_eto_integration_data()
           
            self.update_all_bins( eto_data)
-           #### send data to cloud
+           self.store_cloud_data()           
+           self.status_queue_class
            return_value = "TERMINATE"
        #print "return_value",return_value
        
        return return_value             
 
    def update_all_bins( self, eto_data):
-       assert (self.eto_update == False) ,"Bad logic"
-       if self.eto_update == True:
+       assert (self.eto_update_flag == False) ,"Bad logic"
+       if self.eto_update_flag == True:
           return  # protection for production code
-       self.eto_update = True
+       self.eto_update_flag = True
        self.update_eto_bins_new(eto_data)
        self.update_sprinklers_time_bins_old(eto_data)
-       #### send data to cloud
+       
        
 
 
@@ -208,9 +208,30 @@ class Eto_Management(object):
        print "return_Value",return_value
        return return_value
 
+   def get_max_data(self,json_data):
+       
+       data = json.loads(json_data)
+       print "get_max_data",data
+       key_length = len(data.keys())
+       if key_length > 0:
+           return_value = 0
+           for key,value in data.items():
+              if return_value < value:
+                 return_value = value
+       else:
+          return_value = 0.0 
+          
+       return return_value
 
 
-
+   def store_cloud_data( self ):
+        data = {}
+        data["namespace"] = self.cloud_namespace
+        data["eto"]       = self.get_max_data( self.redis_handle.get(self.eto_integrated_measurement ))
+        data["rain"]      = self.get_max_data( self.redis_handle.get(self.rain_measurement))
+        data["time_stamp"] = time.strftime( "%b %d %Y %H:%M:%S",time.localtime(time.time()-24*3600)) #time stamp is a day earlier
+        print "data",data
+        self.status_queue_class.queue_message("eto_measurement",data )
       
    #
    #
@@ -617,6 +638,8 @@ if __name__ == "__main__":
 
 
    temp = gm.match_relationship("ETO_SITES")
+   cloud_namespace = temp[0]["namespace"]
+   eto.cloud_namespace = gm.convert_namespace(cloud_namespace)
    eto.eto_integrated_measurement = temp[0]["integrated_measurement"]
    eto.eto_measurement    = temp[0]["measurement"]
    eto.mv_threshold_number = temp[0]["mv_threshold_number"]
@@ -629,9 +652,6 @@ if __name__ == "__main__":
    eto.status_queue_class = rabbit_cloud_status_publish.Status_Queue(redis_handle, queue_name )
   
    eto.eto_default = .20
-  
-  
-
    #
    # Adding chains
    #
@@ -642,17 +662,13 @@ if __name__ == "__main__":
    cf.insert_link( "link_2","WaitEvent", ["TIME_TICK"] ) 
    cf.insert_link( "link_3","Enable_Chain",[["eto_make_measurements"]])
    cf.insert_link( "link_0", "Log",          ["Enabling chain"] )
-
    cf.insert_link( "link_4", "SendEvent",    [ "HOUR_TICK",0 ] )
    cf.insert_link( "link_5","WaitEventCount", ["TIME_TICK",2,0] )
    cf.insert_link( "link_0", "Log",          ["TIME TICK DONE"] )
-
    cf.insert_link( "link_6", "Disable_Chain",[["eto_make_measurements"]])  
    cf.insert_link( "link_0", "Log",          ["DISABLE CHAIN DONE"] )
- 
    cf.insert_link( "link_7","One_Step",[eto.print_result_1] )
    cf.insert_link( "link_0", "Log",          ["DISABLE CHAIN DONE"] )
-
    cf.insert_link( "link_8", "SendEvent",    [ "HOUR_TICK",0 ] )
    cf.insert_link( "link_9","Halt",[])
 
@@ -660,10 +676,10 @@ if __name__ == "__main__":
    cf.insert_link( "link_1","WaitEvent", ["DAY_TICK"] )
    cf.insert_link( "link_2","One_Step", [ eto.generate_new_sources ])
    cf.insert_link( "link_3","WaitTod",["*",8,"*","*" ])    
-   cf.insert_link( "link_4","Enable_Chain",[["eto_time_window"]])
+   cf.insert_link( "link_4","Enable_Chain",[["eto_make_measurements"]])
    cf.insert_link( "link_5","WaitTod",["*",18,"*","*" ]) 
    cf.insert_link( "link_6","One_Step", [ eto.check_for_eto_update ] )
-   cf.insert_link( "link_6", "Disable_Chain",[["eto_time_window"]])
+   cf.insert_link( "link_6", "Disable_Chain",[["eto_make_measurements"]])
    cf.insert_link( "link_7", "Reset", [] )
 
 
