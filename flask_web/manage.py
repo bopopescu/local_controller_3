@@ -35,7 +35,6 @@ controller_classes = Build_Controller_Classes(client_driver)
 udp_ping_client = controller_classes.get_controller_class( "192.168.1.82" )
 
 
-
 redis_handle    = redis.StrictRedis(redis_server_ip, redis_server_port  , redis_server_db)
 sys_files = load_files.SYS_FILES(redis_handle)
 app_files = load_files.APP_FILES(redis_handle)
@@ -106,6 +105,11 @@ assert set(moisture_controllers).intersection(moisture_data_keys) != [], "proble
 
 print "db ok"
   
+
+temp = gm.match_relationship("ETO_SITES")
+eto_measurement    = temp[0]["measurement"]
+temp = gm.match_relationship("RAIN_SOURCES")
+rain_measurement    =  temp[0]["measurement"]
 
 
 
@@ -828,11 +832,12 @@ def overal_current_statistics(schedule_id):
                                max_flow_rate = max_current, 
                                canvas_list= canvas_list )
 
+
 @app.route('/eto_raw_data',methods=["GET"])
 @authDB.requires_auth
 def eto_raw_data():
-       eto_data =  redis_handle.hget("CONTROL_VARIABLES","ETO_DATA")
-       rain_data = redis_handle.hget("CONTROL_VARIABLES","RAIN_DATA")
+       eto_data =  redis_data_handle.get(eto_measurement)
+       rain_data = redis_data_handle.get(rain_measurement)
        return render_template( "eto_raw_data",eto_data = eto_data, rain_data = rain_data ) 
 
 
