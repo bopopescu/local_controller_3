@@ -59,8 +59,6 @@ class Moisture_Control(object):
 
 
    def update_moisture_readings( self,chainFlowHandle, chainOjb, parameters, event ):
-       if event == "INIT":
-         return "CONTINUE"
        
        list_data = []
        
@@ -151,8 +149,6 @@ class Moisture_Control(object):
 
    def hour_update( self,chainFlowHandle, chainOjb, parameters, event ):
 
-       if event == "INIT":
-         return "CONTINUE"
        print "hour tick"
        for  i in self.moisture_app_classes:
            name = i["name"]
@@ -169,8 +165,6 @@ class Moisture_Control(object):
  
    def day_update( self,chainFlowHandle, chainOjb, parameters, event ):
 
-       if event == "INIT":
-         return "CONTINUE"
        for  i in self.moisture_app_classes:
            name = i["name"]
            hour_redis_key = self.store_air_list[name]["queue_name"]

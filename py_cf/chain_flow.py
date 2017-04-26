@@ -263,8 +263,9 @@ class CF_Base_Interpreter():
 	   return_value = "CONTINUE"
 	   #print "no_init"
 	if (return_value != "DISABLE") and (return_value != "RESET"): 
-       
-	  return_value = self.check_return_code( chain, link, instruction( self, chain,parameters,  event ))
+          temp = instruction( self, chain,parameters,event)
+          #print "temp",temp
+	  return_value = self.check_return_code( chain, link, temp)
 	  #print "chain",chain["link_index"]
           #print "if" , return_value
 	else:
@@ -293,11 +294,12 @@ class CF_Base_Interpreter():
 
   def check_return_code( self, chain, link , returnCode ):
 
-     
+     #print "returnCode ",returnCode
      return_value = False
      
      assert  self.valid_return_codes.has_key( returnCode ),"bad returnCode "+ chain["name"]
      if returnCode == "TERMINATE" :
+       # "TERMINATE ______________ chain name",chain["name"]
        self.disable_chain_base( chain["name"] )
        return_value = False
      

@@ -49,8 +49,9 @@ class Opcodes():
 
 
   def code_code( self, cf_handle, chainObj, parameters, event ):
-      return  parameters[0]( cf_handle, chainObj, parameters,event)
-      
+      return_value =  parameters[0]( cf_handle, chainObj, parameters,event)
+      #print "return_value%%%%%%%%%%%%%%%%%%%%%%", return_value
+      return return_value
     
     
   def reset_code( self, cf_handle, chainObj, parameters, event ):
@@ -234,7 +235,7 @@ class Opcodes():
      chains = parameters[0]
      
      for j in chains:
-        print "enable", j
+        #print "enable", j
         cf_handle.enable_chain_base( j)
      return "DISABLE"
 
@@ -243,7 +244,7 @@ class Opcodes():
   def disable_chain(  self, cf_handle, chainObj,parameters, event ):
      chains = parameters[0]
      for j in chains:
-        print "disable ",j
+        #print "disable ",j
 	cf_handle.disable_chain_base( j)
   
      return "DISABLE"

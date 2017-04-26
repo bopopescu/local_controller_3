@@ -144,6 +144,7 @@ if __name__ == "__main__":
    json_data    = base64.b64decode(data)
    #print "json_data",json_data
    access_data  = json.loads(json_data )
+   print access_data
    eto = ETO(2400,access_data)
    print eto.integrate_eto_data()
   

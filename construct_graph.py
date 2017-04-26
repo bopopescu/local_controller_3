@@ -197,13 +197,16 @@ if __name__ == "__main__" :
    #cf.start_info_store()
    #cf.add_eto_store()
    
-   cf.add_header_node( "ETO_SITES", properties = {"measurement":"LACIMA_INTEGRATED_ETO_ESTIMATE" } )
+   cf.add_header_node( "ETO_SITES", properties = {"integrated_measurement":"LACIMA_INTEGRATED_ETO_ESTIMATE",
+                                                  "measurement":"LACIMA_ETO_MEASUREMENTS",
+                                                  "mv_threshold_number":1 } )
 
    properties = { "api-key":"e1d03467-5c0d-4a9b-978d-7da2c32d95de"  , "url":"http://et.water.ca.gov/api/data"     , "longitude":  -117.299459  ,"latitude":33.578156  }
    properties["altitude"] = 2400
    properties["measurement_tag"] = "CIMIS_SATELLITE_ETO"
    properties["list_length"]     = 100
    properties["measurement"]     = "CIMIS_SATELLITE_ETO_STORE"
+   properties["majority_vote_flag"] = True
 
    cf.add_info_node( "ETO_ENTRY","ETO_CIMIS_SATELLITE",properties=properties, json_flag=True)
 
@@ -212,15 +215,17 @@ if __name__ == "__main__" :
    properties["measurement_tag"] = "CIMIS_ETO"
    properties["list_length"]     = 100
    properties["measurement"]     = "CIMIS_ETO_STORE"
+   properties["majority_vote_flag"] = False
+
    cf.add_info_node( "ETO_ENTRY","ETO_CIMIS",properties=properties, json_flag=True)
 
    properties = {"api-key":"8b165ee73a734f379a8c91460afc98a1"  ,"url":"http://api.mesowest.net/v2/stations/timeseries?" ,  "station":"SRUC1" }
    properties["altitude"] = 2400
    properties["measurement_tag"] = "SRUC1_ETO"  
    properties["list_length"]     = 100
-   properties["measurement"]    = "CIMIS_MESO_STORE"
+   properties["measurement"]    = "SRUC1_ETO_STORE"
 
-
+   properties["majority_vote_flag"] = True
    cf.add_info_node( "ETO_ENTRY","Santa_Rosa_RAWS",properties=properties, json_flag=True)
    
 
@@ -230,10 +235,11 @@ if __name__ == "__main__" :
    properties["list_length"]     = 100
    properties["measurement"]    = "HYBRID_SITE_STORE"
    properties["rollover"]       = "moisture_1_rollover"
+   properties["majority_vote_flag"] = False
    cf.add_info_node( "ETO_ENTRY","LaCima_Ranch",properties=properties, json_flag=True)
    cf.end_header_node("ETO_SITES")
 
-   cf.add_header_node("RAIN_SOURCES",properties = {"measurement":"LACIMA_INTEGRATED_RAIN_ESTIMATE" } )
+   cf.add_header_node("RAIN_SOURCES",properties = {"measurement":"LACIMA_RAIN_MEASUREMENTS" } )
 
    properties = { "api-key":"e1d03467-5c0d-4a9b-978d-7da2c32d95de"  , "url":"http://et.water.ca.gov/api/data"     , "station":62 }
    properties["measurement_tag"] = "CIMIS_RAIN"
@@ -313,7 +319,7 @@ if __name__ == "__main__" :
    cf.add_header_node("ETO_MEASUREMENTS")
    cf.add_info_node("ETO_STORE","CIMIS_SATELLITE_ETO_STORE",properties={"list_length":300},json_flag = True)
    cf.add_info_node("ETO_STORE","CIMIS_ETO_STORE",properties={"list_length":300},json_flag = True)
-   cf.add_info_node("ETO_STORE","CIMIS_MESO_STORE",properties={"list_length":300},json_flag = True)
+   cf.add_info_node("ETO_STORE","SRUC1_ETO_STORE",properties={"list_length":300},json_flag = True)
    cf.add_info_node("ETO_STORE","HYBRID_SITE_STORE",properties={"list_length":300},json_flag = True)
 
    cf.end_header_node("ETO_MEASUREMENTS") 
