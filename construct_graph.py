@@ -267,34 +267,30 @@ if __name__ == "__main__" :
 
 
     ###### need to add a measurement data
-   cf.add_header_node( "MINUTE_ACQUISITION")
-   cf.add_info_node( "MINUTE_DATA","CONTROLLER_CURRENT",properties={"units":"mAmps"}, json_flag=True)
-   cf.add_info_node( "MINUTE_ELEMENT","IRRIGATION_VALVE_CURRENT",properties={"units":"mAmps"}, json_flag=True)
+   cf.add_header_node( "MINUTE_ACQUISITION",properties= {"measurement":"MINUTE_LIST_STORE","length":10000, "routing_key":"MINUTE_ACQUISTION" }  )
+   cf.add_info_node( "MINUTE_ELEMENT","CONTROLLER_CURRENT",properties={"units":"mAmps"})
+   cf.add_info_node( "MINUTE_ELEMENT","IRRIGATION_VALVE_CURRENT",properties={"units":"mAmps"})
 
    cf.add_header_node("FLOW_METER_LIST")
-   cf.add_info_node( "FLOW_METER","MAIN_FLOW_METER",properties={"units":"GPM" }, json_flag=True)
+   cf.add_info_node( "MINUTE_ELEMENT","MAIN_FLOW_METER",properties={"units":"GPM" }, json_flag=True)
    cf.end_header_node("FLOW_METER_LIST") #FLOW_METER_LIST
-
+  
    cf.add_info_node( "MINUTE_ELEMENT","WELL_CONTROLLER_OUTPUT",properties={"units":"AMPS"}, json_flag = True )
    cf.add_info_node( "MINUTE_ELEMENT","WELL_CONTROLLER_INPUT", properties={"units":"AMPS" }, json_flag = True)
    cf.add_info_node( "MINUTE_ELEMENT","FILTER_PRESSURE", properties = { "units":"PSI" }, json_flag = True )
    cf.add_info_node( "MINUTE_ELEMENT", "WELL_PRESSURE", properties = {"units":"PSI" }, json_flag = True )
-   cf.add_info_node( "MINUTE_VALUE", "MINUTE_VALUE", properties = {} , json_flag= True)
-   cf.add_info_node( "MINUTE_LIST", "MINUTE_LIST",properties =  { "LIST_LENGTH" :10000} , json_flag = True) # about 1 week of data
+   
    cf.end_header_node("MINUTE_ACQUISITION") #"MINUTE_ACQUISITION"
 
 
-   cf.add_header_node( "HOUR_ACQUISTION")
+   cf.add_header_node( "HOUR_ACQUISTION",properties= {"measurement":"HOUR_LIST_STORE","length":300 , "routing_key":"HOUR_ACQUISTION"}  )
    cf.add_info_node( "HOUR_ELEMENT","MODBUS_STATISTICS",properties={"units":"Counts"},json_flag=True )
    cf.add_info_node( "HOUR_ELEMENT","PI_TEMPERATURE",properties={"units":"Deg F" }, json_flag = True )
-   cf.add_info_node( "HOUR_VALUE", "HOUR_VALUE", properties = {} , json_flag= True)
-   cf.add_info_node( "HOUR_LIST", "MINUTE_LIST",properties =  { "LIST_LENGTH" :300} , json_flag = True) # about 1 week of data
    cf.end_header_node("HOUR_ACQUISTION") # HOUR_ACQUISTION
 
 
-   cf.add_header_node( "DAILY_ACQUISTION")
-   cf.add_info_node( "HOUR_VALUE", "HOUR_VALUE", properties = {} , json_flag= True)
-   cf.add_info_node( "HOUR_LIST", "HOUR_LIST",properties =  { "LIST_LENGTH" :100} , json_flag = True) # about 3 months of data
+   cf.add_header_node( "DAILY_ACQUISTION", properties= {"measurement":"HOUR_LIST_STORE","length":300, "routing_key":"DAILY_ACQUISTION"}  )
+   #cf.add_info_node( "DAILY_ELEMENT","xxxxxxxxxxxxxxxx",properties={"units":"Counts"},json_flag=True ) #### reference entry
    cf.end_header_node("DAILY_ACQUISTION")  # Daily Acquistion
 
 
@@ -304,6 +300,8 @@ if __name__ == "__main__" :
 
 
    
+   cf.add_info_node( "MINUTE_LIST_STORE", "MINUTE_LIST_STORE",properties =  { "LIST_LENGTH" :10000} , json_flag = True) # about 1 week of data 
+   cf.add_info_node( "HOUR_LIST_STORE", "HOUR_LIST_STORE",properties =  { "LIST_LENGTH" :10000} , json_flag = True) # about 1 week of data 
 
    cf.add_header_node("RAIN_MEASUREMENTS")
    
@@ -350,7 +348,7 @@ if __name__ == "__main__" :
    cf.add_header_node( "SERIAL_LINK","rtu_2", properties = properties, json_flag= True )
 
 
-   #cf.add_remote(  name="satellite_1",modbus_address=100,type = "click_44", function="irrigation" )
+   
    
    properties                   = {}
    properties["modbus_address"] = 100

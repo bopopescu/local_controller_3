@@ -21,7 +21,7 @@ import redis
 
 
 
-class IO_Controller_Class:
+class IO_Controller_Class(object):
     
     def __init__(self,name, new_instrument, ip, port = 5005  ):
         self.name            = name
@@ -52,7 +52,7 @@ class IO_Controller_Class:
         self.new_instrument.set_ip( self.ip, self.port )
         return self.new_instrument.clear_counter_list( address_list)
  
-class Build_Controller_Classes:
+class Build_Controller_Classes(object):
 
    def __init__( self, new_instrument ):
       self.controller_classes = {}

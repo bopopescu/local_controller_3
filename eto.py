@@ -199,6 +199,10 @@ class Eto_Management(object):
 
    def integrated_eto_flag(self):
        print "integrated eto flag"
+       if ( (self.redis_old.llen( "QUEUES:SPRINKLER:IRRIGATION_CELL_QUEUE" ) != 0 ) or
+          ( self.redis_old.llen("QUEUES:SPRINKLER:IRRIGATION_QUEUE") != 0 )):
+          return False  # items are still in sprinkler queue
+
        key_length = len(self.mv_eto_sensors.keys())
         
        if key_length >= self.mv_threshold_number:

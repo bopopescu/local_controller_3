@@ -357,7 +357,7 @@ if __name__ == "__main__":
   cf = py_cf.CF_Interpreter()
   
 
-  cf.define_chain("get_current_eto",True)
+  cf.define_chain("get_current_eto",False)
   cf.insert_link( "link_1", "WaitEvent",    [ "MINUTE_TICK" ] )
   cf.insert_link( "link_2", "One_Step",     [ pi_temp.processor_temp ] )
   cf.insert_link( "link_3", "Code",         [ etm.verify_eto_resource_updated ] )

@@ -21,7 +21,7 @@ import redis
 
 
 
-class Click_Controller_Base_Class:
+class Click_Controller_Base_Class(object):
     
    def __init__(self,instrument, click_io = []):
        self.instrument  = instrument
@@ -158,6 +158,7 @@ class Click_Controller_Base_Class:
 class Click_Controller_Base_Class_44(Click_Controller_Base_Class):
     
    def __init__(self,instrument):
+       
        click_io = [
                   "Y001","Y002","Y003","Y004", # 1-4
                   "Y101","Y102","Y103","Y104","Y105","Y106","Y107","Y108", # 5 -12
@@ -168,7 +169,7 @@ class Click_Controller_Base_Class_44(Click_Controller_Base_Class):
                   "Y601","Y602","Y603","Y604" # 41 -44
                ]
 
-       Click_Controller_Base_Class(self).__init__(instrument, click_io)
+       super(Click_Controller_Base_Class_44, self).__init__(instrument, click_io )
     
    def measure_analog( self, redis_key, analog_input ):
        pass
@@ -212,14 +213,18 @@ class Click_Controller_Base_Class_22(Click_Controller_Base_Class):
                       "Y201","Y202","Y203","Y204","Y205","Y206","Y207","Y208" # 15 -22
                 ]
 
-       Click_Controller_Base_Class(self).__init__(instrument, click_io)
+       super(Click_Controller_Base_Class_22, self).__init__(instrument,click_io)
+       
     
  
 
 
            
 if __name__ == "__main__":     
-   pass  
-  
+   instrument = {}
+   x = Click_Controller_Base_Class_44( instrument )
+   y = Click_Controller_Base_Class_22( instrument )
+
+    
 
     
