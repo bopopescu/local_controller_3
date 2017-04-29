@@ -268,24 +268,53 @@ if __name__ == "__main__" :
 
     ###### need to add a measurement data
    cf.add_header_node( "MINUTE_ACQUISITION",properties= {"measurement":"MINUTE_LIST_STORE","length":10000, "routing_key":"MINUTE_ACQUISTION" }  )
-   cf.add_info_node( "MINUTE_ELEMENT","CONTROLLER_CURRENT",properties={"units":"mAmps"})
-   cf.add_info_node( "MINUTE_ELEMENT","IRRIGATION_VALVE_CURRENT",properties={"units":"mAmps"})
+
+   #
+   # add pi temperature
+   #
+   #
+
+
+   properties = {}
+   properties["units"] = "mAmps"
+   properties["modbus_remote"] = "satellite_1"
+   properties["m_tag"]          = "measure_analog"
+   properties["parameters"]     = [ "DF1",1.0]
+   cf.add_info_node( "MINUTE_ELEMENT","CONTROLLER_CURRENT",properties=properties)
+
+
+   properties = {}
+   properties["units"] = "mAmps"
+   properties["modbus_remote"] = "satellite_1"
+   properties["m_tag"]          = "measure_analog"
+   properties["parameters"]     = ["DF2",1.0]
+   cf.add_info_node( "MINUTE_ELEMENT","IRRIGATION_VALVE_CURRENT",properties=properties)
 
    cf.add_header_node("FLOW_METER_LIST")
-   cf.add_info_node( "MINUTE_ELEMENT","MAIN_FLOW_METER",properties={"units":"GPM" }, json_flag=True)
+   properties = {}
+   properties["units"]          = "GPM"
+   properties["modbus_remote"] =  "satellite_1"
+   properties["parameters"]     = ["DS301", "C201",.0224145939] # counter id
+   properties["m_tag"]          = "measure_counter"
+   cf.add_info_node( "MINUTE_ELEMENT","MAIN_FLOW_METER",properties=properties, json_flag=True)
+
    cf.end_header_node("FLOW_METER_LIST") #FLOW_METER_LIST
   
-   cf.add_info_node( "MINUTE_ELEMENT","WELL_CONTROLLER_OUTPUT",properties={"units":"AMPS"}, json_flag = True )
-   cf.add_info_node( "MINUTE_ELEMENT","WELL_CONTROLLER_INPUT", properties={"units":"AMPS" }, json_flag = True)
-   cf.add_info_node( "MINUTE_ELEMENT","FILTER_PRESSURE", properties = { "units":"PSI" }, json_flag = True )
-   cf.add_info_node( "MINUTE_ELEMENT", "WELL_PRESSURE", properties = {"units":"PSI" }, json_flag = True )
+   #cf.add_info_node( "MINUTE_ELEMENT","WELL_CONTROLLER_OUTPUT",properties={"units":"AMPS"}, json_flag = True )
+   #cf.add_info_node( "MINUTE_ELEMENT","WELL_CONTROLLER_INPUT", properties={"units":"AMPS" }, json_flag = True)
+   #cf.add_info_node( "MINUTE_ELEMENT","FILTER_PRESSURE", properties = { "units":"PSI" }, json_flag = True )
+   #cf.add_info_node( "MINUTE_ELEMENT", "WELL_PRESSURE", properties = {"units":"PSI" }, json_flag = True )
    
    cf.end_header_node("MINUTE_ACQUISITION") #"MINUTE_ACQUISITION"
 
 
    cf.add_header_node( "HOUR_ACQUISTION",properties= {"measurement":"HOUR_LIST_STORE","length":300 , "routing_key":"HOUR_ACQUISTION"}  )
-   cf.add_info_node( "HOUR_ELEMENT","MODBUS_STATISTICS",properties={"units":"Counts"},json_flag=True )
-   cf.add_info_node( "HOUR_ELEMENT","PI_TEMPERATURE",properties={"units":"Deg F" }, json_flag = True )
+   properties = {}
+   properties["modbus_remote"] = "io_controller"
+   properties["parameters"]   = []
+   properties["m_tag"]        = "modbus_statistics"
+   cf.add_info_node( "HOUR_ELEMENT","MODBUS_STATISTICS",properties=properties,json_flag=True )
+   #cf.add_info_node( "HOUR_ELEMENT","PI_TEMPERATURE",properties={"units":"Deg F" }, json_flag = True )
    cf.end_header_node("HOUR_ACQUISTION") # HOUR_ACQUISTION
 
 
@@ -378,6 +407,13 @@ if __name__ == "__main__" :
    properties["type"]           = "PSOC_4_Moisture"
    properties["function"]       = ["moisture"]
    cf.add_info_node( "REMOTE_UNIT","moisture_1", properties =properties,  json_flag= True )
+
+   properties                   = {}
+   properties["modbus_address"] = 255
+   properties["type"]           = "io_controller"
+   properties["function"]       = ["io_controller"]
+   cf.add_info_node( "REMOTE_UNIT","io_controller", properties =properties,  json_flag= True )
+
 
    cf.end_header_node("SERIAL_LINK")
    cf.end_header_node("UDP_IO_SERVER")
