@@ -23,6 +23,7 @@ class Graph_Management():
       self.controller_name = controller_name
       self.io_server_name  = io_server_name
       self.data_store_name = data_store_name
+      self.initialize_cb_handlers()
 
    def match_relationship( self, query_string, json_flag = True ):
       keys =  self.qc.match_relationship( query_string ) 
@@ -135,7 +136,27 @@ class Graph_Management():
           return_value[i[key]] = i[value]
        return return_value
 
+   
 
+
+   def initialize_cb_handlers( self ):
+       self.cb_handlers = {}
+
+   def add_cb_handler( self, tag, function ):
+       self.cb_handlers[ tag ] = function
+
+   def verify_handler( self, tag ):
+       try:
+           return self.cb_handlers.has_key(tag)
+       except:
+          #print "handlers:", type(self.cb_handlers)
+          print "tag", tag
+          raise        
+
+   def execute_cb_handlers( self, tag, value ):  # parameters is a list
+       function = self.cb_handlers[tag]
+       return function( tag, value  )  
+  
 if __name__ == "__main__" :
    redis_handle  = redis.StrictRedis( host = "localhost", port=6379, db = 15 )   
    common = Redis_Graph_Common( redis_handle)
@@ -280,6 +301,8 @@ if __name__ == "__main__" :
    properties["modbus_remote"] = "satellite_1"
    properties["m_tag"]          = "measure_analog"
    properties["parameters"]     = [ "DF1",1.0]
+   properties["exec_tag"  ]     = "transfer_controller_current"
+   
    cf.add_info_node( "MINUTE_ELEMENT","CONTROLLER_CURRENT",properties=properties)
 
 
@@ -288,6 +311,7 @@ if __name__ == "__main__" :
    properties["modbus_remote"] = "satellite_1"
    properties["m_tag"]          = "measure_analog"
    properties["parameters"]     = ["DF2",1.0]
+   properties["exec_tag"]       = "transfer_irrigation_current"
    cf.add_info_node( "MINUTE_ELEMENT","IRRIGATION_VALVE_CURRENT",properties=properties)
 
    cf.add_header_node("FLOW_METER_LIST")
@@ -296,6 +320,7 @@ if __name__ == "__main__" :
    properties["modbus_remote"] =  "satellite_1"
    properties["parameters"]     = ["DS301", "C201",.0224145939] # counter id
    properties["m_tag"]          = "measure_counter"
+   properties["exec_tag"]       = "transfer_flow"
    cf.add_info_node( "MINUTE_ELEMENT","MAIN_FLOW_METER",properties=properties, json_flag=True)
 
    cf.end_header_node("FLOW_METER_LIST") #FLOW_METER_LIST
@@ -313,13 +338,21 @@ if __name__ == "__main__" :
    properties["modbus_remote"] = "io_controller"
    properties["parameters"]   = []
    properties["m_tag"]        = "modbus_statistics"
+   properties["init_tag"]     = "clear_daily_modbus_statistics"
+   properties["exec_tag"]     = "accumulate_daily_modbus_statistics"
    cf.add_info_node( "HOUR_ELEMENT","MODBUS_STATISTICS",properties=properties,json_flag=True )
    #cf.add_info_node( "HOUR_ELEMENT","PI_TEMPERATURE",properties={"units":"Deg F" }, json_flag = True )
    cf.end_header_node("HOUR_ACQUISTION") # HOUR_ACQUISTION
 
 
-   cf.add_header_node( "DAILY_ACQUISTION", properties= {"measurement":"HOUR_LIST_STORE","length":300, "routing_key":"DAILY_ACQUISTION"}  )
-   #cf.add_info_node( "DAILY_ELEMENT","xxxxxxxxxxxxxxxx",properties={"units":"Counts"},json_flag=True ) #### reference entry
+   cf.add_header_node( "DAILY_ACQUISTION", properties= {"measurement":"DAILY_LIST_STORE","length":300, "routing_key":"DAILY_ACQUISTION"}  )
+
+   properties = {}
+   properties["modbus_remote"] = "skip_controller"
+   properties["parameters"]    = []
+   properties["m_tag"]         =  "no_controller"
+   properties["exec_tag"]      =  "log_daily_modbus_statistics"
+   cf.add_info_node( "DAILY_ELEMENT","daily_modbus_statistics", properties=properties,json_flag=True ) 
    cf.end_header_node("DAILY_ACQUISTION")  # Daily Acquistion
 
 

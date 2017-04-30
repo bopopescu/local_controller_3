@@ -202,8 +202,8 @@ class Click_Controller_Base_Class_44(Click_Controller_Base_Class):
    def measure_counter( self, modbus_address, list_input ):
        counter_register    = list_input[0]
        conversion_factor   = list_input[2]
-       print "counter_register",counter_register
-       print "conversion_factor",conversion_factor
+       
+       
        latch_bit = list_input[1]
 
        conversion_value = list_input[1]
@@ -216,7 +216,7 @@ class Click_Controller_Base_Class_44(Click_Controller_Base_Class):
        self.instrument.write_bits( modbus_address, write_bit,[0])
 
        read_register = self.click_reg_address[ counter_register ]  
-       print "read_register ",read_register    
+           
        counter_value = self.instrument.read_registers( modbus_address, read_register ,1 )
 
       
