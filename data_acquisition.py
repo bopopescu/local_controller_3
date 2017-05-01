@@ -38,6 +38,11 @@ class Data_Acquisition(object):
    def __init__(self):
        pass
 
+   def process_fifteen_second_data( self, chainFlowHandle,chainOjb, parameters, event):
+       print "received 15 second tick"
+       self.common_process( self.fifteen_list, self.fifteen_store )
+       return "CONTINUE"
+
    def process_minute_data( self,chainFlowHandle, chainOjb, parameters, event ):
        print "received minute_tick"
        self.common_process( self.minute_list, self.minute_store )
@@ -75,7 +80,7 @@ class Data_Acquisition(object):
    def execute_init_tags( self, data_list ):
         for i in data_list:
            if i.has_key("init_tag") == True:
-               self.gm.execute_cb_handlers( i["init_tag"], None )
+               self.gm.execute_cb_handlers( i["init_tag"][0], None , i["init_tag"])
 
    def slave_interface( self, element_descriptor ):
     
@@ -88,7 +93,7 @@ class Data_Acquisition(object):
             return_value = None     
        if element_descriptor.has_key("exec_tag"):
               exec_tag = element_descriptor["exec_tag"]  
-              return_value = self.gm.execute_cb_handlers( exec_tag, return_value )
+              return_value = self.gm.execute_cb_handlers( exec_tag[0], return_value,exec_tag )
               #print return_value
        else:
             pass
@@ -96,6 +101,7 @@ class Data_Acquisition(object):
  
    def load_slave_element(self, list_item):
        return_value = None
+       
        remote = list_item["modbus_remote"]
        if self.slave_dict.has_key(remote):
            slave_element = self.slave_dict[remote]
@@ -117,8 +123,12 @@ class Data_Acquisition(object):
       #print "minute list keys",len(self.minute_list)
       for i in self.minute_list:
          self.verify_slave_element(i)
+      for i in self.fifteen_list:
+         self.verify_slave_element(i)
+
 
    def verify_slave_element(self, list_item):
+       #print "list_item",type(list_item),list_item
        try:
            remote = list_item["modbus_remote"]
            #print "remote",remote
@@ -128,12 +138,12 @@ class Data_Acquisition(object):
                 m_tags        = slave_class.m_tags
                 m_tag_function = m_tags[list_item["m_tag"]]
            if list_item.has_key("init_tag"):
-              init_tag = list_item["init_tag"]
+              init_tag = list_item["init_tag"][0]
               #print "init_tag", init_tag
               if self.gm.verify_handler( init_tag ) == False:
                   raise ValueError("Bad init tag "+list_item["init_tag"])     
            if list_item.has_key("exec_tag"):
-              exec_tag = list_item["exec_tag"]
+              exec_tag = list_item["exec_tag"][0]
               #print "exec_tag",exec_tag
               if self.gm.verify_handler( exec_tag ) == False:
                   raise ValueError("Bad exec tag "+list_item["exec_tag"]  )   
@@ -175,13 +185,13 @@ class Modbus_Statistics( object ):
    def __init__( self ):
        pass
 
-   def init_statistics( self, tag, value ):
+   def init_statistics( self, tag, value ,parameters ):
        self.daily_stat = {}
 
-   def log_statistics( self, tag, value ):
+   def log_statistics( self, tag, value,parameters ):
        return self.daily_stat
 
-   def accumulate_statistics( self, tag, input_value ):
+   def accumulate_statistics( self, tag, input_value, parameters ):
        #print "###############",input_value[1]
        value = json.loads(input_value[1])
        for j in value.keys():
@@ -198,20 +208,50 @@ class Modbus_Statistics( object ):
  
 class Legacy_Redis_DB_Issues( object):
 
-   def __init__(self):
-      pass
+   def __init__(self ):
+       redis_config = redis.StrictRedis(host='localhost', port=6379, db=2)
+       redis_host  = redis_config.get("REDIS_SERVER_IP")
+       redis_port  = redis_config.get("REDIS_SERVER_PORT")
+       redis_db    = redis_config.get("REDIS_SERVER_DB")
+       #print "redis",redis_host,redis_port,redis_db
+       redis_handle = redis.StrictRedis( redis_host, redis_port, redis_db )
 
-   def transfer_flow( self, tag, value ):
-      #print "legacy transfer flow ", tag, value
-      return value
+   def transfer_flow( self, tag, value, parameters ):
+       return_value = value
+       #print "value",value,value/parameters[1]
+       #self.redis_handle.lpush("QUEUES:SPRINKLER:FLOW:"+str("main_sensor"),value )
+       #self.redis.ltrim("QUEUES:SPRINKLER:FLOW:"+str(i),0,800)
+       
+       #self.redis.hset("CONTROL_VARIABLES","global_flow_sensor",value/parameters[1] )
+       #self.redis.hset("CONTROL_VARIABLES","global_flow_sensor_corrected",value )
+       return return_value
 
-   def transfer_irrigation_current( self, tag, value ):
-      #print "legacy transfer irrigation_current",tag, value
-      return value
+   def transfer_irrigation_current( self, tag, value ,parameters):
+       return_value = value
+       #print "valve current",value
+       key = "coil_current"
+       #self.redis.lpush( "QUEUES:SPRINKLER:CURRENT:"+key,current )
+       #self.redis.ltrim( "QUEUES:SPRINKLER:CURRENT:"+key,0,800)
+       #self.redis.hset( "CONTROL_VARIABLES",key, current )
+       return return_value
 
-   def transfer_controller_current( self, tag, value ):
-      #print "transfer controller current", tag, value
-      return value
+   def transfer_controller_current( self, tag, value , parameters):
+       return_value = value
+       #print "controller_current ", value
+       key = "plc_current"
+       #self.redis.lpush( "QUEUES:SPRINKLER:CURRENT:"+key,current )
+       #self.redis.ltrim( "QUEUES:SPRINKLER:CURRENT:"+key,0,800)
+       #self.redis.hset( "CONTROL_VARIABLES",key, current )
+       return return_value
+       return return_value
+
+   def get_gpio( self, tag, value, parameters ):
+       return_value = value
+       value = int(value)
+       #print "value",value,parameters[0]
+       #self.redis.hset("GPIO_BITS",parameters[0],value)
+
+
 
     
 if __name__ == "__main__":
@@ -259,13 +299,15 @@ if __name__ == "__main__":
    gm.add_cb_handler("transfer_flow",   legacy.transfer_flow )
    gm.add_cb_handler("transfer_irrigation_current",legacy.transfer_irrigation_current)
    gm.add_cb_handler("transfer_controller_current",legacy.transfer_controller_current)
+   gm.add_cb_handler("get_gpio", legacy.get_gpio)
 
    remote_classes = io_control.construct_classes.Construct_Access_Classes(instrument)
-   
+   fifteen_store   =  gm.match_relationship( "FIFTEEN_SEC_ACQUISITION",json_flag = True)[0]
    minute_store    =  gm.match_relationship( "MINUTE_ACQUISITION", json_flag = True )[0]
    hour_store      =  gm.match_relationship( "HOUR_ACQUISTION", json_flag = True )[0]
    daily_store     =  gm.match_relationship( "DAILY_ACQUISTION", json_flag = True )[0]
    
+   fifteen_list   =  gm.match_relationship( "FIFTEEN_SEC_ELEMENT",json_flag = True)
    minute_list     =  gm.match_relationship( "MINUTE_ELEMENT", json_flag = True )     
    hour_list       =  gm.match_relationship( "HOUR_ELEMENT", json_flag = True )
    daily_list      =  gm.match_relationship( "DAILY_ELEMENT",   json_flag = True )
@@ -298,7 +340,8 @@ if __name__ == "__main__":
    data_acquisition.remote_classes          = remote_classes
    data_acquisition.status_queue_class      = status_queue_class
    data_acquisition.slave_dict              = slave_dict
-
+   data_acquisition.fifteen_store           = fifteen_store
+   data_acquisition.fifteen_list            = fifteen_list
 
    #
    #
@@ -311,6 +354,7 @@ if __name__ == "__main__":
    data_acquisition.execute_init_tags( minute_list )
    data_acquisition.execute_init_tags( hour_list   )
    data_acquisition.execute_init_tags( daily_list )
+   #data_acquisition.execute_init_tags( fifteen_list )
 
 
    #data_acquisition.process_hour_data( None, None,None,None )
@@ -328,13 +372,21 @@ if __name__ == "__main__":
    cf = py_cf.CF_Interpreter()
 
 
-   cf.define_chain("test",False)
+   cf.define_chain("test",True)
    cf.insert_link( "linkxx","Log",["test chain start"])
    cf.insert_link( "link_0", "SendEvent",  ["MINUTE_TICK",1] )
    cf.insert_link( "link_1", "WaitEvent",  ["TIME_TICK"] )
    cf.insert_link( "link_2", "SendEvent",    [ "HOUR_TICK",1 ] )
    cf.insert_link( "link_3", "WaitEventCount", ["TIME_TICK",2,0])
    cf.insert_link( "link_4", "SendEvent",    [ "DAY_TICK", 1] )
+
+
+
+   cf.define_chain("fifteen_second_list",True)
+   cf.insert_link( "link_1","One_Step",[data_acquisition.process_fifteen_second_data])
+   cf.insert_link( "link_2", "WaitEventCount", ["TIME_TICK",15,0])
+   cf.insert_link( "link_3","Reset",[])  
+
 
 
    cf.define_chain("minute_list",True)

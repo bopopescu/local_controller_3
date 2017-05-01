@@ -153,9 +153,9 @@ class Graph_Management():
           print "tag", tag
           raise        
 
-   def execute_cb_handlers( self, tag, value ):  # parameters is a list
+   def execute_cb_handlers( self, tag, value, parameters ):  # parameters is a list
        function = self.cb_handlers[tag]
-       return function( tag, value  )  
+       return function( tag, value , parameters )  
   
 if __name__ == "__main__" :
    redis_handle  = redis.StrictRedis( host = "localhost", port=6379, db = 15 )   
@@ -286,9 +286,31 @@ if __name__ == "__main__" :
 
    cf.add_header_node( "DATA_ACQUISITION")
 
+   cf.add_header_node( "FIFTEEN_SEC_ACQUISITION",properties= {"measurement":"FIFTEEN_SEC_ACQUISITION","length":5760, "routing_key":"FIFTEEN_SEC_ACQUISITION" }  )
+
+   properties = {}
+   properties["units"] = ""
+   properties["modbus_remote"] = "satellite_1"
+   properties["m_tag"]          = "read_input_bit"
+   properties["parameters"]     = [ "X002"]
+   properties["exec_tag"  ]     = ["get_gpio","master_valve_set_switch"]
+   
+   cf.add_info_node( "FIFTEEN_SEC_ELEMENT","MASTER_VALVE_SWITCH_SET",properties=properties, json_flag=True)
+
+   properties = {}
+   properties["units"] = ""
+   properties["modbus_remote"] = "satellite_1"
+   properties["m_tag"]          = "read_input_bit"
+   properties["parameters"]     = [ "X003"]
+   properties["exec_tag"  ]     = ["get_gpio","master_valve_reset_switch"]
+   
+   cf.add_info_node( "FIFTEEN_SEC_ELEMENT","MASTER_VALVE_SWITCH_RESET",properties=properties, json_flag=True)
+
+
+   cf.end_header_node("FIFTEEN_SEC_ACQUISITION") #DATA_ACQUISITION
 
     ###### need to add a measurement data
-   cf.add_header_node( "MINUTE_ACQUISITION",properties= {"measurement":"MINUTE_LIST_STORE","length":10000, "routing_key":"MINUTE_ACQUISTION" }  )
+   cf.add_header_node( "MINUTE_ACQUISITION",properties= {"measurement":"MINUTE_LIST_STORE","length":10000, "routing_key":"MINUTE_ACQUISTION" } , json_flag=True )
 
    #
    # add pi temperature
@@ -301,9 +323,9 @@ if __name__ == "__main__" :
    properties["modbus_remote"] = "satellite_1"
    properties["m_tag"]          = "measure_analog"
    properties["parameters"]     = [ "DF1",1.0]
-   properties["exec_tag"  ]     = "transfer_controller_current"
+   properties["exec_tag"  ]     = ["transfer_controller_current"]
    
-   cf.add_info_node( "MINUTE_ELEMENT","CONTROLLER_CURRENT",properties=properties)
+   cf.add_info_node( "MINUTE_ELEMENT","CONTROLLER_CURRENT",properties=properties, json_flag=True)
 
 
    properties = {}
@@ -311,8 +333,8 @@ if __name__ == "__main__" :
    properties["modbus_remote"] = "satellite_1"
    properties["m_tag"]          = "measure_analog"
    properties["parameters"]     = ["DF2",1.0]
-   properties["exec_tag"]       = "transfer_irrigation_current"
-   cf.add_info_node( "MINUTE_ELEMENT","IRRIGATION_VALVE_CURRENT",properties=properties)
+   properties["exec_tag"]       = ["transfer_irrigation_current"]
+   cf.add_info_node( "MINUTE_ELEMENT","IRRIGATION_VALVE_CURRENT",properties=properties, json_flag=True)
 
    cf.add_header_node("FLOW_METER_LIST")
    properties = {}
@@ -320,7 +342,7 @@ if __name__ == "__main__" :
    properties["modbus_remote"] =  "satellite_1"
    properties["parameters"]     = ["DS301", "C201",.0224145939] # counter id
    properties["m_tag"]          = "measure_counter"
-   properties["exec_tag"]       = "transfer_flow"
+   properties["exec_tag"]       = ["transfer_flow",.0224145939]
    cf.add_info_node( "MINUTE_ELEMENT","MAIN_FLOW_METER",properties=properties, json_flag=True)
 
    cf.end_header_node("FLOW_METER_LIST") #FLOW_METER_LIST
@@ -333,25 +355,25 @@ if __name__ == "__main__" :
    cf.end_header_node("MINUTE_ACQUISITION") #"MINUTE_ACQUISITION"
 
 
-   cf.add_header_node( "HOUR_ACQUISTION",properties= {"measurement":"HOUR_LIST_STORE","length":300 , "routing_key":"HOUR_ACQUISTION"}  )
+   cf.add_header_node( "HOUR_ACQUISTION",properties= {"measurement":"HOUR_LIST_STORE","length":300 , "routing_key":"HOUR_ACQUISTION"} , json_flag=True )
    properties = {}
    properties["modbus_remote"] = "io_controller"
    properties["parameters"]   = []
    properties["m_tag"]        = "modbus_statistics"
-   properties["init_tag"]     = "clear_daily_modbus_statistics"
-   properties["exec_tag"]     = "accumulate_daily_modbus_statistics"
+   properties["init_tag"]     = ["clear_daily_modbus_statistics"]
+   properties["exec_tag"]     = ["accumulate_daily_modbus_statistics"]
    cf.add_info_node( "HOUR_ELEMENT","MODBUS_STATISTICS",properties=properties,json_flag=True )
    #cf.add_info_node( "HOUR_ELEMENT","PI_TEMPERATURE",properties={"units":"Deg F" }, json_flag = True )
    cf.end_header_node("HOUR_ACQUISTION") # HOUR_ACQUISTION
 
 
-   cf.add_header_node( "DAILY_ACQUISTION", properties= {"measurement":"DAILY_LIST_STORE","length":300, "routing_key":"DAILY_ACQUISTION"}  )
+   cf.add_header_node( "DAILY_ACQUISTION", properties= {"measurement":"DAILY_LIST_STORE","length":300, "routing_key":"DAILY_ACQUISTION"}, json_flag=True  )
 
    properties = {}
    properties["modbus_remote"] = "skip_controller"
    properties["parameters"]    = []
    properties["m_tag"]         =  "no_controller"
-   properties["exec_tag"]      =  "log_daily_modbus_statistics"
+   properties["exec_tag"]      =  ["log_daily_modbus_statistics"]
    cf.add_info_node( "DAILY_ELEMENT","daily_modbus_statistics", properties=properties,json_flag=True ) 
    cf.end_header_node("DAILY_ACQUISTION")  # Daily Acquistion
 
@@ -551,14 +573,5 @@ if __name__ == "__main__" :
 
 
  
-
-   '''
-   access_codes = {
-      "messo_eto": {"api-key":"8b165ee73a734f379a8c91460afc98a1"  ,"url":"http://api.mesowest.net/v2/stations/timeseries?" ,  "station":"SRUC1" },
-      "messo_precp":{"api-key":"8b165ee73a734f379a8c91460afc98a1"  ,"url":"http://api.mesowest.net/v2/stations/precip?" ,  "station":"SRUC1" },
-      "cimis_eto":{ "api-key":"e1d03467-5c0d-4a9b-978d-7da2c32d95de"  , "url":"http://et.water.ca.gov/api/data"     , "station":179 },
-      "cimis_spatial":{ "api-key":"e1d03467-5c0d-4a9b-978d-7da2c32d95de"  , "url":"http://et.water.ca.gov/api/data"     , "longitude":  -117.299459  ,"latitude":33.578156  }
-      }
-   '''
 
 

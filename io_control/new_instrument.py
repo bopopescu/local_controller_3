@@ -73,6 +73,7 @@ class Modbus_Instrument:
 
   
     def read_bits(self, modbus_address, registeraddress, bit_number,  functioncode=2):
+        
         first_part  = self._numToOneByteString(modbus_address) + self._numToOneByteString(functioncode) + \
                         self._numToTwoByteString(registeraddress) + self._numToTwoByteString(bit_number)
         

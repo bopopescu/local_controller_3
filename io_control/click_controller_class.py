@@ -37,7 +37,7 @@ class Click_Controller_Base_Class(object):
        m_tags["read_mode"]               = self.read_mode
        m_tags["read_wd_flag"]            = self.read_wd_flag
        m_tags["write_wd_flag"]           = self.write_wd_flag
-
+       m_tags["read_input_bit"]          = self.read_input_bit
        self.m_tags = m_tags
    
        for i in range(0,500): 
@@ -140,26 +140,31 @@ class Click_Controller_Base_Class(object):
         self.instrument.write_bits( modbus_address, write_bit,[0])
  
 
-
+   def read_input_bit( self, modbus_address, input_list ):
+      
+      read_bit      = self.click_bit_address[input_list[0]]
+     
+      return self.instrument.read_bits(modbus_address, read_bit,1 )[0]
 
 
    def read_mode_switch( self, modbus_address, input_list ):
       read_bit      = self.click_bit_address["SC11"]
-      return self.instrument.read_bits(self, modbus_address, read_bit )
+      return self.instrument.read_bits( modbus_address, read_bit,1 )[0]
 
    def read_mode( self, modbus_address , input_list):
       read_bit      = self.click_bit_address["SC10"]
-      return self.instrument.read_bits(self, modbus_address, read_bit )
+
+      return self.instrument.read_bits( modbus_address, read_bit,1 )[0]
 
   
    def read_wd_flag( self, modbus_address, input_list ):
       read_bit      = self.click_bit_address["C200"]
-      return self.instrument.read_bits(self, modbus_address, read_bit )
+      return self.instrument.read_bits( modbus_address, read_bit,1 )[0]
       
 
    def write_wd_flag( self, modbus_address , input_list):
       write_bit      = self.click_bit_address["C200"]
-      self.instrument.write_bits(self, modbus_address,write_bit, [1] )
+      self.instrument.write_bits(modbus_address,write_bit, [1] )[0]
 
        
 
