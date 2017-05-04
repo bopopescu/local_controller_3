@@ -153,32 +153,6 @@ class Data_Acquisition(object):
            
            raise
 
-'''
-           temp = modbus_control.get_all_counters(i)
-           if temp[0] == True:
-               servers.append(i)   
-               data = json.loads(temp[1])
-              
-               for j in data.keys():
-                    if redis.hexists("MODBUS_STATISTICS:"+i,j) == False:
-                       self.redis.hset("MODBUS_STATISTICS:"+i,j,json.dumps(data[j]))
-                    else:
-                       
-                       temp_json = redis.hget("MODBUS_STATISTICS:"+i,j)
-                       
-                       temp_value = json.loads(temp_json)
-                       
-                       
-                       temp_value["address"]  = j
-                       temp_value["failures"] = int(temp_value["failures"]) +int(data[j]["failures"])
-                       temp_value["counts"] = int(temp_value["counts"]) + int(data[j]["counts"])
-                       temp_value["total_failures"] = int(temp_value["total_failures"]) +int(data[j]["total_failures"])
-                       temp_json = json.dumps(temp_value)
-                       self.redis.hset("MODBUS_STATISTICS:"+i,j,temp_json)
-               modbus_control.clear_all_counters(i)
-       self.redis.set("MODBUS_INTERFACES",json.dumps(servers))
-'''
-
 
 class Modbus_Statistics( object ):
 
@@ -251,40 +225,7 @@ class Legacy_Redis_DB_Issues( object):
        #print "value",value,parameters[0]
        #self.redis.hset("GPIO_BITS",parameters[0],value)
 
-
-
-    
-if __name__ == "__main__":
-
-   import time
-   import construct_graph 
-
-   def list_filter( input_list):
-      if len( input_list ) > 0:
-          return input_list[0]
-      else:
-          return []
-
-   gm = construct_graph.Graph_Management("PI_1","main_remote","LaCima_DataStore")
-  
-   data_store_nodes = gm.find_data_stores()
-   io_server_nodes  = gm.find_io_servers()
-  
-   # find ip and port for redis data store
-   data_server_ip   = data_store_nodes[0]["ip"]
-   data_server_port = data_store_nodes[0]["port"]
-   redis_handle = redis.StrictRedis( host = data_server_ip, port=data_server_port, db = 12 )
-
-
-   io_server_ip     = io_server_nodes[0]["ip"]
-   io_server_port   = io_server_nodes[0]["port"]
-   # find ip and port for ip server
-
-   instrument  =  io_control.new_instrument.Modbus_Instrument()
-
-   instrument.set_ip(ip= io_server_ip, port = int(io_server_port))     
- 
-
+def construct_class( redis_handle,gm,instrument):
  
    #
    # Adding in graph call back handlers
@@ -363,15 +304,9 @@ if __name__ == "__main__":
    #data_acquisition.process_hour_data( None, None,None,None )
    #data_acquisition.process_minute_data( None, None,None,None )
    #data_acquisition.process_daily_data( None,None,None,None )
+   return data_acquisition
 
-  
-
-   #
-   # Adding chains
-   #
-   cf = py_cf.CF_Interpreter()
-
-
+def add_chains( cf,data_acquisition ):
    cf.define_chain("test",True)
    cf.insert_link( "linkxx","Log",["test chain start"])
    cf.insert_link( "link_0", "SendEvent",  ["MINUTE_TICK",1] )
@@ -404,6 +339,46 @@ if __name__ == "__main__":
    cf.insert_link( "link_1","WaitEvent",["DAY_TICK" ])
    cf.insert_link( "link_2","One_Step",[data_acquisition.process_daily_data])
    cf.insert_link( "link_3","Reset",[])  
+
+
+    
+if __name__ == "__main__":
+
+   import time
+   import construct_graph 
+
+   def list_filter( input_list):
+      if len( input_list ) > 0:
+          return input_list[0]
+      else:
+          return []
+
+   gm = construct_graph.Graph_Management("PI_1","main_remote","LaCima_DataStore")
+  
+   data_store_nodes = gm.find_data_stores()
+   io_server_nodes  = gm.find_io_servers()
+  
+   # find ip and port for redis data store
+   data_server_ip   = data_store_nodes[0]["ip"]
+   data_server_port = data_store_nodes[0]["port"]
+   redis_handle = redis.StrictRedis( host = data_server_ip, port=data_server_port, db = 12 )
+
+
+   io_server_ip     = io_server_nodes[0]["ip"]
+   io_server_port   = io_server_nodes[0]["port"]
+   # find ip and port for ip server
+
+   instrument  =  io_control.new_instrument.Modbus_Instrument()
+
+   instrument.set_ip(ip= io_server_ip, port = int(io_server_port))     
+   data_acquisition= construct_class( redis_handle,gm,instrument)
+
+   #
+   # Adding chains
+   #
+   cf = py_cf.CF_Interpreter()
+   add_chains(cf, data_acquisition)
+
    print "starting chain flow"
    cf_environ = py_cf.Execute_Cf_Environment( cf )
    cf_environ.execute()
