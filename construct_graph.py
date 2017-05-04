@@ -236,7 +236,7 @@ if __name__ == "__main__" :
    properties["measurement_tag"] = "CIMIS_ETO"
    properties["list_length"]     = 100
    properties["measurement"]     = "CIMIS_ETO_STORE"
-   properties["majority_vote_flag"] = False
+   properties["majority_vote_flag"] = True
 
    cf.add_info_node( "ETO_ENTRY","ETO_CIMIS",properties=properties, json_flag=True)
 
