@@ -124,7 +124,7 @@ class Eto_Management(object):
        return return_value             
 
    def update_all_bins( self, eto_data):
-       assert (self.eto_update_flag == False) ,"Bad logic"
+       assert (self.eto_update_flag == True) ,"Bad logic"
        if self.eto_update_flag == True:
           return  # protection for production code
        self.eto_update_flag = True
@@ -577,30 +577,7 @@ class Messo_Precp(object):
      rain = float(station_data["total_precip_value_1"])/25.4
      return rain
      
-
-       
-if __name__ == "__main__":
-
-   import time
-   import construct_graph 
-   import io_control.construct_classes
-   import io_control.new_instrument
-   import py_cf
-
-   gm = construct_graph.Graph_Management("PI_1","main_remote","LaCima_DataStore")
-   #
-   # Now Find Data Stores
-   #
-   #
-   #
-   data_store_nodes = gm.find_data_stores()
-   # find ip and port for redis data store
-   data_server_ip   = data_store_nodes[0]["ip"]
-   data_server_port = data_store_nodes[0]["port"]
-   # find ip and port for ip server
-   
-   redis_handle = redis.StrictRedis( host = data_server_ip, port=data_server_port, db = 12 )
- 
+def construct_eto_instance( gm, redis_handle ):
    eto = Eto_Management( redis_handle  = redis_handle)
    eto.eto_calculators = ETO_Calculators( redis_handle )
 
@@ -656,11 +633,9 @@ if __name__ == "__main__":
    eto.status_queue_class = rabbit_cloud_status_publish.Status_Queue(redis_handle, queue_name )
   
    eto.eto_default = .20
-   #
-   # Adding chains
-   #
-   cf = py_cf.CF_Interpreter()
+   return eto
 
+def add_eto_chains( eto, cf ):
    cf.define_chain("test_generator",False)
    cf.insert_link( "link_1","SendEvent", ["DAY_TICK",0] )
    cf.insert_link( "link_2","WaitEvent", ["TIME_TICK"] ) 
@@ -693,6 +668,35 @@ if __name__ == "__main__":
    cf.insert_link( "link_2", "WaitEvent",    [ "HOUR_TICK" ] )
    cf.insert_link( "link_3", "Reset",[])
 
+
+       
+if __name__ == "__main__":
+
+   import time
+   import construct_graph 
+   import io_control.construct_classes
+   import io_control.new_instrument
+   import py_cf
+
+   gm = construct_graph.Graph_Management("PI_1","main_remote","LaCima_DataStore")
+   #
+   # Now Find Data Stores
+   #
+   #
+   #
+   data_store_nodes = gm.find_data_stores()
+   # find ip and port for redis data store
+   data_server_ip   = data_store_nodes[0]["ip"]
+   data_server_port = data_store_nodes[0]["port"]
+   # find ip and port for ip server
+   
+   redis_handle = redis.StrictRedis( host = data_server_ip, port=data_server_port, db = 12 )
+   eto = construct_eto_instance( gm, redis_handle ) 
+   #
+   # Adding chains
+   #
+   cf = py_cf.CF_Interpreter()
+   add_eto_chains(eto, cf)
    #
    # Executing chains
    #
