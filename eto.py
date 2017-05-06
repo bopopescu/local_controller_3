@@ -37,15 +37,16 @@ class Eto_Management(object):
         self.redis_handle                  = redis_handle
         self.redis_old                     = redis.StrictRedis( host = '192.168.1.82', port=6379, db = 0 )
  
-        self.eto_update_flag               = self.redis_handle.hget("ETO_VARIABLES","ETO_UPDATE_FLAG")
+        self.eto_update_flag               = int(self.redis_handle.hget("ETO_VARIABLES","ETO_UPDATE_FLAG"))
         if self.eto_update_flag == None:
-           self.eto_update_flag = False
-
+           self.eto_update_flag = 0
+           self.redis_handle.hset("ETO_VARIABLES","ETO_UPDATE_FLAG",0)
+       
 
 
    def check_for_eto_update( self, chainFlowHandle, chainObj, parameters, event ):
        print "check_for_eto_update"
-       if self.eto_update_flag == False:
+       if self.eto_update_flag == 0:
            self.update_all_bins( self.get_eto_integration_data())
            
        return "DISABLE"
@@ -65,6 +66,7 @@ class Eto_Management(object):
            self.redis_handle.lpush(data_store, "EMPTY")
            list_length = i["list_length"]
            self.redis_handle.ltrim(data_store,0, list_length)
+       self.redis_handle.hset("ETO_VARIABLES","ETO_UPDATE_FLAG",0)
 
        return "DISABLE"  
 
@@ -131,11 +133,11 @@ class Eto_Management(object):
        return return_value             
 
    def update_all_bins( self, eto_data):
-       assert (self.eto_update_flag == False) ,"Bad logic"
-       if self.eto_update_flag == True:
+       assert (self.eto_update_flag == 0) ,"Bad logic"
+       if self.eto_update_flag == 1:
           return  # protection for production code
-       self.eto_update_flag = True
-       self.redis_handle.hset("ETO_VARIABLES","ETO_UPDATE_FLAG",True)
+       self.eto_update_flag = 1
+       self.redis_handle.hset("ETO_VARIABLES","ETO_UPDATE_FLAG",1)
        self.update_eto_bins_new(eto_data)
        self.update_sprinklers_time_bins_old(eto_data)
        

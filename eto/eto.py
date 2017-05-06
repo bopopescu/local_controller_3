@@ -89,15 +89,16 @@ class ETO():
        rain = {}
        eto = {}
        print "made it here1"
-       '''
+       
        try:
            messo_eto            = Messo_ETO(self.access_codes)
            messo_results        = messo_eto.get_daily_data(time = time.time())
+          
            eto["messo"]         = self.calculate_eto( messo_results)
 
        except:
           print "exception messo eto"
-          raise
+          #raise
        print "made it here2"
        try:
           messo_precp                      =  Messo_Precp(self.access_codes)
@@ -106,7 +107,7 @@ class ETO():
            print "exception messo rain"
 
        print "made it here3"
-       '''
+       
        try:
            cimis_eto         = CIMIS_ETO( self.access_codes )
            cimis_results     = cimis_eto.get_eto(time = time.time()-24*3600)

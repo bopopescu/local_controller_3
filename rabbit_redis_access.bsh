@@ -3,7 +3,7 @@ do
    for i in {1..60}
    do
        echo "executing rabbitmq redis gateway $i"
-       /usr/bin/python rabbit_redis_access.py  >>  /tmp/rabbit_redis_access.err   2>&1
+       /usr/bin/python rabbit_redis_access.py  2>  /tmp/rabbit_redis_access.err   
      
         mv /tmp/rabbit_redis_access.err /tmp/rabbit_redis_access.errr
         sleep 5

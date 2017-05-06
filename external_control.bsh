@@ -2,7 +2,7 @@
 while [ 1 ]
 do
    echo "executing external interface module"
-   python external_control.py >>  /tmp/external_control.err 2>&1
+   python external_control.py 2>  /tmp/external_control.err 
    python cloud_event_queue.py "reboot" "external_control"
    sleep 10
    echo "dumping error file"
