@@ -309,13 +309,9 @@ if __name__ == "__main__" :
 
    cf.end_header_node("FIFTEEN_SEC_ACQUISITION") #DATA_ACQUISITION
 
-    ###### need to add a measurement data
+ 
    cf.add_header_node( "MINUTE_ACQUISITION",properties= {"measurement":"MINUTE_LIST_STORE","length":10000, "routing_key":"MINUTE_ACQUISTION" } , json_flag=True )
 
-   #
-   # add pi temperature
-   #
-   #
 
 
    properties = {}
@@ -382,10 +378,63 @@ if __name__ == "__main__" :
 
    cf.end_header_node("DATA_ACQUISITION") #DATA_ACQUISITION
 
+   cf.add_header_node( "LINUX_DATA_ACQUISITION")
 
+   cf.add_header_node( "LINUX_HOUR_ACQUISTION",properties= {"measurement":"HOUR_LIST_STORE","length":300 , "routing_key":"linux_hour_measurement"
+} , json_flag=True )
+  
+   properties = {}
+   properties["modbus_remote"] = "skip_controller"
+   properties["parameters"]   = []
+   properties["m_tag"]        = "no_controller"
+   properties["exec_tag"]     = ["linux_memory_load"]
+   cf.add_info_node( "LINUX_HOUR_ELEMENT","linux_memory_load",properties=properties,json_flag=True )
+ 
+
+
+   properties = {}
+   properties["modbus_remote"] = "skip_controller"
+   properties["parameters"]   = []
+   properties["m_tag"]        = "no_controller"
+   properties["exec_tag"]     = ["pi_temperature"]
+   cf.add_info_node( "LINUX_HOUR_ELEMENT","pi_temperature_hourly",properties=properties,json_flag=True )
    
-   cf.add_info_node( "MINUTE_LIST_STORE", "MINUTE_LIST_STORE",properties =  { "LIST_LENGTH" :10000} , json_flag = True) # about 1 week of data 
-   cf.add_info_node( "HOUR_LIST_STORE", "HOUR_LIST_STORE",properties =  { "LIST_LENGTH" :10000} , json_flag = True) # about 1 week of data 
+   cf.end_header_node( "LINUX_HOUR_ACQUISTION") # HOUR_ACQUISTION
+
+
+   cf.add_header_node( "LINUX_DAILY_ACQUISTION", properties= {"measurement":"DAILY_LIST_STORE","length":300, "routing_key":"linux_daily_measurement"}, json_flag=True  )
+
+   properties = {}
+   properties["modbus_remote"] = "skip_controller"
+   properties["parameters"]    = []
+   properties["m_tag"]         =  "no_controller"
+   properties["exec_tag"]      =  ["linux_daily_disk"]
+   cf.add_info_node( "LINUX_DAILY_ELEMENT","linux_daily_disk", properties=properties,json_flag=True ) 
+
+   properties = {}
+   properties["modbus_remote"] = "skip_controller"
+   properties["parameters"]    = []
+   properties["m_tag"]         =  "no_controller"
+   properties["exec_tag"]      =  ["linux_daily_redis"]
+   cf.add_info_node( "LINUX_DAILY_ELEMENT","linux_daily_redis", properties=properties,json_flag=True ) 
+
+   properties = {}
+   properties["modbus_remote"] = "skip_controller"
+   properties["parameters"]    = []
+   properties["m_tag"]         =  "no_controller"
+   properties["exec_tag"]      =  ["linux_daily_memory"]
+   cf.add_info_node( "LINUX_DAILY_ELEMENT","linux_daily_memory", properties=properties,json_flag=True )
+   cf.end_header_node("LINUX_DAILY_ACQUISTION")  # Daily Acquistion
+
+
+
+
+   cf.end_header_node("LINUX_DATA_ACQUISITION") 
+   
+  
+   
+   #cf.add_info_node( "MINUTE_LIST_STORE", "MINUTE_LIST_STORE",properties =  { "LIST_LENGTH" :10000} , json_flag = True) # about 1 week of data 
+   #cf.add_info_node( "HOUR_LIST_STORE", "HOUR_LIST_STORE",properties =  { "LIST_LENGTH" :10000} , json_flag = True) # about 1 week of data 
 
    cf.add_header_node("RAIN_MEASUREMENTS")
    

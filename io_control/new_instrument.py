@@ -331,7 +331,7 @@ class Modbus_Instrument:
 
         
         self.sock.setblocking(0)
-        ready = select.select([self.sock], [], [], 5.0)
+        ready = select.select([self.sock], [], [], 30.0)
         answer = ""
         if ready[0]:
             data = self.sock.recvfrom(1024)

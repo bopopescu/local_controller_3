@@ -13,6 +13,8 @@ class Opcodes():
         self.opcodes["Reset" ]            =    self.reset_code     
         self.opcodes["SendEvent"]         =    self.send_event_code 
         self.opcodes["WaitTod" ]          =    self.wait_tod_code  
+        self.opcodes["WaitTodGE"]         =    self.wait_tod_ge_code
+        self.opcodes["WaitTodGE"]         =    self.wait_tod_le_code
         self.opcodes["WaitEvent"]         =    self.wait_event_code
         self.opcodes["WaitEventCount"]    =    self.wait_event_count_code
         self.opcodes["WaitTime" ]         =    self.wait_time_code       
@@ -179,6 +181,70 @@ class Opcodes():
     
     if ( ( second == time_stamp.second ) or
 	 ( second == "*" ) ) == False:
+	return returnValue
+   
+
+    return "DISABLE"
+
+  def wait_tod_ge_code(  self, cf_handle, chainObj,parameters, event ):
+   
+ 
+    returnValue = "HALT"
+    dow = parameters[0]
+    hour = parameters[1]
+    minute = parameters[2]
+    second = parameters[3]
+
+    time_stamp = datetime.datetime.today()
+   
+    if (  ( dow == "*" ) or
+	 ( dow >= time_stamp.weekday()) ) == False:
+	return returnValue
+   
+
+    if ( ( hour == "*" ) or
+	 ( hour >= time_stamp.hour ) ) == False:
+	return returnValue
+    
+
+    if ( ( minute == "*"  ) or
+	 ( minute >= time_stamp.minute ) ) == False:
+	return returnValue
+    
+    if ( ( second == "*" ) or
+	 ( second >= time_stamp.second  ) ) == False:
+	return returnValue
+   
+
+    return "DISABLE"
+
+  def wait_tod_le_code(  self, cf_handle, chainObj,parameters, event ):
+   
+ 
+    returnValue = "HALT"
+    dow = parameters[0]
+    hour = parameters[1]
+    minute = parameters[2]
+    second = parameters[3]
+
+    time_stamp = datetime.datetime.today()
+   
+    if (  ( dow == "*" ) or
+	 ( dow <= time_stamp.weekday()) ) == False:
+	return returnValue
+   
+
+    if ( ( hour == "*" ) or
+	 ( hour <= time_stamp.hour ) ) == False:
+	return returnValue
+    
+
+    if ( ( minute == "*" ) or
+	 ( minute <= time_stamp.minute ) ) == False:
+	return returnValue
+    
+    if ( ( second == "*" ) or
+	 ( second <= time_stamp.second  ) ) == False:
 	return returnValue
    
 

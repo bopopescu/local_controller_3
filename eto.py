@@ -36,14 +36,17 @@ class Eto_Management(object):
    def __init__( self, redis_handle):
         self.redis_handle                  = redis_handle
         self.redis_old                     = redis.StrictRedis( host = '192.168.1.82', port=6379, db = 0 )
-        self.eto_update_flag               = False
-        
+ 
+        self.eto_update_flag               = self.redis_handle.hget("ETO_VARIABLES","ETO_UPDATE_FLAG")
+        if self.eto_update_flag == None:
+           self.eto_update_flag = False
+
 
 
    def check_for_eto_update( self, chainFlowHandle, chainObj, parameters, event ):
        print "check_for_eto_update"
        if self.eto_update_flag == False:
-           self.update_all_bins( self, self.get_eto_integration_data())
+           self.update_all_bins( self.get_eto_integration_data())
            
        return "DISABLE"
       
@@ -114,20 +117,25 @@ class Eto_Management(object):
        if self.integrated_eto_flag() == True:
 
            eto_data = self.get_eto_integration_data()
-          
-           self.update_all_bins( eto_data)
-           self.store_cloud_data()           
-           self.status_queue_class
+           if self.eto_update_flag == False:
+               print "made it here --------------"
+               self.store_cloud_data() 
+               self.update_all_bins( eto_data)
+ 
+  
+                     
+
            return_value = "TERMINATE"
        #print "return_value",return_value
        
        return return_value             
 
    def update_all_bins( self, eto_data):
-       assert (self.eto_update_flag == True) ,"Bad logic"
+       assert (self.eto_update_flag == False) ,"Bad logic"
        if self.eto_update_flag == True:
           return  # protection for production code
        self.eto_update_flag = True
+       self.redis_handle.hset("ETO_VARIABLES","ETO_UPDATE_FLAG",True)
        self.update_eto_bins_new(eto_data)
        self.update_sprinklers_time_bins_old(eto_data)
        
@@ -654,12 +662,15 @@ def add_eto_chains( eto, cf ):
    cf.define_chain("eto_time_window",True)
    cf.insert_link( "link_1","WaitEvent", ["DAY_TICK"] )
    cf.insert_link( "link_2","One_Step", [ eto.generate_new_sources ])
-   cf.insert_link( "link_3","WaitTod",["*",8,"*","*" ])    
-   cf.insert_link( "link_4","Enable_Chain",[["eto_make_measurements"]])
-   cf.insert_link( "link_5","WaitTod",["*",18,"*","*" ]) 
-   cf.insert_link( "link_6","One_Step", [ eto.check_for_eto_update ] )
-   cf.insert_link( "link_6", "Disable_Chain",[["eto_make_measurements"]])
-   cf.insert_link( "link_7", "Reset", [] )
+   cf.insert_link(  "link_3","Halt",[])
+
+   cf.define_chain("enable_measurement",True)
+   cf.insert_link( "link_1","WaitTodGE",["*",8,"*","*" ])    
+   cf.insert_link( "link_2","Enable_Chain",[["eto_make_measurements"]])
+   cf.insert_link( "link_3","WaitTodGE",["*",18,"*","*" ]) 
+   cf.insert_link( "link_4","One_Step", [ eto.check_for_eto_update ] )
+   cf.insert_link( "link_5", "Disable_Chain",[["eto_make_measurements"]])
+   cf.insert_link( "link_6", "Reset", [] )
 
 
    cf.define_chain("eto_make_measurements",False)

@@ -62,10 +62,14 @@ class Data_Acquisition(object):
    def common_process( self, data_list , store_element ):  
        #print "data_list",data_list
        #print "store_element",store_element
+       if len(data_list) == 0:
+          return
        data_dict = {}
        for i in data_list:
            temp_data =   self.slave_interface( i)
            data_dict[i["name"]] = temp_data
+       data_dict["namespace"] = self.gm.convert_namespace(store_element["namespace"])
+       data_dict["time_stamp"] = time.strftime( "%b %d %Y %H:%M:%S",time.localtime(time.time()))
        #print data_dict
        data_json           = json.dumps(data_dict)
        redis_key           = store_element["measurement"]
@@ -75,7 +79,7 @@ class Data_Acquisition(object):
        #self.redis_handle.ltrim(redis_key,0,redis_array_length)
        
        # send data to influxdb
-       #self.status_queue_class.queue_message(store_element["routing_key"], data_dict )
+       self.status_queue_class.queue_message(store_element["routing_key"], data_dict )
 
    def execute_init_tags( self, data_list ):
         for i in data_list:
@@ -225,33 +229,24 @@ class Legacy_Redis_DB_Issues( object):
        #print "value",value,parameters[0]
        #self.redis.hset("GPIO_BITS",parameters[0],value)
 
-def construct_class( redis_handle,gm,instrument):
+def construct_class( redis_handle,
+                     gm,instrument,
+                     remote_classes,
+                     fifteen_store,
+                     minute_store,
+                     hour_store,
+                     daily_store,
+                     fifteen_list,
+                     minute_list,
+                     hour_list,
+                     daily_list ):
+
  
    #
    # Adding in graph call back handlers
    #
    #
    #
-   mod_stat = Modbus_Statistics()
-   gm.add_cb_handler("log_daily_modbus_statistics", mod_stat.log_statistics )  
-   gm.add_cb_handler("clear_daily_modbus_statistics", mod_stat.init_statistics )
-   gm.add_cb_handler("accumulate_daily_modbus_statistics",mod_stat.accumulate_statistics )
-   legacy = Legacy_Redis_DB_Issues()
-   gm.add_cb_handler("transfer_flow",   legacy.transfer_flow )
-   gm.add_cb_handler("transfer_irrigation_current",legacy.transfer_irrigation_current)
-   gm.add_cb_handler("transfer_controller_current",legacy.transfer_controller_current)
-   gm.add_cb_handler("get_gpio", legacy.get_gpio)
-
-   remote_classes = io_control.construct_classes.Construct_Access_Classes(instrument)
-   fifteen_store   =  gm.match_relationship( "FIFTEEN_SEC_ACQUISITION",json_flag = True)[0]
-   minute_store    =  gm.match_relationship( "MINUTE_ACQUISITION", json_flag = True )[0]
-   hour_store      =  gm.match_relationship( "HOUR_ACQUISTION", json_flag = True )[0]
-   daily_store     =  gm.match_relationship( "DAILY_ACQUISTION", json_flag = True )[0]
-   
-   fifteen_list   =  gm.match_relationship( "FIFTEEN_SEC_ELEMENT",json_flag = True)
-   minute_list     =  gm.match_relationship( "MINUTE_ELEMENT", json_flag = True )     
-   hour_list       =  gm.match_relationship( "HOUR_ELEMENT", json_flag = True )
-   daily_list      =  gm.match_relationship( "DAILY_ELEMENT",   json_flag = True )
 
    status_stores = gm.match_relationship("CLOUD_STATUS_STORE",json_flag = True)
    queue_name    = status_stores[0]["queue_name"]
@@ -307,14 +302,6 @@ def construct_class( redis_handle,gm,instrument):
    return data_acquisition
 
 def add_chains( cf,data_acquisition ):
-   cf.define_chain("test",True)
-   cf.insert_link( "linkxx","Log",["test chain start"])
-   cf.insert_link( "link_0", "SendEvent",  ["MINUTE_TICK",1] )
-   cf.insert_link( "link_1", "WaitEvent",  ["TIME_TICK"] )
-   cf.insert_link( "link_2", "SendEvent",    [ "HOUR_TICK",1 ] )
-   cf.insert_link( "link_3", "WaitEventCount", ["TIME_TICK",2,0])
-   cf.insert_link( "link_4", "SendEvent",    [ "DAY_TICK", 1] )
-
 
 
    cf.define_chain("fifteen_second_list",True)
@@ -340,8 +327,42 @@ def add_chains( cf,data_acquisition ):
    cf.insert_link( "link_2","One_Step",[data_acquisition.process_daily_data])
    cf.insert_link( "link_3","Reset",[])  
 
+def construct_daily_acquisition_class( redis_handle, gm, instrument):
+   mod_stat = Modbus_Statistics()
+   gm.add_cb_handler("log_daily_modbus_statistics", mod_stat.log_statistics )  
+   gm.add_cb_handler("clear_daily_modbus_statistics", mod_stat.init_statistics )
+   gm.add_cb_handler("accumulate_daily_modbus_statistics",mod_stat.accumulate_statistics )
+   legacy = Legacy_Redis_DB_Issues()
+   gm.add_cb_handler("transfer_flow",   legacy.transfer_flow )
+   gm.add_cb_handler("transfer_irrigation_current",legacy.transfer_irrigation_current)
+   gm.add_cb_handler("transfer_controller_current",legacy.transfer_controller_current)
+   gm.add_cb_handler("get_gpio", legacy.get_gpio)
 
+   remote_classes = io_control.construct_classes.Construct_Access_Classes(instrument)
+   fifteen_store   =  gm.match_relationship( "FIFTEEN_SEC_ACQUISITION",json_flag = True)[0]
+   minute_store    =  gm.match_relationship( "MINUTE_ACQUISITION", json_flag = True )[0]
+   hour_store      =  gm.match_relationship( "HOUR_ACQUISTION", json_flag = True )[0]
+   daily_store     =  gm.match_relationship( "DAILY_ACQUISTION", json_flag = True )[0]
+   
+   fifteen_list   =  gm.match_relationship( "FIFTEEN_SEC_ELEMENT",json_flag = True)
+   minute_list     =  gm.match_relationship( "MINUTE_ELEMENT", json_flag = True )     
+   hour_list       =  gm.match_relationship( "HOUR_ELEMENT", json_flag = True )
+   daily_list      =  gm.match_relationship( "DAILY_ELEMENT",   json_flag = True )
     
+   data_acquisition= construct_class( redis_handle,
+                                      gm,instrument,
+                                      remote_classes,
+                                      fifteen_store,
+                                      minute_store,
+                                      hour_store,
+                                      daily_store,
+                                      fifteen_list,
+                                      minute_list,
+                                      hour_list,
+                                      daily_list )
+   return data_acquisition
+ 
+   
 if __name__ == "__main__":
 
    import time
@@ -370,13 +391,21 @@ if __name__ == "__main__":
 
    instrument  =  io_control.new_instrument.Modbus_Instrument()
 
-   instrument.set_ip(ip= io_server_ip, port = int(io_server_port))     
-   data_acquisition= construct_class( redis_handle,gm,instrument)
-
+   instrument.set_ip(ip= io_server_ip, port = int(io_server_port)) 
+   data_acquisition = construct_daily_acquisition_class( redis_handle, gm, instrument)
    #
    # Adding chains
    #
    cf = py_cf.CF_Interpreter()
+   cf.define_chain("test",False)
+   cf.insert_link( "linkxx","Log",["test chain start"])
+   cf.insert_link( "link_0", "SendEvent",  ["MINUTE_TICK",1] )
+   cf.insert_link( "link_1", "WaitEvent",  ["TIME_TICK"] )
+   cf.insert_link( "link_2", "SendEvent",    [ "HOUR_TICK",1 ] )
+   cf.insert_link( "link_3", "WaitEventCount", ["TIME_TICK",2,0])
+   cf.insert_link( "link_4", "SendEvent",    [ "DAY_TICK", 1] )
+
+
    add_chains(cf, data_acquisition)
 
    print "starting chain flow"

@@ -28,6 +28,7 @@ class Build_Configuration(object):
 
    def end_header_node( self, assert_namespace ):
        #print self.namespace
+       #print( "end_header_node",len(self.namespace),self.namespace)
        assert (assert_namespace == self.namespace[-1][0]) ,"miss match namespace  got  "+assert_namespace+" expected "+self.namespace[-1][0]
        del self.namespace[-1]    
 
