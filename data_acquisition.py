@@ -75,8 +75,8 @@ class Data_Acquisition(object):
        redis_key           = store_element["measurement"]
        redis_array_length  = store_element["length"]
        print "data_json",data_json, redis_key,redis_array_length
-       #self.redis_handle.lpush(redis_key,data_json)
-       #self.redis_handle.ltrim(redis_key,0,redis_array_length)
+       self.redis_handle.lpush(redis_key,data_json)
+       self.redis_handle.ltrim(redis_key,0,redis_array_length)
        
        # send data to influxdb
        self.status_queue_class.queue_message(store_element["routing_key"], data_dict )
@@ -397,7 +397,7 @@ if __name__ == "__main__":
    # Adding chains
    #
    cf = py_cf.CF_Interpreter()
-   cf.define_chain("test",False)
+   cf.define_chain("test",True)
    cf.insert_link( "linkxx","Log",["test chain start"])
    cf.insert_link( "link_0", "SendEvent",  ["MINUTE_TICK",1] )
    cf.insert_link( "link_1", "WaitEvent",  ["TIME_TICK"] )
