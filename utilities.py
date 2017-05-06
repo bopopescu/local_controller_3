@@ -298,12 +298,14 @@ if __name__ == "__main__":
    import construct_graph 
    import io_control.construct_classes
    import io_control.new_instrument
+   from   linux_acquisition import construct_linux_acquisition_class
+   from   linux_acquisition import add_chains
 
-   graph_management = construct_graph.Graph_Management("PI_1","main_remote","LaCima_DataStore") 
+   gm = construct_graph.Graph_Management("PI_1","main_remote","LaCima_DataStore") 
    
 
     
-   cimis_email_data    =  graph_management.match_relationship( "CIMIS_EMAIL", json_flag = True )[0]
+   cimis_email_data    =  gm.match_relationship( "CIMIS_EMAIL", json_flag = True )[0]
  
  
 
@@ -314,17 +316,41 @@ if __name__ == "__main__":
    redis_port  = redis_config.get("REDIS_SERVER_PORT")
    redis_db    = redis_config.get("REDIS_SERVER_DB")
    redis_handle = redis.StrictRedis( redis_host, redis_port, redis_db )
+
+   data_store_nodes = gm.find_data_stores()
+   io_server_nodes  = gm.find_io_servers()
+  
+   # find ip and port for redis data store
+   data_server_ip   = data_store_nodes[0]["ip"]
+   data_server_port = data_store_nodes[0]["port"]
+   redis_new_handle = redis.StrictRedis( host = data_server_ip, port=data_server_port, db = 12 )
+
+
+   io_server_ip     = io_server_nodes[0]["ip"]
+   io_server_port   = io_server_nodes[0]["port"]
+   # find ip and port for ip server
+
+   instrument  =  io_control.new_instrument.Modbus_Instrument()
+
+   instrument.set_ip(ip= io_server_ip, port = int(io_server_port)) 
+   linux_monitoring = construct_linux_acquisition_class( redis_handle, gm, instrument )
+
+
    action       = System_Monitoring( redis_handle )
    sched        = Schedule_Monitoring( redis_handle )
  
    ntpd = Ntpd()
 
+   
 
  
    #
    # Adding chains
    #
    cf = py_cf.CF_Interpreter()
+
+
+
    cf.define_chain("delete_cimis_email_data",True)
    cf.insert_link( "link_1","WaitTod",["*",9,"*","*" ])
    cf.insert_link( "link_2","One_Step",[delete_cimis_email.delete_email_files])
@@ -343,12 +369,6 @@ if __name__ == "__main__":
    cf.insert_link(  "link_1",  "WaitEvent",[ "MINUTE_TICK" ] )
    cf.insert_link(  "link_3",  "Reset",[] )
 
-
-
-
- 
- 
-
    #
    #
    # internet time update
@@ -361,6 +381,24 @@ if __name__ == "__main__":
    cf.insert_link(  "link_10", "Log",["got time"] )
    cf.insert_link(  "link_2",  "WaitEvent",[ "HOUR_TICK" ] )
    cf.insert_link(  "link_3",  "Reset",[] )
+
+
+   cf.define_chain("linux_test",False)
+   cf.insert_link( "linkxx","Log",["test chain start"])
+   cf.insert_link( "link_0", "SendEvent",  ["MINUTE_TICK",1] )
+   cf.insert_link( "link_1", "WaitEvent",  ["TIME_TICK"] )
+   cf.insert_link( "link_2", "SendEvent",    [ "HOUR_TICK",1 ] )
+   cf.insert_link( "link_3", "WaitEventCount", ["TIME_TICK",2,0])
+   cf.insert_link( "link_4", "SendEvent",    [ "DAY_TICK", 1] )
+
+
+
+   add_chains(cf, linux_monitoring)
+
+
+ 
+ 
+
 
 
    cf_environ = py_cf.Execute_Cf_Environment( cf )
