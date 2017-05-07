@@ -164,7 +164,7 @@ class Click_Controller_Base_Class(object):
 
    def write_wd_flag( self, modbus_address , input_list):
       write_bit      = self.click_bit_address["C200"]
-      self.instrument.write_bits(modbus_address,write_bit, [1] )[0]
+      self.instrument.write_bits(modbus_address,write_bit, [1] )
 
        
 

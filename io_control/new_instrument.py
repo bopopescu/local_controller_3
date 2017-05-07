@@ -132,13 +132,16 @@ class Modbus_Instrument:
         payloadToSlave =  self._numToOneByteString(modbus_address ) + self._numToOneByteString(functioncode) + \
                           self._numToTwoByteString(registeraddress) + self._numToTwoByteString(number_of_bits) + self._numToOneByteString( loop_count ) +bit_data
         message = payloadToSlave + self._calculateCrcString(payloadToSlave)
+        
         response = self._communicate(message)
+        
         crc_flag, return_data = self.check_crc( response )
+        
         if crc_flag != 0:
                 pass
         else:
                  raise
-           
+         
         return 
 
 #Request
