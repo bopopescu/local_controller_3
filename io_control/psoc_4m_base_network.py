@@ -180,25 +180,25 @@ if __name__ == "__main__":
        psoc_4m = PSOC_BASE_4M( instrument, 0x201 )
        #for i in range(0,100):
        #   print i, psoc_4m.read_system_variables(40)
-       
-       print  psoc_4m.read_system_variables(100)
+       for i in range(0,1000):
+           print  psoc_4m.read_system_variables(100)
 
-       print psoc_4m.read_time( 40 )
-       print psoc_4m.update_current_time(40)
-       print psoc_4m.read_time( 40 )
-       print psoc_4m.clear_watch_dog_flag(40)
-       print  psoc_4m.read_system_variables(40)
+           print psoc_4m.read_time( 40 )
+           #print psoc_4m.update_current_time(40)
+           print psoc_4m.read_time( 40 )
+           print psoc_4m.clear_watch_dog_flag(40)
+           print  psoc_4m.read_system_variables(40)
        
-       print psoc_4m.set_controller_watch_dog_flag(40)
-       print  psoc_4m.read_system_variables(40)
+           print psoc_4m.set_controller_watch_dog_flag(40)
+           print  psoc_4m.read_system_variables(40)
 
-       print psoc_4m.clear_power_on_reset(40)
-       print psoc_4m.clear_minute_rollover(40)
-       print psoc_4m.verify_unit(40)
-       print  psoc_4m.read_system_variables(40)
-       print psoc_4m.clear_watch_dog_flag(40)
-       print  psoc_4m.read_system_variables(40)
-       print psoc_4m.process_event_queue( 40, 0 )
+           print psoc_4m.clear_power_on_reset(40)
+           print psoc_4m.clear_minute_rollover(40)
+           print psoc_4m.verify_unit(40)
+           print  psoc_4m.read_system_variables(40)
+           print psoc_4m.clear_watch_dog_flag(40)
+           print  psoc_4m.read_system_variables(40)
+           print psoc_4m.process_event_queue( 40, 0 )
        
-       #psoc_4m.commission_modbus_address(40)
+           #psoc_4m.commission_modbus_address(40)
        

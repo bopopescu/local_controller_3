@@ -328,23 +328,23 @@ class Modbus_Instrument:
     
     def _communicate(self, message, number_of_bytes_to_read= 1024):
 
-       
-        self.sock.sendto(message, (self.ip, self.port))        
-
+       for i in range(0,5):
+           #print "_comm i",i
+           self.sock.sendto(message, (self.ip, self.port))        
+           self.sock.setblocking(0)
+           ready = select.select([self.sock], [], [], 30.0)
+           answer = ""
+           if ready[0]:
+               data = self.sock.recvfrom(1024)
+               answer = data[0]
+            
+           if len(answer) > 1:
+              return answer
+           
+       print "no communication with the instrument"
+       raise IOError('No communication with the instrument (no answer)')
 
         
-        self.sock.setblocking(0)
-        ready = select.select([self.sock], [], [], 30.0)
-        answer = ""
-        if ready[0]:
-            data = self.sock.recvfrom(1024)
-            answer = data[0]
-            
-        if len(answer) == 0:
-            print "no communication with the instrument"
-            raise IOError('No communication with the instrument (no answer)')
-
-        return answer
 
 
     def check_crc( self, response ):
@@ -551,26 +551,27 @@ if __name__ == "__main__":
     #
     instrument = Modbus_Instrument()
     instrument.set_ip("192.168.1.82",5005)
-    print instrument.read_bits( 100, 0x4063, 7 ,  functioncode=1)
-    print instrument.write_bits( 100, 0x4063,  value = [ 1,1,0,0,0,0,0,1,1] ,functioncode=15)   
+    for i in range(0,1):
+        print instrument.read_bits( 100, 0x4063, 50 ,  functioncode=1)
+    #print instrument.write_bits( 100, 0x4063,  value = [ 1,1,0,0,0,0,0,1,1] ,functioncode=15)   
+    #print instrument.read_bits( 100, 0x4063, 15 ,  functioncode=1)   
+    #print instrument.write_bits( 100, 0x4063,   value = [ 0,0,0,0,0,0,0,0,0,0] ,functioncode=15)   
     print instrument.read_bits( 100, 0x4063, 15 ,  functioncode=1)   
-    print instrument.write_bits( 100, 0x4063,   value = [ 0,0,0,0,0,0,0,0,0,0] ,functioncode=15)   
-    print instrument.read_bits( 100, 0x4063, 15 ,  functioncode=1)   
-
-    print instrument.read_registers( modbus_address=100, registeraddress = 20, register_number=10, functioncode = 3 )
-    print instrument.write_registers( modbus_address=100, registeraddress = 20, functioncode = 16,value=[ 10,20,30,40,50,60,70,80,90,100] )
-    print instrument.read_registers( modbus_address=100, registeraddress=20, register_number=10, functioncode = 3)
-    print instrument.write_registers( modbus_address=100, registeraddress = 20, functioncode = 16,value=[ 0,0,0,0,0,0,0,0,0,0] )
-    print instrument.read_registers( modbus_address=100, registeraddress=1, register_number=10, functioncode=3, signed=False)
+    for i in range(0,1000):
+         print instrument.read_registers( modbus_address=40, registeraddress = 0, register_number=10, functioncode = 3 )
+         print instrument.write_registers( modbus_address=100, registeraddress = 20, functioncode = 16,value=[ 10,20,30,40,50,60,70,80,90,100] )
+         print instrument.read_registers( modbus_address=125, registeraddress=20, register_number=10, functioncode = 3)
+         print instrument.write_registers( modbus_address=100, registeraddress = 20, functioncode = 16,value=[ 0,0,0,0,0,0,0,0,0,0] )
+         print instrument.read_registers( modbus_address=170, registeraddress=1, register_number=10, functioncode=3, signed=False)
     print instrument.read_bits( 100, 61449, 1, functioncode = 2 )
-	
+    	
     #quit()
     #instrument.set_ip()
     #print  instrument.redis_write( {"test1":123,"test2":124 } )
     #print  instrument.redis_read(["test1","test2"] )
     #print  instrument.redis_write( {"test1":34,"test2":35 } )
     #print  instrument.redis_read(["test1","test2"] )
-    print instrument.ping_device( [31] )
+    #print instrument.ping_device( [31] )
     quit()
     #print instrument.ping_all_devices(  )
 
