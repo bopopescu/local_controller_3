@@ -138,6 +138,7 @@ class Eto_Management(object):
 
            eto_data = self.get_eto_integration_data()
            print #*************** update_flag ***************, self.eto_update_flag
+           
            if self.eto_update_flag == 0:
                print "made it here --------------"
                self.store_cloud_data() 
@@ -674,7 +675,7 @@ def add_eto_chains( eto, cf ):
    cf.insert_link( "link_2","One_Step", [ eto.generate_new_sources ])
    cf.insert_link(  "link_3","Halt",[])
 
-   cf.define_chain("enable_measurement",False)
+   cf.define_chain("enable_measurement",True)
    cf.insert_link( "link_1","WaitTodGE",["*",8,"*","*" ])    
    cf.insert_link( "link_2","Enable_Chain",[["eto_make_measurements"]])
    cf.insert_link( "link_3","WaitTodGE",["*",18,"*","*" ]) 
@@ -685,11 +686,11 @@ def add_eto_chains( eto, cf ):
 
    cf.define_chain("eto_make_measurements",False)
    cf.insert_link( "link_0", "Log",          ["Enabling chain"] )
-   cf.insert_link( "link_2", "WaitEvent",    [ "HOUR_TICK" ] )
    cf.insert_link( "link_1", "Code",         [ eto.make_measurement ] )
+   cf.insert_link( "link_2", "WaitEvent",    [ "HOUR_TICK" ] )
    cf.insert_link( "link_3", "Reset",[])
 
-   cf.define_chain("test_generator",False)
+   cf.define_chain("test_generator",False )
    cf.insert_link( "link_1","SendEvent", ["DAY_TICK",0] )
    cf.insert_link("xxx","Log",["Sending Day Tick"])
    cf.insert_link( "link_2","WaitEvent", ["TIME_TICK"] ) 
