@@ -333,7 +333,7 @@ if __name__ == "__main__":
    instrument  =  io_control.new_instrument.Modbus_Instrument()
 
    instrument.set_ip(ip= io_server_ip, port = int(io_server_port)) 
-   linux_monitoring = construct_linux_acquisition_class( redis_handle, gm, instrument )
+   linux_monitoring = construct_linux_acquisition_class( redis_new_handle, gm, instrument )
 
 
    action       = System_Monitoring( redis_handle )
@@ -383,7 +383,7 @@ if __name__ == "__main__":
    cf.insert_link(  "link_3",  "Reset",[] )
 
 
-   cf.define_chain("linux_test",False)
+   cf.define_chain("linux_test",True)
    cf.insert_link( "linkxx","Log",["test chain start"])
    cf.insert_link( "link_0", "SendEvent",  ["MINUTE_TICK",1] )
    cf.insert_link( "link_1", "WaitEvent",  ["TIME_TICK"] )

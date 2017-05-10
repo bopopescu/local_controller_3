@@ -60,10 +60,11 @@ class Data_Acquisition(object):
        return "CONTINUE"
 
    def common_process( self, data_list , store_element ):  
-       #print "data_list",data_list
-       #print "store_element",store_element
        if len(data_list) == 0:
           return
+       print "data_list", store_element['measurement']
+       #print "store_element",store_element
+
        data_dict = {}
        for i in data_list:
            temp_data =   self.slave_interface( i)
@@ -74,10 +75,11 @@ class Data_Acquisition(object):
        data_json           = json.dumps(data_dict)
        redis_key           = store_element["measurement"]
        redis_array_length  = store_element["length"]
-       print "data_json",data_json, redis_key,redis_array_length
+       print "redis_key",redis_key,redis_array_length
+       #print "data_json",data_json, redis_key,redis_array_length
        self.redis_handle.lpush(redis_key,data_json)
        self.redis_handle.ltrim(redis_key,0,redis_array_length)
-       
+       print "print array length", self.redis_handle.llen(redis_key)
        # send data to influxdb
        self.status_queue_class.queue_message(store_element["routing_key"], data_dict )
 

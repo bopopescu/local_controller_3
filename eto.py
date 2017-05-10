@@ -3,7 +3,7 @@
 # File: eto.py
 #
 #
-#
+#redis_handle
 #
 
 
@@ -33,7 +33,9 @@ from cloud_event_queue import Cloud_Event_Queue
 ONE_DAY = 24*3600
 
 class Eto_Management(object):
-   def __init__( self, redis_handle):
+   def __init__( self, redis_handle,eto_sources,rain_sources):
+        self.eto_sources                   =  eto_sources
+        self.rain_sources                  = rain_sources
         self.redis_handle                  = redis_handle
         self.redis_old                     = redis.StrictRedis( host = '192.168.1.82', port=6379, db = 0 )
  
@@ -41,7 +43,7 @@ class Eto_Management(object):
         if self.eto_update_flag == None:
            self.eto_update_flag = 0
            self.redis_handle.hset("ETO_VARIABLES","ETO_UPDATE_FLAG",0)
-       
+        self.initialize_data_lists()       
 
 
    def check_for_eto_update( self, chainFlowHandle, chainObj, parameters, event ):
@@ -51,14 +53,45 @@ class Eto_Management(object):
            
        return "DISABLE"
       
-  
+   def initialize_data_lists( self ):
+       print "initialize_data_lists"
+       for i in self.eto_sources:
+           try:
+               data_store = i["measurement"]
+               print "eto_data_store",data_store
+               length = self.redis_handle.llen(data_store)
+               print data_store,length
+               if length == 0:
+                   self.redis_handle.lpush(data_store, "EMPTY")
+                   length = self.redis_handle.llen(data_store)
+                   print data_store,length
+
+           except:
+               self.redis_handle.lpush(data_store, "EMPTY")
+
+       for i in self.rain_sources:
+           try:
+               data_store = i["measurement"]
+               print "rain_store",data_store
+               length = self.redis_handle.llen(data_store)
+               print data_store,length
+               if length == 0:
+                   self.redis_handle.lpush(data_store, "EMPTY")
+           except:
+               self.redis_handle.lpush(data_store, "EMPTY")
+
+       
+ 
 
    def generate_new_sources( self, chainFlowHandle, chainObj, parameters, event ):
        print "generate_new_sources", event
+ 
        for i in self.eto_sources:
            data_store = i["measurement"]
+           #print "data_store",data_store
            self.redis_handle.lpush(data_store, "EMPTY")
            list_length = i["list_length"]
+           print "list_length",list_length
            self.redis_handle.ltrim(data_store,0, list_length)
 
        for i in self.rain_sources:
@@ -83,43 +116,29 @@ class Eto_Management(object):
            data_store = i["measurement"]
         
            data_value = self.redis_handle.lindex( data_store,0)
-           
-           if str(data_value) == "EMPTY":
-               flag, data = self.eto_calculators.eto_calc( i )
-               #print "flag ###################################### data",flag,data
-               if flag == True:
-                  
-                   self.redis_handle.lset( data_store, 0, json.dumps(data))
-                   self.update_integrated_eto_value(i,data )
-               else:
-                   #print "False ETO",i
-                   pass
-           else:
-               self.update_integrated_eto_value(i,json.loads(self.redis_handle.lindex( data_store, 0)))
+           flag, data = self.eto_calculators.eto_calc( i )
+           if flag == True:
+               temp = json.dumps(data)
+               self.redis_handle.lset( data_store, 0, temp)
+               self.update_integrated_eto_value(i,temp)
          
 
        for i in self.rain_sources :
            data_store = i["measurement"]
            data_value = self.redis_handle.lindex( data_store,0)
-           
-           if str(data_value) == "EMPTY":
-               flag, data = self.eto_calculators.rain_calc( i )
-               if flag == True:
-                   self.redis_handle.lset( data_store, 0, json.dumps(data ))
-                   self.update_rain_value(i,data)
-               else:
-                   #print "False RAIN",i
-                   pass          
-           else:
-             self.update_rain_value(i,json.loads(redis_handle.lindex( data_store, 0)))
-     
+           flag, data = self.eto_calculators.rain_calc( i )
+           if flag == True:
+               temp = json.dumps(data)
+               self.redis_handle.lset( data_store, 0, temp)
+               self.update_rain_value(i,temp)
            
        
        self.store_integrated_data()
        if self.integrated_eto_flag() == True:
 
            eto_data = self.get_eto_integration_data()
-           if self.eto_update_flag == False:
+           print #*************** update_flag ***************, self.eto_update_flag
+           if self.eto_update_flag == 0:
                print "made it here --------------"
                self.store_cloud_data() 
                self.update_all_bins( eto_data)
@@ -156,7 +175,7 @@ class Eto_Management(object):
                temp = float(temp)             
              except: 
 	       temp = 0
-             temp = temp + eto_data
+             temp = temp + float(eto_data)
              self.redis_old.hset( "ETO_RESOURCE",j, temp )
 
 
@@ -588,15 +607,22 @@ class Messo_Precp(object):
      return rain
      
 def construct_eto_instance( gm, redis_handle ):
-   eto = Eto_Management( redis_handle  = redis_handle)
-   eto.eto_calculators = ETO_Calculators( redis_handle )
+   
+   
 
    #
    #
    # find eto sources
    #
    #
-   eto.eto_sources = gm.match_relationship("ETO_ENTRY")
+   eto_sources = gm.match_relationship("ETO_ENTRY")
+   #
+   # find rain sources
+   # 
+   rain_sources = gm.match_relationship("RAIN_ENTRY")
+
+   eto = Eto_Management( redis_handle, eto_sources, rain_sources)
+   eto.eto_calculators = ETO_Calculators( redis_handle)
    #
    # find eto data stores
    eto.data_stores = gm.match_relationship("ETO_STORE")
@@ -608,10 +634,6 @@ def construct_eto_instance( gm, redis_handle ):
    eto_store_temp_list   = gm.form_key_list( "name", eto.data_stores )
    assert len(set(eto_source_temp_list)^set(eto_store_temp_list)) == 0, "graphical data base error"
      
-   #
-   # find rain sources
-   # 
-   eto.rain_sources = gm.match_relationship("RAIN_ENTRY")
    #
    # find rain stores
    #
@@ -646,27 +668,13 @@ def construct_eto_instance( gm, redis_handle ):
    return eto
 
 def add_eto_chains( eto, cf ):
-   cf.define_chain("test_generator",False)
-   cf.insert_link( "link_1","SendEvent", ["DAY_TICK",0] )
-   cf.insert_link( "link_2","WaitEvent", ["TIME_TICK"] ) 
-   cf.insert_link( "link_3","Enable_Chain",[["eto_make_measurements"]])
-   cf.insert_link( "link_0", "Log",          ["Enabling chain"] )
-   cf.insert_link( "link_4", "SendEvent",    [ "HOUR_TICK",0 ] )
-   cf.insert_link( "link_5","WaitEventCount", ["TIME_TICK",2,0] )
-   cf.insert_link( "link_0", "Log",          ["TIME TICK DONE"] )
-   cf.insert_link( "link_6", "Disable_Chain",[["eto_make_measurements"]])  
-   cf.insert_link( "link_0", "Log",          ["DISABLE CHAIN DONE"] )
-   cf.insert_link( "link_7","One_Step",[eto.print_result_1] )
-   cf.insert_link( "link_0", "Log",          ["DISABLE CHAIN DONE"] )
-   cf.insert_link( "link_8", "SendEvent",    [ "HOUR_TICK",0 ] )
-   cf.insert_link( "link_9","Halt",[])
-
    cf.define_chain("eto_time_window",True)
    cf.insert_link( "link_1","WaitEvent", ["DAY_TICK"] )
+   cf.insert_link(" xxx","Log",["Got Day Tick"])
    cf.insert_link( "link_2","One_Step", [ eto.generate_new_sources ])
    cf.insert_link(  "link_3","Halt",[])
 
-   cf.define_chain("enable_measurement",True)
+   cf.define_chain("enable_measurement",False)
    cf.insert_link( "link_1","WaitTodGE",["*",8,"*","*" ])    
    cf.insert_link( "link_2","Enable_Chain",[["eto_make_measurements"]])
    cf.insert_link( "link_3","WaitTodGE",["*",18,"*","*" ]) 
@@ -676,10 +684,26 @@ def add_eto_chains( eto, cf ):
 
 
    cf.define_chain("eto_make_measurements",False)
-   #cf.insert_link( "link_0", "Log",          ["Enabling chain"] )
-   cf.insert_link( "link_1", "Code",         [ eto.make_measurement ] )
+   cf.insert_link( "link_0", "Log",          ["Enabling chain"] )
    cf.insert_link( "link_2", "WaitEvent",    [ "HOUR_TICK" ] )
+   cf.insert_link( "link_1", "Code",         [ eto.make_measurement ] )
    cf.insert_link( "link_3", "Reset",[])
+
+   cf.define_chain("test_generator",False)
+   cf.insert_link( "link_1","SendEvent", ["DAY_TICK",0] )
+   cf.insert_link("xxx","Log",["Sending Day Tick"])
+   cf.insert_link( "link_2","WaitEvent", ["TIME_TICK"] ) 
+   cf.insert_link( "link_3","Enable_Chain",[["eto_make_measurements"]])
+   cf.insert_link( "link_0", "Log",          ["Enabling chain"] )
+   cf.insert_link( "link_4", "SendEvent",    [ "HOUR_TICK",0 ] )
+   cf.insert_link( "link_5","WaitEventCount", ["TIME_TICK",2,0] )
+   cf.insert_link( "link_0", "Log",          ["TIME TICK DONE"] )
+   cf.insert_link( "link_6", "Disable_Chain",[["eto_make_measurements"]])  
+   cf.insert_link( "link_0", "Log",          ["DISABLE CHAIN DONE"] )
+   #cf.insert_link( "link_7","One_Step",[eto.print_result_1] )
+   cf.insert_link( "link_0", "Log",          ["DISABLE CHAIN DONE"] )
+   cf.insert_link( "link_8", "SendEvent",    [ "HOUR_TICK",0 ] )
+   cf.insert_link( "link_9","Halt",[])
 
 
        
@@ -702,7 +726,7 @@ if __name__ == "__main__":
    data_server_ip   = data_store_nodes[0]["ip"]
    data_server_port = data_store_nodes[0]["port"]
    # find ip and port for ip server
-   
+   print "data_server_ip",data_server_ip,data_server_port
    redis_handle = redis.StrictRedis( host = data_server_ip, port=data_server_port, db = 12 )
    eto = construct_eto_instance( gm, redis_handle ) 
    #

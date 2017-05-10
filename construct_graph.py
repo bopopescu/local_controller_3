@@ -380,7 +380,7 @@ if __name__ == "__main__" :
 
    cf.add_header_node( "LINUX_DATA_ACQUISITION")
 
-   cf.add_header_node( "LINUX_HOUR_ACQUISTION",properties= {"measurement":"HOUR_LIST_STORE","length":300 , "routing_key":"linux_hour_measurement"
+   cf.add_header_node( "LINUX_HOUR_ACQUISTION",properties= {"measurement":"LINUX_HOUR_LIST_STORE","length":300 , "routing_key":"linux_hour_measurement"
 } , json_flag=True )
   
    properties = {}
@@ -402,7 +402,7 @@ if __name__ == "__main__" :
    cf.end_header_node( "LINUX_HOUR_ACQUISTION") # HOUR_ACQUISTION
 
 
-   cf.add_header_node( "LINUX_DAILY_ACQUISTION", properties= {"measurement":"DAILY_LIST_STORE","length":300, "routing_key":"linux_daily_measurement"}, json_flag=True  )
+   cf.add_header_node( "LINUX_DAILY_ACQUISTION", properties= {"measurement":"LINUX_DAILY_LIST_STORE","length":300, "routing_key":"linux_daily_measurement"}, json_flag=True  )
 
    properties = {}
    properties["modbus_remote"] = "skip_controller"
