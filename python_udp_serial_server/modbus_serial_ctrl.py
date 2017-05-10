@@ -114,7 +114,7 @@ class ModbusSerialCtrl():
           if self._try_interface( interface ,serial_interface):
              if self._try_ping(serial_interface):
                 return
-       print "made it here"
+       #print "made it here"
        raise Exception('interface_error', serial_interface )
 
    def _try_interface( self, interface, serial_interface ):

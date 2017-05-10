@@ -26,7 +26,7 @@ if __name__ == "__main__":
 
   msg_mgr.add_device( 255,    redis_handler) # This is for local server functions
 
-  print msg_mgr.ping_devices( [31] )
+#  print msg_mgr.ping_devices( [31] )
   print msg_mgr.ping_devices( [100] )
   print msg_mgr.ping_all_devices()
 

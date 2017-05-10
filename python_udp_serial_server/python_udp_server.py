@@ -17,7 +17,7 @@ class UDP_Server():
                
                self.sock.settimeout(None)  # wait for indefinite time
                input_msg, address = self.sock.recvfrom(1024) # classic modbus message is limited to 256 bytes
-	   
+	       #print "input_msg",len(input_msg)
                if input_msg != None:
                    
                    #addr = ord(input_msg[0])
@@ -26,10 +26,12 @@ class UDP_Server():
                        #print [input_msg, output_msg ]
                    else:
                        output_msg = input_msg
-                   if output_msg != None:
-                      self.sock.settimeout( self.time_out )
-                      number_sent = self.sock.sendto(output_msg,address)
-                      #print "sent byte",number_sent
+                   if output_msg == "":
+                      output_msg = "@"
+                   #print len(output_msg)
+                   self.sock.settimeout( self.time_out )
+                   number_sent = self.sock.sendto(output_msg,address)
+                   #print "sent byte",number_sent
            #except Exception as inst:
            #    print type(inst)     # the exception instance
            #    print inst.args      # arguments stored in .args

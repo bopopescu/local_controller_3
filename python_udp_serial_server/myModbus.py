@@ -107,6 +107,7 @@ class Instrument():
     """
 
     def __init__(self, port, slaveaddress, mode=MODE_RTU):
+        
         """
         if port not in _SERIALPORTS or not _SERIALPORTS[port]:
             self.serial = _SERIALPORTS[port] = serial.Serial(port=port, baudrate=BAUDRATE, parity=PARITY, bytesize=BYTESIZE, stopbits=STOPBITS, timeout=TIMEOUT)
@@ -156,9 +157,9 @@ class Instrument():
 
         New in version 0.5.
         """
-
-        if  self.close_port_after_each_call:
-            self.serial.close()
+        #print "made it here"
+        #if  self.close_port_after_each_call:
+        #    self.serial.close()
 
     def __repr__(self):
         """String representation of the :class:`.Instrument` object."""
@@ -297,7 +298,7 @@ class Instrument():
         _checkInt(numberOfDecimals, minvalue=0, maxvalue=10, description='number of decimals')
         _checkBool(signed, description='signed')
         _checkNumerical(value, description='input value')
-
+        #print "made it here"
         self._genericCommand(functioncode, registeraddress, value, numberOfDecimals, signed=signed)
 
 
@@ -1026,7 +1027,7 @@ class Instrument():
         #        format(number_of_bytes_to_read, message))
 
         #if self.close_port_after_each_call:
-        #    self.serial.open()
+        self.serial.open()
 
         #self.serial.flushInput() TODO
 
@@ -1065,11 +1066,25 @@ class Instrument():
         self.serial.write(message)
 
         # Read response
-        answer = self.serial.read(number_of_bytes_to_read)
+        answer = ""
+        for i in range( 0, 10):
+           #print "first i",i
+           new_answer = self.serial.read(number_of_bytes_to_read)
+           if len(new_answer) > 0:
+              answer = answer + new_answer
+              break 
+
+        for i in range(0,10):
+           #print "second i",i
+           new_answer = self.serial.read(number_of_bytes_to_read)
+           answer = answer + new_answer
+           if len(new_answer) ==  0:
+              break 
+            
         #_LATEST_READ_TIMES[self.serial.port] = time.time()
 
         #if self.close_port_after_each_call:
-        #    self.serial.close()
+        self.serial.close()
 
         #if sys.version_info[0] > 2:
         #    answer = str(answer, encoding='latin1')  # Convert types to make it Python3 compatible

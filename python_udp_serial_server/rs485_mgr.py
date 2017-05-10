@@ -18,8 +18,8 @@ class RS485_Mgr():
 
    def open( self, interface_parameters ):
        try:
-           
-           self.instrument = Instrument(interface_parameters["interface"],31 )  # 10 is instrument address
+           print "interface_parameters",interface_parameters
+           self.instrument = Instrument(interface_parameters["interface"],40 )  # 10 is instrument address
            print "timeout", interface_parameters["timeout"]
            self.instrument.serial.timeout = interface_parameters["timeout"]
            self.instrument.serial.parity = serial.PARITY_NONE
@@ -28,6 +28,7 @@ class RS485_Mgr():
            self.interface_parameters = interface_parameters
            return True
        except:
+           print "open return false"
            return False
        
 
@@ -41,14 +42,14 @@ class RS485_Mgr():
 
    def process_message( self, parameters, message, counters = None ):
        #print "made it to rs485"
-       for i in range(0,10):
+       for i in range(0,3):
            #print i
            try:
 
                response = ""
-               #print "message ",message
+               #print "message ",len(message)
                response =  self.instrument._communicate( message, 1024)
-               #print "response ",response
+               #print "response ",len(response)
                #print "message",[message],len(response),[response]
                if len(response  ) > 4:
                    receivedChecksum          = response[-2:]
@@ -134,9 +135,9 @@ if __name__ == "__main__":
    parameters["register_number"] =  1
    if rs485_mgr.open(interface_parameters ):
      for i in range(0,100000):
-        print i
-        print rs485_mgr.probe_register( parameters )
-        time.sleep(1)
+        #print i
+        print i,rs485_mgr.probe_register( parameters )
+        #time.sleep(.05)
      rs485_mgr.close()
       
 
