@@ -157,7 +157,7 @@ if __name__ == "__main__":
        import new_instrument
        import time
        new_instrument  =  new_instrument.Modbus_Instrument()
-       new_instrument.set_ip(ip= "192.168.1.82", port = 5005)       
+       new_instrument.set_ip(ip= "192.168.1.84", port = 5005)       
        
        psoc_moisture = PSOC_4M_MOISTURE_UNIT( new_instrument )
 

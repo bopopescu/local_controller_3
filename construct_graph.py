@@ -469,15 +469,15 @@ if __name__ == "__main__" :
    cf.end_header_node("DATA_STORE")
 
    properties = {}
-   properties["ip"] = "192.168.1.82"   
+   properties["ip"] = "192.168.1.84"   
    properties["remote_type"] = "UDP"
    properties["port"] = 5005   
    cf.add_header_node( "UDP_IO_SERVER","main_remote", properties = properties, json_flag= True )
-   
-
-   properties                = {}
-   properties["protocol"]    = "modbus_rtu"
-   properties["baud_rate"]   = 38400
+ 
+   properties                           = {}
+   properties["type"]                  = "rs485_modbus",
+   properties["interface_parameters"]  =  { "interface":None, "timeout":.05, "baud_rate":38400 }
+   properties["search_device"]         =  "satellite_1" 
    cf.add_header_node( "SERIAL_LINK","rtu_2", properties = properties, json_flag= True )
 
 
@@ -487,6 +487,7 @@ if __name__ == "__main__" :
    properties["modbus_address"] = 100
    properties["type"]           = "click_44"
    properties["function"]       = ["irrigation","flow_meter","plc_current","valve_current","switches"]
+   properties["parameters"]     = { "address":100 , "search_register":0, "register_number":1 }
    cf.add_info_node( "REMOTE_UNIT","satellite_1", properties = properties, json_flag= True )
   
   
@@ -495,6 +496,7 @@ if __name__ == "__main__" :
    properties["modbus_address"] = 125
    properties["type"]           = "click_22"
    properties["function"]       = ["irrigation"]
+   properties["parameters"]     = { "address":125 , "search_register":0 ,"register_number":1  }
    cf.add_info_node( "REMOTE_UNIT","satellite_2", properties = properties, json_flag= True )
 
   
@@ -503,6 +505,7 @@ if __name__ == "__main__" :
    properties["modbus_address"] = 170
    properties["type"]           = "click_22"
    properties["function"]       = ["irrigation"]
+   properties["parameters"]     = { "address":170 , "search_register":0, "register_number":1 }
    cf.add_info_node( "REMOTE_UNIT","satellite_3", properties =properties,  json_flag= True )
 
 
@@ -510,14 +513,8 @@ if __name__ == "__main__" :
    properties["modbus_address"] = 40
    properties["type"]           = "PSOC_4_Moisture"
    properties["function"]       = ["moisture"]
+   properties["parameters"]     =  { "address":40 , "search_register":1,"register_number":10 }
    cf.add_info_node( "REMOTE_UNIT","moisture_1", properties =properties,  json_flag= True )
-
-   properties                   = {}
-   properties["modbus_address"] = 255
-   properties["type"]           = "io_controller"
-   properties["function"]       = ["io_controller"]
-   cf.add_info_node( "REMOTE_UNIT","io_controller", properties =properties,  json_flag= True )
-
 
    cf.end_header_node("SERIAL_LINK")
    cf.end_header_node("UDP_IO_SERVER")

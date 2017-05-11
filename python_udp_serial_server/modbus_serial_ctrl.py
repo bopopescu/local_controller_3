@@ -44,11 +44,12 @@ class ModbusSerialCtrl():
    def ping_all_devices( self ):
        #print "ping all devices",self.remote_devices.keys()
        return_value = {}
-       for i in self.remote_devices.keys():
-           logical_interface         = self.remote_devices[i]["interface"]
+       for i , j, in self.remote_devices.items():
+
+           logical_interface         = j["interface"]
            handler                   = self.serial_interfaces[ logical_interface ]["handler"]
            interface_parameters      = self.serial_interfaces[ logical_interface ]["interface_parameters"]
-           parameters                = self.remote_devices[i]["parameters"]
+           parameters                = j["parameters"]
            address                   = handler.find_address( parameters )
            #print "parameters",parameters
            flag                      = handler.probe_register( parameters )
@@ -92,11 +93,13 @@ class ModbusSerialCtrl():
        return usb_interfaces
 
    def _open_modbus_logical_interfaces( self  ):
-        for i in self.serial_interfaces.keys():
-           if self.serial_interfaces[i]["interface_parameters"]["interface"] != None:
-              self._open_fixed_interface( self.serial_interfaces[i] )
+        
+        for i,j in self.serial_interfaces.items():
+           
+           if  j["interface_parameters"]["interface"] != None:
+              self._open_fixed_interface( j )
            else:
-              self._open_floating_interface( self.serial_interfaces[i] )
+              self._open_floating_interface( j )
 
  
      

@@ -159,7 +159,7 @@ class Instrument():
         """
         #print "made it here"
         #if  self.close_port_after_each_call:
-        #    self.serial.close()
+        self.serial.close()
 
     def __repr__(self):
         """String representation of the :class:`.Instrument` object."""
@@ -1062,25 +1062,26 @@ class Instrument():
         '''
         # Write message
         latest_write_time = time.time()
-
+        
         self.serial.write(message)
 
         # Read response
         answer = ""
-        for i in range( 0, 10):
+        for i in range( 0, 25):  # .5 second wait
            #print "first i",i
            new_answer = self.serial.read(number_of_bytes_to_read)
            if len(new_answer) > 0:
               answer = answer + new_answer
               break 
 
-        for i in range(0,10):
+        for i in range(0,20):  # .
            #print "second i",i
            new_answer = self.serial.read(number_of_bytes_to_read)
            answer = answer + new_answer
            if len(new_answer) ==  0:
               break 
             
+        
         #_LATEST_READ_TIMES[self.serial.port] = time.time()
 
         #if self.close_port_after_each_call:

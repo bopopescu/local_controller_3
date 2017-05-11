@@ -204,7 +204,6 @@ if __name__ == "__main__":
    io_server_ip     = io_server_nodes[0]["ip"]
    io_server_port   = io_server_nodes[0]["port"]
    # find ip and port for ip server
-
    instrument  =  io_control.new_instrument.Modbus_Instrument()
 
    instrument.set_ip(ip= io_server_ip, port = int(io_server_port))     

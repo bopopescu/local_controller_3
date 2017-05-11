@@ -1016,10 +1016,10 @@ if __name__ == "__main__":
    redis.hset("CONTROL_VARIABLES","SUSPEND","OFF")
    redis.hincrby("CONTROLLER_STATUS", "irrigation_resets") 
    alarm_queue = io_control_backup.alarm_queue.AlarmQueue( redis,"cloud_alarm_queue" )
-   io_server  =  io_control_backup.modbus_UDP_device.ModbusUDPDeviceClient(remote_devices , "192.168.1.82")
+   io_server  =  io_control_backup.modbus_UDP_device.ModbusUDPDeviceClient(remote_devices , "192.168.1.84")
    plc_click   = io_control_backup.click.PLC_Click( alarm_queue, io_server, redis, redis_dict )
 
-   modbus_control = io_control_backup.modbus_UDP_device.ModbusUDPDeviceClient( [], "192.168.1.82")
+   modbus_control = io_control_backup.modbus_UDP_device.ModbusUDPDeviceClient( [], "192.168.1.84")
    
 
    plc_map = { "CLICK":plc_click }
@@ -1033,7 +1033,7 @@ if __name__ == "__main__":
    plc_watch_dog_interface   = io_control_backup.irrigation_ctl.WatchDogControl( remote_devices, plc_map )
    plc_watch_dog             = PLC_WATCH_DOG( redis, alarm_queue,plc_watch_dog_interface )
 
-   monitor           = Monitor(redis, basic_io_control, counter_devices, analog_devices, gpio_bit_input_devices,alarm_queue, ["192.168.1.82"] )
+   monitor           = Monitor(redis, basic_io_control, counter_devices, analog_devices, gpio_bit_input_devices,alarm_queue, ["192.168.1.84"] )
    monitor.update_modbus_statistics()
 
    wd_client         = watch_dog.Watch_Dog_Client(redis, "irrigation_ctrl","irrigation control")

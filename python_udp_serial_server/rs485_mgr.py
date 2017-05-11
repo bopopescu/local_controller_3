@@ -60,15 +60,18 @@ class RS485_Mgr():
                        #print "made it here",counters
                        if counters != None:
                            counters["counts"] = counters["counts"] +1
+                       #print i,len(response)
                        return response
                    else:
                        if counters != None:
                            counters["failures"] = counters["failures"] +1
-               time.sleep(self.instrument.timeout)
+               #time.sleep(self.instrument.timeout)
            except:
+              raise
               response = ""
        if counters != None:  
            counters["total_failures"] = counters["total_failures"] +1
+       counters["counts"] = counters["counts"] +1
        return response
      
 
@@ -77,14 +80,14 @@ class RS485_Mgr():
       return parameters["address"]
 
 
-   def probe_register( self, parameters ):
+   def probe_register( self, parameters, counters = None ):
        address     = parameters["address"]
        register    = parameters["search_register"]
        number      = parameters["register_number"]
        payload     = struct.pack("<BBBBBB",address,3,(register>>8)&255,register&255,0,number)  # read register 0 1 length
        calculatedChecksum = self._calculateCrcString(payload)
        payload = payload+calculatedChecksum
-       response = self.process_message(parameters,payload )
+       response = self.process_message(parameters,payload,counters )
 
        receivedChecksum          = response[-2:]
        responseWithoutChecksum   = response[0 : len(response) - 2]
@@ -93,7 +96,8 @@ class RS485_Mgr():
        
        if return_value == True :
              return_value = address == ord(response[0])  # check address
-       
+       #else:
+       #   print "probe failure"
        return return_value
  
        
@@ -128,17 +132,21 @@ if __name__ == "__main__":
    interface_parameters = {}
    interface_parameters["interface"]   = "/dev/ttyUSB0"
    interface_parameters["baud_rate"]   = 38400
-   interface_parameters["timeout"]     = .15
+   interface_parameters["timeout"]     = .02
    parameters = {}
-   parameters["address"] = 100
+   parameters["address"] = 170
    parameters["search_register"] = 0
    parameters["register_number"] =  1
+   counters = {}
+   counters["failures"]        = 0
+   counters["counts"]          = 0
+   counters["total_failures"]  = 0
    if rs485_mgr.open(interface_parameters ):
-     for i in range(0,100000):
+     for i in range(0,100):
         #print i
-        print i,rs485_mgr.probe_register( parameters )
+        print i, rs485_mgr.probe_register( parameters,counters )
         #time.sleep(.05)
      rs485_mgr.close()
-      
+   print counters  
 
 
