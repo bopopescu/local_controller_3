@@ -32,7 +32,7 @@ from io_control.new_instrument import Modbus_Instrument
 client_driver = Modbus_Instrument()
 controller_classes = Build_Controller_Classes(client_driver)
   
-udp_ping_client = controller_classes.get_controller_class( "192.168.1.82" )
+udp_ping_client = controller_classes.get_controller_class( "192.168.1.84" )
 
 
 redis_handle    = redis.StrictRedis(redis_server_ip, redis_server_port  , redis_server_db)

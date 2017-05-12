@@ -68,14 +68,14 @@ class Generate_IO_System:
 if __name__ == "__main__":
 
    generate = Generate_IO_System(["CLICK","MOISTURE"])
-   generate.add_io_controller("192.168.1.82","192.168.1.82" )
+   generate.add_io_controller("192.168.1.82","192.168.1.84" )
    print generate.list_controller_ip()
    generate.add_slave("Main","CLICK",100)
    generate.add_slave("Satellite_1","CLICK",125)
    generate.add_slave("Satellite_2","CLICK",170)
    generate.add_slave("Moisture_1","MOISTURE",40)
    print generate.list_all_slaves()
-   print generate.list_slaves_by_fields( {"type":"CLICK","ip":"192.168.1.82"})
+   print generate.list_slaves_by_fields( {"type":"CLICK","ip":"192.168.1.84"})
    print generate.list_slaves_by_fields( {"type":"MOISTURE"})
 
 

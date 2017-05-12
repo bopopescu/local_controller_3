@@ -8,8 +8,7 @@ if __name__ == "__main__":
    import   python_udp_serial_server.python_udp_server
    import   construct_graph
 
-   msg_mgr         =  python_udp_serial_server.msg_manager.MessageManager()
-   redis_handler   =  python_udp_serial_server.modbus_redis_mgr.ModbusRedisServer(msg_mgr)
+   
 
   
 
@@ -32,7 +31,12 @@ if __name__ == "__main__":
    serial_link = {}
    serial_link[temp_link["name"]] = temp_link  
    
-  
+   msg_mgr         =  python_udp_serial_server.msg_manager.MessageManager()
+   print "temp_link",temp_link
+   redis_host      =  udp_io_server["redis_host"]
+   redis_db        =  int(udp_io_server["redis_db"])
+   redis_handler   =  python_udp_serial_server.modbus_redis_mgr.ModbusRedisServer( message_handler= msg_mgr, host = redis_host , redis_db = redis_db )
+
 
    modbus_serial_ctrl  = python_udp_serial_server.modbus_serial_ctrl.ModbusSerialCtrl( serial_link, remote_units, msg_mgr)
 

@@ -46,7 +46,7 @@ if __name__ == "__main__":
   import msg_manager
 
   msg_mgr         = msg_manager.MessageManager()
-  redis_handler   =  modbus_redis_mgr.ModbusRedisServer(msg_mgr)
+  redis_handler   =  modbus_redis_mgr.ModbusRedisServer(msg_mgr, redis)
 
   rs485_interface_1 = rs485_mgr.RS485_Mgr()
   rs485_interface_2 = rs485_mgr.RS485_Mgr()

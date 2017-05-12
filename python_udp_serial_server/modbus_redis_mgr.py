@@ -15,8 +15,8 @@ import json
 
 
 class ModbusRedisServer():  # manages the local functions of io server
-   def __init__(self, message_handler, redis_db = 0 ):
-       self.redis            = redis.StrictRedis( host = "127.0.0.1", port=6379, db = redis_db )
+   def __init__(self, message_handler,host = "127.0.0.1", redis_db = 0 ):
+       self.redis_handle            = redis.StrictRedis( host , port=6379, db = redis_db )
        self.message_handler = message_handler
        self.commands              = {}
        self.commands[255]         = self.set_redis_registers 
@@ -29,13 +29,13 @@ class ModbusRedisServer():  # manages the local functions of io server
    def set_redis_registers( self, json_object ):
        keys = json_object.keys()
        for i in keys:
-           self.redis.set( i, json_object[i] )
+           self.redis_handle.set( i, json_object[i] )
        return None
 
    def read_redis_registers( self, json_object ):
       return_dict = {}
       for i in json_object:
-          return_dict[i] = self.redis.get(i)
+          return_dict[i] = self.redis_handle.get(i)
       return return_dict
 
    def counter_functions( self, json_object ):

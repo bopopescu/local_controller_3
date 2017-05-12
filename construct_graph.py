@@ -472,6 +472,8 @@ if __name__ == "__main__" :
    properties["ip"] = "192.168.1.84"   
    properties["remote_type"] = "UDP"
    properties["port"] = 5005   
+   properties["redis_host"] = "192.168.1.84"
+   properties["redis_db"]   = 0
    cf.add_header_node( "UDP_IO_SERVER","main_remote", properties = properties, json_flag= True )
  
    properties                           = {}

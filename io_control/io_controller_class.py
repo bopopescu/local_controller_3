@@ -32,6 +32,7 @@ class IO_Controller_Class(object):
 
 
     def ping_device( self,  address_list ):
+        #print "ping device",self.ip,self.ip,self.port,address_list
         self.new_instrument.set_ip( self.ip, self.port )
         return self.new_instrument.ping_device( address_list )
        
@@ -62,8 +63,10 @@ class Build_Controller_Classes(object):
           temp_json= self.redis_handle.hmget( "IO_CONTROLLER_HASH",i )
  
           temp_data = json.loads(temp_json[0])
-          temp_class = IO_Controller_Class( temp_data["name"], new_instrument, temp_data["ip"], temp_data["port"] )
-          self.controller_classes[temp_data["ip"] ] = temp_class
+          temp_class = IO_Controller_Class( temp_data["name"], new_instrument, "192.168.1.84", 5005 )
+          print 'temp_data["ip"]',temp_data["ip"]
+          #self.controller_classes[temp_data["ip"] ] = temp_class
+          self.controller_classes["192.168.1.84"] = temp_class
 
    def get_controller_class( self, ip ):
        try:
