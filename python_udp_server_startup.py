@@ -35,7 +35,7 @@ if __name__ == "__main__":
    print "temp_link",temp_link
    redis_host      =  udp_io_server["redis_host"]
    redis_db        =  int(udp_io_server["redis_db"])
-   redis_handler   =  python_udp_serial_server.modbus_redis_mgr.ModbusRedisServer( message_handler= msg_mgr, host = redis_host , redis_db = redis_db )
+   redis_handler   =  python_udp_serial_server.modbus_redis_mgr.ModbusRedisServer( message_handler= msg_mgr, host = "localhost" , redis_db = redis_db )
 
 
    modbus_serial_ctrl  = python_udp_serial_server.modbus_serial_ctrl.ModbusSerialCtrl( serial_link, remote_units, msg_mgr)
