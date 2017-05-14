@@ -673,7 +673,7 @@ def add_eto_chains( eto, cf ):
    cf.insert_link( "link_1","WaitEvent", ["DAY_TICK"] )
    cf.insert_link(" xxx","Log",["Got Day Tick"])
    cf.insert_link( "link_2","One_Step", [ eto.generate_new_sources ])
-   cf.insert_link(  "link_3","Halt",[])
+   cf.insert_link(  "link_3","Reset",[])
 
    cf.define_chain("enable_measurement",True)
    cf.insert_link( "link_1","WaitTodGE",["*",8,"*","*" ])    
