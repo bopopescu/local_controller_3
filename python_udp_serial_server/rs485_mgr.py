@@ -57,21 +57,22 @@ class RS485_Mgr():
                    calculatedChecksum = self._calculateCrcString(responseWithoutChecksum)
                    #print "crc",[receivedChecksum, calculatedChecksum], ord(message[0]),parameters["address"]
                    if (receivedChecksum == calculatedChecksum) and (ord(message[0]) == parameters["address"] ): # check checksum
-                       #print "made it here",counters
-                       if counters != None:
-                           counters["counts"] = counters["counts"] +1
+                       #print "made it here",#
+                       #if counters != None:
+                       #    counters["counts"] = counters["counts"] +1
                        #print i,len(response)
                        return response
                    else:
-                       if counters != None:
-                           counters["failures"] = counters["failures"] +1
+                       pass
+                       #if counters != None:
+                       #    counters["failures"] = counters["failures"] +1
                #time.sleep(self.instrument.timeout)
            except:
               raise
               response = ""
-       if counters != None:  
-           counters["total_failures"] = counters["total_failures"] +1
-       counters["counts"] = counters["counts"] +1
+       #if counters != None:  
+       #    counters["total_failures"] = counters["total_failures"] +1
+       #counters["counts"] = counters["counts"] +1
        return response
      
 

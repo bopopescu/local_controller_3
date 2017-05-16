@@ -1005,7 +1005,7 @@ if __name__ == "__main__":
    #ir_ctl = Irrigation_Control("/media/mmc1/app_data_files","/media/mmc1/system_data_files")
    from data_management.configuration import *
 
-   redis                     = redis.StrictRedis( host = '192.168.1.82', port=6379, db = 0 )
+   redis                     = redis.StrictRedis( host = '192.168.1.84', port=6379, db = 0 )
    app_files        =  load_files.APP_FILES(redis)     
    sys_files        =  load_files.SYS_FILES(redis)
    redis_dict  = {}

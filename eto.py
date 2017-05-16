@@ -37,7 +37,7 @@ class Eto_Management(object):
         self.eto_sources                   =  eto_sources
         self.rain_sources                  = rain_sources
         self.redis_handle                  = redis_handle
-        self.redis_old                     = redis.StrictRedis( host = '192.168.1.82', port=6379, db = 0 )
+        self.redis_old                     = redis.StrictRedis( host = '192.168.1.84', port=6379, db = 0 )
  
         self.eto_update_flag               = int(self.redis_handle.hget("ETO_VARIABLES","ETO_UPDATE_FLAG"))
         if self.eto_update_flag == None:
@@ -681,6 +681,7 @@ def add_eto_chains( eto, cf ):
    cf.insert_link( "link_3","WaitTodGE",["*",18,"*","*" ]) 
    cf.insert_link( "link_4","One_Step", [ eto.check_for_eto_update ] )
    cf.insert_link( "link_5", "Disable_Chain",[["eto_make_measurements"]])
+   cf.insert_link( "link_2", "WaitEvent",    [ "HOUR_TICK" ] )
    cf.insert_link( "link_6", "Reset", [] )
 
 

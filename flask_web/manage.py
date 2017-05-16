@@ -111,8 +111,21 @@ eto_measurement    = temp[0]["measurement"]
 temp = gm.match_relationship("RAIN_SOURCES")
 rain_measurement    =  temp[0]["measurement"]
 
+interfaces = []
+remotes = {}
+remote_interfaces = gm.match_relationship("UDP_IO_SERVER")
+for i in remote_interfaces:
 
+  interfaces.append(i["ip"])
 
+remote_units = gm.match_relationship("REMOTE_UNIT")
+remotes[ interfaces[0]] =[]
+
+for i in remote_units:
+   remotes[interfaces[0]].append(i["modbus_address"])
+
+print interfaces
+print remotes
 
 
 
@@ -362,10 +375,11 @@ def ping_modbus_devie():
    param            = request.get_json()
    interface        = param["interface"] 
    remote           = param["remote"]
+   print "ping",remote
    temp = udp_ping_client.ping_device(  [ remote ] )
    temp1  = json.loads( temp[1] )
    
-   #print "temp1",temp1
+   print "temp1",temp1
    if temp1[0]["result"] == True :
          return_value = "ping received for remote: "+remote
    else:
@@ -792,10 +806,7 @@ def modbus_statistics():
 @app.route('/modbus_ping',methods=["GET"])
 @authDB.requires_auth
 def modbus_ping():
-       interfaces = json.loads(redis_handle.get("MODBUS_INTERFACES"))
-       remotes = {}
-       for i in interfaces:
-           remotes[i] = redis_handle.hkeys( "MODBUS_STATISTICS:"+i )
+        
        json_interfaces = json.dumps(interfaces)
        json_remotes = json.dumps( remotes )
        print json_interfaces

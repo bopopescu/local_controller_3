@@ -193,7 +193,7 @@ class Legacy_Redis_DB_Issues( object):
        redis_host  = redis_config.get("REDIS_SERVER_IP")
        redis_port  = redis_config.get("REDIS_SERVER_PORT")
        redis_db    = redis_config.get("REDIS_SERVER_DB")
-       #print "redis",redis_host,redis_port,redis_db
+       print "redis",redis_host,redis_port,redis_db
        redis_handle = redis.StrictRedis( redis_host, redis_port, redis_db )
 
    def transfer_flow( self, tag, value, parameters ):
