@@ -353,13 +353,12 @@ if __name__ == "__main__" :
 
    cf.add_header_node( "HOUR_ACQUISTION",properties= {"measurement":"HOUR_LIST_STORE","length":300 , "routing_key":"HOUR_ACQUISTION"} , json_flag=True )
    properties = {}
-   properties["modbus_remote"] = "io_controller"
+   properties["modbus_remote"] = "skip_controller"
    properties["parameters"]   = []
-   properties["m_tag"]        = "modbus_statistics"
+   properties["m_tag"]        = "no_controller"
    properties["init_tag"]     = ["clear_daily_modbus_statistics"]
    properties["exec_tag"]     = ["accumulate_daily_modbus_statistics"]
-   cf.add_info_node( "HOUR_ELEMENT","MODBUS_STATISTICS",properties=properties,json_flag=True )
-   #cf.add_info_node( "HOUR_ELEMENT","PI_TEMPERATURE",properties={"units":"Deg F" }, json_flag = True )
+   cf.add_info_node( "HOUR_ELEMENT","MODBUS_STATISTICS",properties=properties,json_flag=True ) 
    cf.end_header_node("HOUR_ACQUISTION") # HOUR_ACQUISTION
 
 

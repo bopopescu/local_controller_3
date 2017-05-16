@@ -137,7 +137,7 @@ class Data_Acquisition(object):
        #print "list_item",type(list_item),list_item
        try:
            remote = list_item["modbus_remote"]
-           #print "remote",remote
+           print "remote",remote
            if remote != "skip_controller":
                 slave_element = self.slave_dict[remote]
                 slave_class   = slave_element["class"]
@@ -172,6 +172,7 @@ class Modbus_Statistics( object ):
        return self.daily_stat
 
    def accumulate_statistics( self, tag, input_value, parameters ):
+       return
        #print "###############",input_value[1]
        value = json.loads(input_value[1])
        for j in value.keys():
