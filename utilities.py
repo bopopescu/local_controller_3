@@ -311,12 +311,6 @@ if __name__ == "__main__":
 
    delete_cimis_email = Delete_Cimis_Email(cimis_email_data)
 
-   redis_config = redis.StrictRedis(host='localhost', port=6379, db=2)
-   redis_host  = redis_config.get("REDIS_SERVER_IP")
-   redis_port  = redis_config.get("REDIS_SERVER_PORT")
-   redis_db    = redis_config.get("REDIS_SERVER_DB")
-   redis_handle = redis.StrictRedis( redis_host, redis_port, redis_db )
-
    data_store_nodes = gm.find_data_stores()
    io_server_nodes  = gm.find_io_servers()
   
@@ -324,6 +318,9 @@ if __name__ == "__main__":
    data_server_ip   = data_store_nodes[0]["ip"]
    data_server_port = data_store_nodes[0]["port"]
    redis_new_handle = redis.StrictRedis( host = data_server_ip, port=data_server_port, db = 12 )
+
+   redis_handle = redis.StrictRedis( host = data_server_ip, port=data_server_port, db = 0 )
+
 
 
    io_server_ip     = io_server_nodes[0]["ip"]

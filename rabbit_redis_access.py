@@ -6,7 +6,7 @@ import time
 import os
 import redis
 import logging
-
+import construct_graph
 global connection
 
 
@@ -270,22 +270,30 @@ class Remote_Interface_server():
 
   
 if __name__ == "__main__":
-   redis_startup       = redis.StrictRedis( host = "localhost", port=6379, db = 2 )
    
-   redis_password_ip = redis_startup.get("PASSWORD_SERVER_IP")
-   redis_password_db = redis_startup.get("PASSWORD_SERVER_DB")
-   redis_password_port = redis_startup.get("PASSWORD_SERVER_PORT")
-   redis_handle        = redis.StrictRedis( redis_password_ip, 6379, redis_password_db )
+   gm = construct_graph.Graph_Management("PI_1","main_remote","LaCima_DataStore")
+   #
+   # Now Find Data Stores
+   #
+   #
+   #
+   data_store_nodes = gm.find_data_stores()
+   # find ip and port for redis data store
+   data_server_ip   = data_store_nodes[0]["ip"]
+   data_server_port = data_store_nodes[0]["port"]
+   # find ip and port for ip server
+   print "data_server_ip",data_server_ip,data_server_port
+   redis_handle = redis.StrictRedis( host = data_server_ip, port=data_server_port, db = 2 )
    
 
-   user_name = redis_startup.hget("redis_gateway", "user_name" )
-   password  = redis_startup.hget("redis_gateway", "password"  )
-   vhost     = redis_startup.hget("redis_gateway", "vhost"     )
-   queue     = redis_startup.hget("redis_gateway", "queue"     )
-   port      = int(redis_startup.hget("redis_gateway", "port"  ))
-   server    = redis_startup.hget("redis_gateway", "server"    )
+   user_name = redis_handle.hget("redis_gateway", "user_name" )
+   password  = redis_handle.hget("redis_gateway", "password"  )
+   vhost     = redis_handle.hget("redis_gateway", "vhost"     )
+   queue     = redis_handle.hget("redis_gateway", "queue"     )
+   port      = int(redis_handle.hget("redis_gateway", "port"  ))
+   server    = redis_handle.hget("redis_gateway", "server"    )
    
-
+   print "server",server
    logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.CRITICAL)
    
    

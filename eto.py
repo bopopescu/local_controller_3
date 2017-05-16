@@ -135,7 +135,6 @@ class Eto_Management(object):
        
        self.store_integrated_data()
        if self.integrated_eto_flag() == True:
-
            eto_data = self.get_eto_integration_data()
            print #*************** update_flag ***************, self.eto_update_flag
            
@@ -147,12 +146,13 @@ class Eto_Management(object):
   
                      
 
-           return_value = "TERMINATE"
-       #print "return_value",return_value
+           return_value = "DISABLE"
+       print "return_value",return_value
        
        return return_value             
 
    def update_all_bins( self, eto_data):
+
        assert (self.eto_update_flag == 0) ,"Bad logic"
        if self.eto_update_flag == 1:
           return  # protection for production code
@@ -170,13 +170,16 @@ class Eto_Management(object):
 
    def update_sprinklers_time_bins_old( self, eto_data ): 
         keys = self.redis_old.hkeys( "ETO_RESOURCE" )
+        print "keys",keys
         for j in keys:
 	     try:
                temp = self.redis_old.hget( "ETO_RESOURCE", j )
                temp = float(temp)             
              except: 
+               print "exception"
 	       temp = 0
              temp = temp + float(eto_data)
+             print "j===========",j,temp
              self.redis_old.hset( "ETO_RESOURCE",j, temp )
 
 

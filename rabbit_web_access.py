@@ -6,13 +6,14 @@ import time
 import os
 import redis
 import logging
+import construct_graph
 
 global connection
 from web_access import *
 
 class Remote_Interface_server():
 
-   def __init__(self,redis ):
+   def __init__(self ):
         self.redis                 = redis
         self.cmds                  = {}
         self.cmds["GET_WEB_PAGE"]  = self.get_web_page
@@ -87,26 +88,33 @@ def on_request(ch, method, props, body):
 
   
 if __name__ == "__main__":
-   redis_startup       = redis.StrictRedis( host = "127.0.0.1", port=6379, db = 2 )
 
-   user_name = redis_startup.hget("web_gateway", "user_name" )
-   password  = redis_startup.hget("web_gateway", "password"  )
-   vhost     = redis_startup.hget("web_gateway", "vhost"     )
-   queue     = redis_startup.hget("web_gateway", "queue"     )
-   port      = int(redis_startup.hget("web_gateway", "port"  ))
-   server    = redis_startup.hget("web_gateway", "server"    )
+   gm = construct_graph.Graph_Management("PI_1","main_remote","LaCima_DataStore")
+   #
+   # Now Find Data Stores
+   #
+   #
+   #
+   data_store_nodes = gm.find_data_stores()
+   # find ip and port for redis data store
+   data_server_ip   = data_store_nodes[0]["ip"]
+   data_server_port = data_store_nodes[0]["port"]
+   # find ip and port for ip server
+   print "data_server_ip",data_server_ip,data_server_port
+   redis_handle = redis.StrictRedis( host = data_server_ip, port=data_server_port, db = 2 )
+
+   user_name = redis_handle.hget("web_gateway", "user_name" )
+   password  = redis_handle.hget("web_gateway", "password"  )
+   vhost     = redis_handle.hget("web_gateway", "vhost"     )
+   queue     = redis_handle.hget("web_gateway", "queue"     )
+   port      = int(redis_handle.hget("web_gateway", "port"  ))
+   server    = redis_handle.hget("web_gateway", "server"    )
 
    web_client = Web_Client_Interface( )
    logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.CRITICAL)
    
-   redis_password_ip = redis_startup.get("PASSWORD_SERVER_IP")
-   redis_password_db = redis_startup.get("PASSWORD_SERVER_DB")
-   redis_password_port = redis_startup.get("PASSWORD_SERVER_PORT")
-   redis_handle        = redis.StrictRedis( redis_password_ip, 6379, redis_password_db )
-
    
-   
-   rt = Remote_Interface_server(redis_handle )
+   rt = Remote_Interface_server()
    credentials = pika.PlainCredentials( user_name, password )
    parameters = pika.ConnectionParameters(server,
                                            port,  #ssl port

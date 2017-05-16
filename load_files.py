@@ -19,11 +19,16 @@ from os.path import isfile, join
 import base64
 import redis
 import json
+import construct_graph
 
-redis_config = redis.StrictRedis(host='localhost', port=6379, db=0)
-redis_host  = redis_config.get("REDIS_SERVER")
 
-redis                     = redis.StrictRedis( redis_host, port=6379, db = 0 )
+graph_management = construct_graph.Graph_Management("PI_1","main_remote","LaCima_DataStore")
+data_store_nodes = graph_management.find_data_stores()
+# find ip and port for redis data store
+data_server_ip   = data_store_nodes[0]["ip"]
+data_server_port = data_store_nodes[0]["port"]
+
+redis                     = redis.StrictRedis( data_server_ip, data_server_port, db = 0 )
 app_files = "/home/pi/new_python/app_data_files/"
 sys_files = "/home/pi/new_python/system_data_files/"
 

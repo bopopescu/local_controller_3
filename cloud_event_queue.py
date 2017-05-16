@@ -4,6 +4,7 @@ import json
 import base64
 import redis
 import sys
+import construct_graph
 
 class Cloud_Event_Queue():
    def __init__(self,redis):
@@ -24,15 +25,17 @@ class Cloud_Event_Queue():
           
 
 if __name__ == "__main__":
-   redis_config = redis.StrictRedis(host='localhost', port=6379, db=2)
-   redis_password_ip = redis_config.get("PASSWORD_SERVER_IP")
-   redis_password_db = redis_config.get("PASSWORD_SERVER_DB")
-   redis_password_port = redis_config.get("PASSWORD_SERVER_PORT")
-   redis_handle        = redis.StrictRedis( redis_password_ip, 6379, redis_password_db )
+   graph_management = construct_graph.Graph_Management("PI_1","main_remote","LaCima_DataStore")
+   data_store_nodes = graph_management.find_data_stores()
+  
+   # find ip and port for redis data store
+   data_server_ip   = data_store_nodes[0]["ip"]
+   data_server_port = data_store_nodes[0]["port"]
+   redis_handle = redis.StrictRedis( host = data_server_ip, port=data_server_port, db = 12 )
    cloud_event_queue = Cloud_Event_Queue( redis_handle )
    event   =  sys.argv[1]
    process =  sys.argv[2]
    #print "event",event,"process",process
-   data = { "action":"reboot" ,"process":process}
+   data = { "action":"reboot" ,"process":process }
    cloud_event_queue.store_event_queue( event,data )
-   redis_handle.hincrby("CONTROLLER_STATUS", "system_resets")    
+   redis_handle.hincrby("PROCESS_REBOOTS", process )    

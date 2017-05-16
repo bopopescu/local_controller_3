@@ -34,7 +34,6 @@ controller_classes = Build_Controller_Classes(client_driver)
   
 udp_ping_client = controller_classes.get_controller_class( "192.168.1.84" )
 
-
 redis_handle    = redis.StrictRedis(redis_server_ip, redis_server_port  , redis_server_db)
 sys_files = load_files.SYS_FILES(redis_handle)
 app_files = load_files.APP_FILES(redis_handle)
