@@ -43,7 +43,7 @@ class RS485_Mgr():
    def process_message( self, parameters, message, counters = None ):
        #print "made it to rs485"
        for i in range(0,5):
-           print i
+           #print i
            try:
 
                response = ""
@@ -68,7 +68,7 @@ class RS485_Mgr():
                    counters["failures"] = counters["failures"] +1
                
            except:
-              raise
+              
               response = ""
        if counters != None:  
            counters["total_failures"] = counters["total_failures"] +1
