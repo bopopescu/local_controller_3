@@ -48,7 +48,7 @@ if __name__ == "__main__":
 
    msg_mgr.add_device( 255,    redis_handler) # This is for local server function
    print msg_mgr.ping_devices( [100] )
-   print msg_mgr.ping_all_devices()
+   #print msg_mgr.ping_all_devices()
    udp_server = python_udp_serial_server.python_udp_server.UDP_Server()
    udp_server.process_msg(msg_mgr)
 

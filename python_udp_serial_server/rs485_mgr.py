@@ -42,13 +42,14 @@ class RS485_Mgr():
 
    def process_message( self, parameters, message, counters = None ):
        #print "made it to rs485"
-       for i in range(0,3):
-           #print i
+       for i in range(0,5):
+           print i
            try:
 
                response = ""
                #print "message ",len(message)
                response =  self.instrument._communicate( message, 1024)
+               time.sleep(.05)
                #print "response ",len(response)
                #print "message",[message],len(response),[response]
                if len(response  ) > 4:
@@ -62,16 +63,17 @@ class RS485_Mgr():
                            counters["counts"] = counters["counts"] +1
                        #print i,len(response)
                        return response
-                   else:
-                       if counters != None:
-                          counters["retries"] = counters["retries"] +1
-               #time.sleep(self.instrument.timeout)
+              
+               if counters != None:
+                   counters["failures"] = counters["failures"] +1
+               
            except:
               raise
               response = ""
        if counters != None:  
            counters["total_failures"] = counters["total_failures"] +1
            counters["counts"] = counters["counts"] +1
+       
        return response
      
 
@@ -142,7 +144,7 @@ if __name__ == "__main__":
    counters["counts"]          = 0
    counters["total_failures"]  = 0
    if rs485_mgr.open(interface_parameters ):
-     for i in range(0,100):
+     for i in range(0,10):
         #print i
         print i, rs485_mgr.probe_register( parameters,counters )
         #time.sleep(.05)
