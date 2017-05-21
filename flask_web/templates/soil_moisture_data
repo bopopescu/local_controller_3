@@ -5,7 +5,7 @@
 	<link rel="shortcut icon" href="/static/favicon.ico">
         
 
-        <title>'Soil Moisture Data</title>
+        <title>Soil Moisture Data</title>
 
         {% include 'include_files.html' %}
         {% set header_name = 'Soil Moisture Data' %}
@@ -27,7 +27,7 @@
     </h4>
 
 <div id="data" >
-test data  
+  
 </div>
 
 </div><!-- /page -->

@@ -93,9 +93,7 @@ class PSOC_BASE_4M():
      
        
        
-        
-   def set_instrument( self, instrument ):
-       self.instrument = instrument
+ 
 
 
    # 
@@ -176,29 +174,29 @@ if __name__ == "__main__":
        import time
        instrument  =  new_instrument.Modbus_Instrument()
        instrument.set_ip(ip= "192.168.1.84",port = 5005)
-       #new_instrument.set_ip(ip= "192.168.1.82", port = 5005)       
+       #new_instrument.set_ip(ip= "192.168.1.84", port = 5005)       
        psoc_4m = PSOC_BASE_4M( instrument, 0x201 )
        #for i in range(0,100):
        #   print i, psoc_4m.read_system_variables(40)
-       for i in range(0,1):
-           print  psoc_4m.read_system_variables(40)
-
-           print psoc_4m.read_time( 40 )
-           #print psoc_4m.update_current_time(40)
-           print psoc_4m.read_time( 40 )
-           print psoc_4m.clear_watch_dog_flag(40)
-           print  psoc_4m.read_system_variables(40)
        
-           print psoc_4m.set_controller_watch_dog_flag(40)
-           print  psoc_4m.read_system_variables(40)
+       print  psoc_4m.read_system_variables(100)
 
-           print psoc_4m.clear_power_on_reset(40)
-           print psoc_4m.clear_minute_rollover(40)
-           print psoc_4m.verify_unit(40)
-           print  psoc_4m.read_system_variables(40)
-           print psoc_4m.clear_watch_dog_flag(40)
-           print  psoc_4m.read_system_variables(40)
-           print psoc_4m.process_event_queue( 40, 0 )
+       print psoc_4m.read_time( 40 )
+       print psoc_4m.update_current_time(40)
+       print psoc_4m.read_time( 40 )
+       print psoc_4m.clear_watch_dog_flag(40)
+       print  psoc_4m.read_system_variables(40)
        
-           #psoc_4m.commission_modbus_address(40)
+       print psoc_4m.set_controller_watch_dog_flag(40)
+       print  psoc_4m.read_system_variables(40)
+
+       print psoc_4m.clear_power_on_reset(40)
+       print psoc_4m.clear_minute_rollover(40)
+       print psoc_4m.verify_unit(40)
+       print  psoc_4m.read_system_variables(40)
+       print psoc_4m.clear_watch_dog_flag(40)
+       print  psoc_4m.read_system_variables(40)
+       print psoc_4m.process_event_queue( 40, 0 )
+       
+       #psoc_4m.commission_modbus_address(40)
        

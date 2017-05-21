@@ -15,8 +15,8 @@ class Execute_Cf_Environment():
      old_second = time_stamp.second
      self.cf.execute_initialize()
      while True:
-       time.sleep(.01)
-       self.cf.queue_event("SUB_SECOND_TICK",10)
+       time.sleep(.1)
+       #self.cf.queue_event("SUB_SECOND_TICK",10)
        time_stamp = datetime.datetime.today()
        hour = time_stamp.hour
        minute = time_stamp.minute

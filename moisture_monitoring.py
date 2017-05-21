@@ -232,7 +232,7 @@ if __name__ == "__main__":
                     status_queue_class, moisture_app_classes, moisture_remote_classes , remote_classes )
    
 
-   moisture_class.update_moisture_readings(None,None,None, None ) #populate data
+   #moisture_class.update_moisture_readings(None,None,None, None ) #populate data
 
    #
    # Adding chains
@@ -245,7 +245,7 @@ if __name__ == "__main__":
    #cf.insert_link( "link_3", "SendEvent",    [ "DAY_TICK", 1] )
    
 
-   cf.define_chain("update_moisture_readings",True)
+   cf.define_chain("update_moisture_readings",False)
    cf.insert_link( "link_1", "WaitEventCount",    [ "MINUTE_TICK",15,0 ] )
    cf.insert_link( "link_2", "One_Step",     [  moisture_class.update_moisture_readings ] )
    cf.insert_link( "link_3", "Reset", [] )
@@ -254,18 +254,17 @@ if __name__ == "__main__":
    cf.define_chain("check_for_moisture_update",True)
    cf.insert_link( "link_1", "WaitEvent",    [ "TIME_TICK" ] )
    cf.insert_link( "link_2", "One_Step",         [ moisture_class.check_update_flag ] )
- 
    cf.insert_link( "link_4", "Reset", [] )
 
 
-   cf.define_chain("update_hour_readings",True)
+   cf.define_chain("update_hour_readings",False)
    cf.insert_link( "link_1", "WaitEvent",    [ "HOUR_TICK" ] )
    cf.insert_link( "link_2", "One_Step",         [ moisture_class.hour_update ] )
    cf.insert_link( "link_4", "Reset", [] )
 
 
   
-   cf.define_chain("update_day_readings",True)
+   cf.define_chain("update_day_readings",False)
    cf.insert_link( "link_1", "WaitEvent",    [ "DAY_TICK" ] )
    cf.insert_link( "link_2", "One_Step",         [ moisture_class.day_update ] )
    cf.insert_link( "link_4", "Reset", [] )

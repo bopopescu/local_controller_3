@@ -68,7 +68,7 @@ class RS485_Mgr():
                    counters["failures"] = counters["failures"] +1
                
            except:
-              
+              raise # serial errror              
               response = ""
        if counters != None:  
            counters["total_failures"] = counters["total_failures"] +1
@@ -136,7 +136,7 @@ if __name__ == "__main__":
    interface_parameters["baud_rate"]   = 38400
    interface_parameters["timeout"]     = .02
    parameters = {}
-   parameters["address"] = 170
+   parameters["address"] = 100
    parameters["search_register"] = 0
    parameters["register_number"] =  1
    counters = {}
@@ -144,7 +144,7 @@ if __name__ == "__main__":
    counters["counts"]          = 0
    counters["total_failures"]  = 0
    if rs485_mgr.open(interface_parameters ):
-     for i in range(0,10):
+     for i in range(0,100):
         #print i
         print i, rs485_mgr.probe_register( parameters,counters )
         #time.sleep(.05)

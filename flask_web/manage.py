@@ -894,6 +894,30 @@ def soil_moisture_plc_status():
        return render_template( "soil_moisture_plc_status" ) 
 
 
+@app.route('/view_running_process',methods=["GET"])
+@authDB.requires_auth
+def view_running_process():
+   os.system("/home/pi/new_python/python_process.bsh > tmp_file")
+   with open("tmp_file","r") as myfile:
+       data = myfile.readlines()
+   print "length of data",len(data)
+   return render_template( "view_running_processes",file_list = data ) 
+
+
+
+@app.route('/list_reboot_files',methods=["GET"])
+@authDB.requires_auth
+def list_reboot_files():
+
+   os.system("ls -l /tmp/*.errr > tmp_file")
+   data = ""
+   with open("tmp_file","r") as myfile:
+       data = myfile.readlines()
+   print "length of data",len(data)
+   return render_template( "list_reboot_files" ,file_list = data ) 
+
+
+
 display_control = []
 temp  = {}
 temp["name"]              = "Average Flow"

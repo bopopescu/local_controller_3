@@ -1268,7 +1268,7 @@ if __name__ == "__main__":
 
 
    cf.define_chain("measure_input_gpio", True )# TBD
-   cf.insert_link( "link_1",  "WaitTime",    [5,0,0,0] )
+   cf.insert_link( "link_1",  "WaitTime",    [30,0,0,0] )
    cf.insert_link( "link_2",  "One_Step",    [ monitor.measure_input_gpio ] )
    cf.insert_link( "link_3",  "Reset",       [] )
 
@@ -1353,16 +1353,17 @@ if __name__ == "__main__":
    cf.insert_link( "link_5",    "WaitTime",             [ 5,0,0,0] ) # wait 1 seconds
    cf.insert_link( "link_6",    "Reset",                [] )
 
-   cf.define_chain("monitor_master_on_switch",True) #TBD
-   cf.insert_link("link_1",  "WaitTime",             [5,0,0,0] ) 
-   cf.insert_link("link_2",  "Code",                 [ detect_on_switch_on ] )
-   cf.insert_link("link_3",  "One_Step",             [ clear_redis_set_keys ] )
-   cf.insert_link("link_4",  "Enable_Chain",         [["manual_master_valve_on_chain"]] )
-   cf.insert_link("link_5",  "Enable_Chain",         [["manual_master_valve_off_chain"]] )
-   cf.insert_link("link_6",  "WaitTime",             [3600*8,0,0,0] ) # wait 8 hours
-   cf.insert_link("link_7",  "Disable_Chain",        [["manual_master_valve_on_chain"]] )
-   cf.insert_link("link_8",  "One_Step",             [ irrigation_io_control.turn_off_master_valves ])   
-   cf.insert_link("link_9",  "Reset",                [])
+   cf.define_chain("monitor_master_on_switch",False) #TBD
+   #cf.insert_link("link_1",  "WaitTime",             [5,0,0,0] ) 
+   #cf.insert_link("link_2",  "Code",                 [ detect_on_switch_on ] )
+   #cf.insert_link("link_3",  "One_Step",             [ clear_redis_set_keys ] )
+   #cf.insert_link("link_4",  "Enable_Chain",         [["manual_master_valve_on_chain"]] )
+   #cf.insert_link("link_5",  "Enable_Chain",         [["manual_master_valve_off_chain"]] )
+   #cf.insert_link("link_6",  "WaitTime",             [3600*8,0,0,0] ) # wait 8 hours
+   #cf.insert_link("link_7",  "Disable_Chain",        [["manual_master_valve_on_chain"]] )
+   #cf.insert_link("link_8",  "One_Step",             [ irrigation_io_control.turn_off_master_valves ])   
+   #cf.insert_link("link_9",  "Reset",                [])
+   cf.insert_link("link_9",  "Halt",                [])
 
 
    cf.define_chain("monitor_master_on_web",False) #TBD
@@ -1380,14 +1381,14 @@ if __name__ == "__main__":
 
    cf.define_chain("manual_master_valve_off_chain",False ) #TBD
    cf.insert_link("link_1",    "WaitTime",             [5,0,0,0] ) 
-   cf.insert_link("link_1",    "Code",                 [ detect_switch_off ] )
-   cf.insert_link("link_2",    "One_Step",             [ clear_redis_clear_keys ] )
-   cf.insert_link("link_3",    "One_Step",             [ clear_redis_set_keys ] )
-   cf.insert_link("link_4",    "Enable_Chain",         [["monitor_master_on_switch"]] ) 
-   cf.insert_link("link_5",    "Disable_Chain",        [["manual_master_valve_on_chain"]] ) 
-   cf.insert_link("link_6",    "Disable_Chain",        [["monitor_master_on_web"]] )     
-   cf.insert_link("link_7",    "One_Step",             [ irrigation_io_control.turn_off_master_valves ] )# turn turn on master valve
-   cf.insert_link("link_8",    "One_Step",             [ irrigation_io_control.turn_off_cleaning_valves ] )# turn turn off master valve
+   #cf.insert_link("link_1",    "Code",                 [ detect_switch_off ] )
+   #cf.insert_link("link_2",    "One_Step",             [ clear_redis_clear_keys ] )
+   #cf.insert_link("link_3",    "One_Step",             [ clear_redis_set_keys ] )
+   #cf.insert_link("link_4",    "Enable_Chain",         [["monitor_master_on_switch"]] ) 
+   #cf.insert_link("link_5",    "Disable_Chain",        [["manual_master_valve_on_chain"]] ) 
+   #cf.insert_link("link_6",    "Disable_Chain",        [["monitor_master_on_web"]] )     
+   #cf.insert_link("link_7",    "One_Step",             [ irrigation_io_control.turn_off_master_valves ] )# turn turn on master valve
+   #cf.insert_link("link_8",    "One_Step",             [ irrigation_io_control.turn_off_cleaning_valves ] )# turn turn off master valve
    cf.insert_link("link_6",    "Disable_Chain",        [["manual_master_valve_off_chain"]] )
 
 
@@ -1425,8 +1426,8 @@ if __name__ == "__main__":
 
    cf.define_chain("plc_watch_dog", True ) #TBD
    #cf.insert_link( "link_1",  "Log",        ["plc watch dog thread"] )
-   cf.insert_link( "link_2",  "One_Step",   [ plc_watch_dog.read_mode ] )
-   cf.insert_link( "link_3",  "One_Step",   [ plc_watch_dog.read_mode_switch ] ) 
+   #cf.insert_link( "link_2",  "One_Step",   [ plc_watch_dog.read_mode ] )
+   #cf.insert_link( "link_3",  "One_Step",   [ plc_watch_dog.read_mode_switch ] ) 
    cf.insert_link( "link_4",  "One_Step",   [ plc_watch_dog.read_wd_flag  ]      )
    cf.insert_link( "link_5",  "One_Step",   [ plc_watch_dog.write_wd_flag ]      )
    cf.insert_link( "link_1", "WaitTime",    [ 30,0,0,0] ) # wait 1 seconds
