@@ -914,9 +914,13 @@ def list_reboot_files():
    with open("tmp_file","r") as myfile:
        data = myfile.readlines()
    print "length of data",len(data)
-   return render_template( "list_reboot_files" ,file_list = data ) 
-
-
+   return render_template( "list_reboot_files" ,file_list = data )
+ 
+@app.route('/reboot_system',methods=["GET"])
+@authDB.requires_auth
+def reboot_system():
+   os.system("sudo reboot")
+   return "system rebooted"
 
 display_control = []
 temp  = {}
