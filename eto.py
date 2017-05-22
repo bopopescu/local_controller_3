@@ -40,6 +40,8 @@ class Eto_Management(object):
         self.redis_old                     = redis.StrictRedis( host = '192.168.1.84', port=6379, db = 0 )
  
         self.eto_update_flag               = int(self.redis_handle.hget("ETO_VARIABLES","ETO_UPDATE_FLAG"))
+         
+
         if self.eto_update_flag == None:
            self.eto_update_flag = 0
            self.redis_handle.hset("ETO_VARIABLES","ETO_UPDATE_FLAG",0)
@@ -85,7 +87,7 @@ class Eto_Management(object):
 
    def generate_new_sources( self, chainFlowHandle, chainObj, parameters, event ):
        print "generate_new_sources", event
- 
+       self.redis_handle.hset("ETO_VARIABLES","NEW_SOURCES",time.strftime("%c"))
        for i in self.eto_sources:
            data_store = i["measurement"]
            #print "data_store",data_store
@@ -134,10 +136,13 @@ class Eto_Management(object):
            
        
        self.store_integrated_data()
+       self.redis_handle.hset("ETO_VARIABLES","INTEGRATED_FLAG",self.integrated_eto_flag())
+
        if self.integrated_eto_flag() == True:
            eto_data = self.get_eto_integration_data()
            print #*************** update_flag ***************, self.eto_update_flag
-           
+           self.redis_handle.hset("ETO_VARIABLES","UPDATE_FLAG",self.eto_update_flag)
+
            if self.eto_update_flag == 0:
                print "made it here --------------"
                self.store_cloud_data() 
