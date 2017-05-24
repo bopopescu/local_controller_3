@@ -949,6 +949,11 @@ class Monitor():
            self.redis.ltrim( "QUEUES:SPRINKLER:CURRENT:"+i,0,800)
            self.redis.hset( "CONTROL_VARIABLES",i, current )
 
+   def measure_current_a( self, *args ):
+       for i in  analog_devices.keys():
+           current = self.basic_io_control.get_analog( i )
+           self.redis.hset( "CONTROL_VARIABLES",i, current )
+
        
 
 class PLC_WATCH_DOG():
@@ -959,16 +964,23 @@ class PLC_WATCH_DOG():
        self.watch_dog_interface    = watch_dog_interface
 
    def read_wd_flag( self,*arg ):
-       return_value = self.watch_dog_interface.read_wd_flag()
-       #print "read_wd_flag",return_value
+       try:
+          return_value = self.watch_dog_interface.read_wd_flag()
+          #print "read_wd_flag",return_value
+       except:
+          pass
        return "DISABLE"
      
 
    def write_wd_flag( self,value,*arg ):
-       self.watch_dog_interface.write_wd_flag(1)
+       try:
+          self.watch_dog_interface.write_wd_flag(1)
+       except:
+           pass
        return "DISABLE"
       
    def read_mode_switch( self,value,*arg ):
+ 
        return_value = self.watch_dog_interface.read_mode_switch()
        #print "read_mode_switch",return_value
        return "DISABLE"
@@ -1255,6 +1267,8 @@ if __name__ == "__main__":
    cf.define_chain("reboot_message", True)  #tested
    cf.insert_link( "link_1",  "One_Step", [  clear_redis_set_keys ] )
    cf.insert_link( "link_2",  "One_Step", [ clear_redis_clear_keys ] )
+   cf.insert_link( "link_2",  "One_Step",   [ plc_watch_dog.read_mode ] )
+   cf.insert_link( "link_3",  "One_Step",   [ plc_watch_dog.read_mode_switch ] ) 
    cf.insert_link( "link_3",  "One_Step", [ irrigation_io_control.disable_all_sprinklers ] )
    cf.insert_link( "link_4",  "One_Step" ,[ check_for_uncompleted_sprinkler_element ] )
    cf.insert_link( "link_5",  "Terminate",  [] )
@@ -1267,14 +1281,14 @@ if __name__ == "__main__":
    cf.insert_link(  "link_5",  "Reset",      [] )
 
 
-   cf.define_chain("measure_input_gpio", True )# TBD
+   cf.define_chain("measure_input_gpio", False )# TBD
    cf.insert_link( "link_1",  "WaitTime",    [30,0,0,0] )
    cf.insert_link( "link_2",  "One_Step",    [ monitor.measure_input_gpio ] )
    cf.insert_link( "link_3",  "Reset",       [] )
 
 
    cf.define_chain("update_time_stamp", True) #tested
-   cf.insert_link( "link_1",  "WaitTime",    [15,0,0,0] )
+   cf.insert_link( "link_1",  "WaitTime",    [10,0,0,0] )
    cf.insert_link( "link_3",  "One_Step",    [ monitor.update_time_stamp ] )
    cf.insert_link( "link_4",  "Reset",       [] )
 
@@ -1451,9 +1465,17 @@ if __name__ == "__main__":
    cf.insert_link( "link_4",  "WaitTime",       [ 1,0,0,0] ) # wait 1 seconds
    cf.insert_link( "link_5",  "One_Step",       [ monitor.measure_current ] )
    cf.insert_link( "link_6",  "Code",            [ sprinkler_element.check_current ] )
-   cf.insert_link( "link_7",  "Enable_Chain",   [["monitor_irrigation_cell" ]])
+   cf.insert_link( "link_7",  "Enable_Chain",   [["monitor_irrigation_cell","monitor_current_sub" ]])
    cf.insert_link( "link_8",  "WaitEvent",      ["CELL_DONE" ] )
    cf.insert_link( "link_9",  "Reset",          [] )
+
+
+   cf.define_chain("monitor_current_sub", False )
+   cf.insert_link( "link_0",  "Log"  ,           [["monitor_current_sub chain is working"]])
+   cf.insert_link( "link_1",  "WaitTime",       [ 15,0,0,0] ) # wait 15 second
+   cf.insert_link( "link_2",  "One_Step",       [ monitor.measure_current_a ] )
+   cf.insert_link( "link_3",  "One_Step",       [ sprinkler_element.check_current ] )
+   cf.insert_link( "link_4",  "Reset",          [] )
 
 
    cf.define_chain("monitor_irrigation_cell", False ) #Tested
@@ -1462,7 +1484,7 @@ if __name__ == "__main__":
    cf.insert_link( "link_3",  "One_Step",       [ sprinkler_element.check_for_excessive_flow_rate ] )
    cf.insert_link( "link_3",  "Code",           [ sprinkler_element.monitor ] )
    cf.insert_link( "link_4",  "SendEvent",      ["CELL_DONE"] ) 
-   cf.insert_link( "link_5",  "Disable_Chain",  [["monitor_irrigation_cell" ]])
+   cf.insert_link( "link_5",  "Disable_Chain",  [["monitor_irrigation_cell","monitor_current_sub" ]])
 
 
    length = redis.llen("QUEUES:SPRINKLER:IRRIGATION_CELL_QUEUE" )
