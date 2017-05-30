@@ -206,12 +206,12 @@ class CF_Base_Interpreter():
            j["link_index"] = 1
            j["active"] = True
            self.reset_chain(  j["name"] )
-	   
+           
         else:
             j["active"] = False
-	
-	
-	
+        
+        
+        
   def execute( self ):
     while True:
        if len( self.event_queue ) > 0 :
@@ -252,37 +252,37 @@ class CF_Base_Interpreter():
      return_value     = True
    
      if active_flag == True:
-        if init_flag == True:
+       if init_flag == True:
            init_event = {}
            init_event["name"] = "INIT"
            return_value = instruction(  self,  chain,parameters,  init_event )
 
            link["init_flag"] = False
-	   #print "initialize",return_value
-        else:
+           #print "initialize",return_value
+       else:
            return_value = "CONTINUE"
            #print "no_init"
-	if (return_value != "DISABLE") and (return_value != "RESET"): 
-          temp = instruction( self, chain,parameters,event)
-          #print "temp",temp
-	  return_value = self.check_return_code( chain, link, temp)
-	  #print "chain",chain["link_index"]
-          #print "if" , return_value
-	else:
+       if (return_value != "DISABLE") and (return_value != "RESET"): 
+           temp = instruction( self, chain,parameters,event)
+           #print "temp",temp
+           return_value = self.check_return_code( chain, link, temp)
+           #print "chain",chain["link_index"]
+           #print "if" , return_value
+       else:
 
-         return_value = self.check_return_code( chain,link,return_value )
-         #print "return value",return_value	
+           return_value = self.check_return_code( chain,link,return_value )
+         #print "return value",return_value        
        
      else:
        
         link_index = link_index + 1
-	return_value = True
+        return_value = True
         chain["link_index"] = link_index
         #print "else+++",return_value
   
      #print "return_value",return_value
 
-     return return_value	     
+     return return_value             
 
 
   def queue_event( self, event_name, event_data ):
@@ -322,20 +322,20 @@ class CF_Base_Interpreter():
      if returnCode == "DISABLE" :
         #print "made it here"
         self.disable_link(  link["name"] )
-	chain["link_index"] = chain["link_index"] +1
-	return_value = True
+        chain["link_index"] = chain["link_index"] +1
+        return_value = True
         #print "chain",chain["link_index"]
      
 
      if returnCode == "RESET" :
        
-	self.reset_chain( chain["name"] )
-	chain["link_index"] = 0
-	return_value = False
+        self.reset_chain( chain["name"] )
+        chain["link_index"] = 0
+        return_value = False
     
      if returnCode == "SYSTEM_RESET" :
-        self.execute_initialize()
-        return_value = False
+         self.execute_initialize()
+         return_value = False
      
      return return_value
 
@@ -352,7 +352,7 @@ if __name__ == "__main__":
 
     cf.execute_initialize()
     for i in range(0,10):
-       print i
+       print( i )         
        cf.queue_event("TEST", [] )
        cf.execute(  )
     print("done")

@@ -9,38 +9,32 @@ class Execute_Cf_Environment():
 
   def execute(self):
      time_stamp = datetime.datetime.today()
-     old_day  = time_stamp.day
      old_hour = time_stamp.hour
      old_minute = time_stamp.minute
      old_second = time_stamp.second
      self.cf.execute_initialize()
      while True:
-       time.sleep(.1)
-       #self.cf.queue_event("SUB_SECOND_TICK",10)
+       time.sleep(.01)
+       self.cf.queue_event("SUB_SECOND_TICK",10)
        time_stamp = datetime.datetime.today()
        hour = time_stamp.hour
        minute = time_stamp.minute
        second = time_stamp.second
-       day    = time_stamp.day
        if old_second != second :
          self.cf.queue_event( "TIME_TICK", second )
        if old_minute != minute :
          self.cf.queue_event( "MINUTE_TICK", minute )
        if old_hour != hour :
          self.cf.queue_event( "HOUR_TICK", minute )
-       if old_day != day :
-         self.cf.queue_event( "DAY_TICK", day )
-
        old_hour    = hour
        old_minute  = minute
        old_second  = second
-       old_day     = day
        try:
           self.cf.execute(  ) 
        except:
-          print( "chain flow exception" )
-          print( "current chain is ",self.cf.current_chain["name"] )
-          print( "current link  is ",self.cf.current_link          )
+          print "chain flow exception"
+          print "current chain is ",self.cf.current_chain
+          print "current link  is ",self.cf.current_link
           raise
 
 
@@ -87,12 +81,15 @@ class CF_Interpreter(chain_flow.CF_Base_Interpreter ):
      self.insert_link( link ,"Wait",[function, parameters] )
     
    
+  def  wait_tod_reset( self, link):
+     self.opcodes["WaitTod_Reset" ]   =  self.wait_tod_code_reset 
    
-  def  wait_event_reset( self, link, event_name, time_count):
-    self.insert_link( link ,"WaitEvent_Reset",[event_name,time_count,0] )
-
-  def wait_event_count( self, link, event_name, count ):
-    self.insert_link( link ,"WaitEvent_Reset",[event_name, count,0] )
+  def  wait_event_reset( self, link, event_name):
+    self.insert_link( link ,"WaitEvent_Reset",[event_name] )
+   
+   #note python dow is Monday 0  Sunday 6  -- fix later ? 
+  def  wait_time_reset( self, link,dow,hour,minute,second ):  
+      self.insert_link( link ,"WaitTime_Reset",[dow,hour,minute,second] )
       
   def  wait_condition( self, link,function,parameters ):
      self.insert_link( link ,"Wait_Reset",[function, parameters] )
@@ -151,7 +148,7 @@ if __name__ == "__main__":
 
     cf.execute_initialize()
     for i in range(0,10):
-       print( i )
+       print i
        cf.queue_event("TEST", [] )
        cf.execute(  )
     print("done")
