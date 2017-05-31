@@ -786,14 +786,16 @@ def site_map(map_type):
 @app.route('/display_environmental_conditions',methods=["GET"])
 @authDB.requires_auth
 def display_environmental_conditions():
-       keys  = redis_handle.hkeys("EQUIPMENT_ENVIRON")
-       units = []
-       for i in keys:
-           temp =  json.loads(redis_handle.hget("EQUIPMENT_ENVIRON",i))
-           temp["data"] = json.dumps(temp["data"])
-           units.append( temp     )
+    
+#       keys  = redis_handle.hkeys("EQUIPMENT_ENVIRON")
+#       units = []
+#       for i in keys:
+#           temp =  json.loads(redis_handle.hget("EQUIPMENT_ENVIRON",i))
+#           temp["data"] = json.dumps(temp["data"])
+#           units.append( temp     )
        
-       return render_template( "display_environmental_conditions",units = units ) 
+       data = redis_data_handle.lindex("LINUX_HOUR_LIST_STORE",0)
+       return render_template( "display_environmental_conditions",data  = json.loads(data)) 
 
                        
 @app.route('/modbus_statistics',methods=["GET"])

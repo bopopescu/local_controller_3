@@ -12,14 +12,23 @@
     {% include 'menu.html' %}
 
     
-       <h3>List of Units </h3>
+       <h3>Time Stamp </h3>
        <ol>
-       {% for item in units -%}
-          <li>Unit: {{item.description}}  ------------------------ Environmental Data: {{ item.data}}</li>
-       {%- endfor %}  
-
+       {{ data['time_stamp'] }}
       </ol>
    
+       <h3>Pi Temperature </h3>
+       <ol>
+       {{ data['pi_temperature_hourly'] }}
+      </ol>
+
+       <h3>Process Statistics </h3>
+       <ol>
+       {% for entry in data['linux_memory_load'] %}
+       <li><h2>{{entry }}</h2>
+       {% endfor %}
+      </ol>
+
 
 </div><!-- /page -->
 </body>
