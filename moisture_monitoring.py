@@ -106,7 +106,7 @@ class Moisture_Control(object):
          temp = driver_class.check_status( modbus_address )
          time.sleep(1.0)
          driver_class.force_moisture_reading(modbus_address)
-         time.sleep(1.0)
+         time.sleep(1.5)
 
          temp =  driver_class.read_moisture_control( modbus_address )
          item["humidity"] = temp["AIR_HUMIDITY_FLOAT"]

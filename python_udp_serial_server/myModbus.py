@@ -1067,7 +1067,7 @@ class Instrument():
 
         # Read response
         answer = ""
-        for i in range( 0, 25):  # .5 second wait
+        for i in range( 0, 50):  # .5 second wait
            #print "first i",i
            new_answer = self.serial.read(number_of_bytes_to_read)
            if len(new_answer) > 0:
