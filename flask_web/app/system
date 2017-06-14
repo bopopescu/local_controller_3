@@ -1,0 +1,33 @@
+import json 
+
+import redis
+
+
+class FlowRateFunctions():
+
+   def __init__(self ):
+       pass
+
+
+
+  def redis_get_status(self, url_list, redis_handle, cherrypy ):
+      return_data = {}
+
+      return_data["controller_time_stamp"]  = redis_handle.get("sprinkler_time_stamp")
+      return_data["flow_rate"]              = redis_handle.get( "global_flow_sensor")
+      return_data["op_mode"]                = redis_handle.get( "sprinkler_ctrl_mode")
+      return_data["schedule"]               = redis_handle.get( "schedule_name" )
+      return_data["step"]                   = redis_handle.get( "schedule_step")
+      return_data["time_of_step"]           = redis_handle.get( "schedule_time_max" )
+      return_data["current_duration"]       = redis_handle.get( "schedule_time_count")
+      return_data["derating_factor"]        = redis_handle.get("derating_factor")
+      return_data["rain_day"]               = redis_handle.get("rain_day" )
+      return_data["pcl_current"]            = redis_handle.get( "plc_current" )
+      return_data["coil_current"]           = redis_handle.get( "coil_current" )
+      return_data["eto_yesterday"]          = redis_handle.get( "YESTERDAY_ETO" )
+      return_data["eto_current"]            = redis_handle.get( "CURRENT_ETO" )
+      return_data["eto_master_valve"]       = redis_handle.get("MASTER_VALVE_SETUP")
+      return_data["eto_managment_flag"]     = redis_handle.get("ETO_MANAGE_FLAG")
+      temp = json.dumps(return_data)
+      return temp
+
