@@ -8,7 +8,7 @@ import redis
 import base64
 import json
 
-import py_cf_3.cf_interpreter
+import py_cf.cf_interpreter
 import os
 import copy
 
@@ -237,7 +237,7 @@ if __name__ == "__main__":
    #
    # Adding chains
    #
-   cf = py_cf_3.cf_interpreter.CF_Interpreter()
+   cf = py_cf.cf_interpreter.CF_Interpreter()
    
    #cf.define_chain("test",True)
    #cf.insert_link( "link_1", "SendEvent",    [ "HOUR_TICK",1 ] )
@@ -285,7 +285,7 @@ if __name__ == "__main__":
   #
 
  
-   cf_environ = py_cf_3.cf_interpreter.Execute_Cf_Environment( cf )
+   cf_environ = py_cf.cf_interpreter.Execute_Cf_Environment( cf )
    cf_environ.execute()
 
 

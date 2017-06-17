@@ -66,9 +66,10 @@ def on_request(ch, method, props, body):
     try:
  
        input_data   = json.loads( base64.b64decode(body))
+       #print( "input_data",input_data)
  
        output_data  = rt.process_commands( input_data )
-       
+       #print( "output_data",output_data)
     except:
 
        output_data = {}

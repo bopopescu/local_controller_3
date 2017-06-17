@@ -246,7 +246,8 @@ class Remote_Interface_server():
 
    def on_request(self, ch, method, props, body):
        try:
-           input_data   = json.loads( base64.b64decode(body))
+           #input_data   = json.loads( base64.b64decode(body))
+           input_data = json.loads( body)
            #print "input_data",input_data
            output_data  = self.process_commands( input_data )
            #print "output_data",output_data
@@ -257,8 +258,9 @@ class Remote_Interface_server():
           output_data["results"] = None
           output_data = json.dumps(output_data)
 
-       #print "data output = ",output_data
-       response     = base64.b64encode(  json.dumps(output_data ) )
+       print "data output = ",output_data
+       #response     = base64.b64encode(  json.dumps(output_data ) )
+       response = json.dumps(output_data)
        ch.basic_publish(exchange='',
                      routing_key=props.reply_to,
                      properties=pika.BasicProperties(correlation_id = \
