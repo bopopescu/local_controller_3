@@ -24,9 +24,9 @@ class Web_Client_Interface():
                path = "/"+path
            url = url +path
      
-      print ("path",path,"url",url)
+      #print ("path",path,"url",url)
       r = requests.get(url, auth=HTTPDigestAuth(user, password),verify=False)   
-      print( "r",r.status_code)    
+      #print( "r",r.status_code)    
       return { "success":(requests.codes.ok==r.status_code), "status":r.status_code   ,"results": r.text   }
 
    def post_path( self, path="/", user="admin", password="password",payload = ""):
@@ -36,7 +36,7 @@ class Web_Client_Interface():
            if path[0] != '/':
                path = "/"+path
            url = url +path
-      print ("path",path,"url",url)
+      #print ("path",path,"url",url)
       headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
       r = requests.post(url, json=payload , auth=HTTPDigestAuth(user, password), headers=headers, verify=False)
       return { "success":(requests.codes.ok==r.status_code), "status":r.status_code   ,"results": r.json()   }
@@ -44,7 +44,7 @@ class Web_Client_Interface():
 if __name__ == "__main__":
    web_client = Web_Client_Interface( )
    #print web_client.get_path(path="")
-   print( web_client.get_path(path="/"))
+   #print( web_client.get_path(path="/"))
    
 
    '''

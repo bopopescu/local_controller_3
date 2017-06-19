@@ -9,6 +9,9 @@ import logging
 import farm_template_py3
 
 global connection
+
+
+
 from web_access_py3 import *
 
 class Remote_Interface_server():
@@ -21,7 +24,7 @@ class Remote_Interface_server():
         self.cmds["PING"]          = self.ping
 
    def get_web_page( self, command_data ):
-           
+          
        results = web_client.get_path( command_data["path"] )
        return results
 
@@ -39,11 +42,13 @@ class Remote_Interface_server():
    def process_commands( self, command_data ):
  
        try:
+           
            object_data = {}
            command = command_data["command"]
-           print( "command",command )
-           if self.cmds.has_key( command ):
+           
+           if  command in self.cmds:
                result = self.cmds[command]( command_data)
+               
                return  json.dumps( result )
            else:
            
@@ -52,33 +57,30 @@ class Remote_Interface_server():
               return json.dumps(object_data)
       
        except:
- 
+
+           raise
            object_data = {}
            object_data["reply"] = "BAD_COMMAND_2"
            object_data["results"] = None
-           raise
            return json.dumps(object_data)                  
-
 
 def on_request(ch, method, props, body):
     global rt
    
     try:
- 
-       input_data   = json.loads( base64.b64decode(body))
- 
-       output_data  = rt.process_commands( input_data )
+      
+       output_data  = rt.process_commands( json.loads(body.decode("utf-8") )) 
        
     except:
-
-       output_data = {}
+     
+       output_data = {} 
        output_data["reply"] = "BAD_COMMAND_3"
        output_data["results"] = None
        output_data = json.dumps(output_data)
 
-
-    response     = base64.b64encode(  output_data )
     
+    #response     = base64.b64encode(  output_data )
+    response   = output_data
     ch.basic_publish(exchange='',
                      routing_key=props.reply_to,
                      properties=pika.BasicProperties(correlation_id = \
@@ -88,7 +90,7 @@ def on_request(ch, method, props, body):
 
   
 if __name__ == "__main__":
-
+   
    gm = farm_template_py3.Graph_Management("PI_1","main_remote","LaCima_DataStore")
    #
    # Now Find Data Stores
