@@ -19,7 +19,7 @@ import py_cf_py3
 import os
 import copy
 import load_files_py3
-import rabbit_cloud_status_publish
+import rabbit_cloud_status_publish_py3
 import farm_template_py3
 
 
@@ -354,7 +354,7 @@ class ETO_Calculators(object):
                 print( "handler is bad")
                 #raise ValueError("non existance handler")
         except BaseException:
-            #raise
+            raise
             print( "problem with handler " + eto_source["measurement_tag"])
             return False, 0.0
 
@@ -414,7 +414,7 @@ class ETO_Calculators(object):
 
         for i in range(0, 24):
             temp = messo_results[i]
-            data = json.loads(redis_data_json[i])
+            data = json.loads(redis_data_json[i].decode())
             temp["Humidity"] = data["air_humidity"]
             temp["TC"] = self.convert_to_C(data["air_temperature"])
         # print messo_results[0]
@@ -694,7 +694,7 @@ def construct_eto_instance(gm, redis_handle):
 
     queue_name = status_stores[0]["queue_name"]
 
-    eto.status_queue_class = rabbit_cloud_status_publish.Status_Queue(
+    eto.status_queue_class = rabbit_cloud_status_publish_py3.Status_Queue(
         redis_handle, queue_name)
 
     eto.eto_default = .20
@@ -725,7 +725,7 @@ def add_eto_chains(eto, cf):
     cf.insert_link("link_3","Log",["Receiving Hour tick"])
     cf.insert_link("link_4", "Reset", [])
 
-    cf.define_chain("test_generator", True)
+    cf.define_chain("test_generator", False)
     cf.insert_link("link_1", "SendEvent", ["DAY_TICK", 0])
     #cf.insert_link("rrr", "Log", ["Sending Day Tick"])
     cf.insert_link("link_2", "WaitEvent", ["TIME_TICK"])
