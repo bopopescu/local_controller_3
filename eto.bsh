@@ -2,8 +2,8 @@
 while [ 1 ]
 do
    echo "executing eto interface module"
-   python eto.py    2>  /tmp/eto.err 
-   python cloud_event_queue.py "reboot" "eto"
+   python3 eto_py3.py    2>  /tmp/eto.err 
+   python3 cloud_event_queue_py3.py "reboot" "eto"
    sleep 10
    echo "dumping error file"
    mv /tmp/eto.err /tmp/eto.errr
