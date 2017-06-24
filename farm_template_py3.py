@@ -1,6 +1,8 @@
 import json
 import redis
 
+import redis_graph_py3
+import redis_graph_py3.redis_graph_functions
 from redis_graph_py3.redis_graph_functions import Build_Configuration
 from redis_graph_py3.redis_graph_functions import Query_Configuration
 
@@ -288,7 +290,7 @@ class Graph_Management(Query_Configuration):
 
    def verify_handler( self, tag ):
        try:
-           return self.cb_handlers.has_key(tag)
+           return tag in self.cb_handlers
        except:
           #print "handlers:", type(self.cb_handlers)
           #print "tag", tag

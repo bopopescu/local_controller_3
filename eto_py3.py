@@ -354,7 +354,7 @@ class ETO_Calculators(object):
                 print( "handler is bad")
                 #raise ValueError("non existance handler")
         except BaseException:
-            raise
+            #raise
             print( "problem with handler " + eto_source["measurement_tag"])
             return False, 0.0
 
@@ -407,8 +407,7 @@ class ETO_Calculators(object):
         #    print i, messo_results[i]
         if len(redis_data_json) < 24:
             # print redis_data_json
-            raise
-
+            raise BaseException("bad data")
         # print messo_results[0]
         # print json.loads(redis_data_json[0])
 

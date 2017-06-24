@@ -83,14 +83,14 @@ class Modbus_Instrument:
         crc_flag, return_data = self.check_crc( response )
         if crc_flag != 0:
 
-            byte_count = int.from_bytes(return_data[0])
+            byte_count = int(return_data[0])
             for i in return_data[1:]:
                 if bit_number >= 8 :
                     bit_number -= 8
-                    return_value.extend( self.unpack_bits( 8, int.from_bytes(i) ) )
+                    return_value.extend( self.unpack_bits( 8, int(i) ) )
                 else:
                     
-                    return_value.extend( self.unpack_bits(bit_number, int.from_bytes(i) ) )
+                    return_value.extend( self.unpack_bits(bit_number, int(i) ) )
                     bit_number = 0
     
         return return_value 
@@ -115,7 +115,7 @@ class Modbus_Instrument:
         bit_data = ""
          # pack bit fields in word array
         # use pack to pact into network string
-        loop_count = number_of_bits/8
+        loop_count = int(number_of_bits/8)
         if (number_of_bits % 8) != 0:
              loop_count += 1
  
@@ -129,7 +129,8 @@ class Modbus_Instrument:
              
         
         payloadToSlave =  self._numToOneByteString(modbus_address ) + self._numToOneByteString(functioncode) + \
-                          self._numToTwoByteString(registeraddress) + self._numToTwoByteString(number_of_bits) + self._numToOneByteString( loop_count ) +bit_data
+                          self._numToTwoByteString(registeraddress) + self._numToTwoByteString(number_of_bits) +\
+                          self._numToOneByteString( loop_count ) +bit_data.encode()
         message = payloadToSlave + self._calculateCrcString(payloadToSlave)
         
         response = self._communicate(message)

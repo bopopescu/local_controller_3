@@ -61,7 +61,7 @@ class APP_FILES():
     def load_file(self, name):
         compact_data = self.redis_handle.hget(self.key, name)
         json_data = base64.b64decode(compact_data)
-        data = json.loads(json_data)
+        data = json.loads(json_data.decode("utf-8") )
         return data
 
     def delete_file(self, name):
@@ -90,7 +90,7 @@ class SYS_FILES():
 
     def load_file(self, name):
         compact_data = self.redis_handle.hget(self.key, name)
-        data = json.loads(base64.b64decode(compact_data))
+        data = json.loads(base64.b64decode(compact_data).decode("utf-8") )
         return data
 
     def delete_file(self, name):

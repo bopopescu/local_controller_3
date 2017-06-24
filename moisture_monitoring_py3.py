@@ -120,7 +120,7 @@ class Moisture_Control(object):
          measure_properties["resistive_data"]            =     driver_class.read_moisture_resistive_data( modbus_address )
          measure_properties["read_status"]               =     "Communication was successful at "+time_stamp
          measure_properties["measurement_status"]        =     1
-         #print("measure_properties",measure_properties)
+         print("measure_properties",measure_properties)
        except:
           #raise
           print ("exception handler")
@@ -154,7 +154,7 @@ class Moisture_Control(object):
            name = i["name"]
            redis_key = self.store_data_list[name]["queue_name"]
            data_json  = redis_handle.lindex( redis_key, 0)
-           data   = json.loads(data_json)          
+           data   = json.loads(data_json.decode("utf-8") )          
            temp = {"air_temperature": data["measurements"]["air_temperature"],"air_humidity": data["measurements"]["air_humidity"]}
            redis_key = self.store_air_list[name]["queue_name"]
            redis_length = self.store_air_list[name]["list_length"]
@@ -266,7 +266,11 @@ if __name__ == "__main__":
 
 
    cf.define_chain("check_for_moisture_update",True)
+   cf.insert_link(  "link_5", "Log",["check started"] )
+
    cf.insert_link( "link_1", "WaitEvent",    [ "TIME_TICK" ] )
+   cf.insert_link(  "link_3", "Log",["check for update"] )
+
    cf.insert_link( "link_2", "One_Step",         [ moisture_class.check_update_flag ] )
    cf.insert_link( "link_4", "Reset", [] )
 
