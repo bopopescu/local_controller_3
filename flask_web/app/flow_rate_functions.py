@@ -1,7 +1,7 @@
 
 import json 
 import redis
-import base64
+
 
 
 
@@ -28,8 +28,7 @@ class FlowRateFunctions():
    def get_flow_rate_sensor_names( self, data_file_path = "../system_data_files/global_sensors.json" ):
        return_data = []
        data = self.redis_handle.hget("FILES:SYS","global_sensors.json")
-       data = base64.b64decode(data)
-       data      = json.loads(data)
+       data      = json.loads(data.decode())
    
        for i in data:
       

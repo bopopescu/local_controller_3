@@ -187,12 +187,12 @@ class Moisture_Control(object):
      
 if __name__ == "__main__":
    import time
-   import farm_template_py3 
+   from redis_graph_py3  import farm_template_py3 
    import rabbit_cloud_status_publish_py3
    import io_control_py3
-   import io_control_py3.new_instrument_py3
+
    import io_control_py3.io_controller_py3
-   import construct_classes_py3
+   import io_control_py3.construct_classes_py3
 
    def find_remotes_by_function( graph_management, function ):
        keys = graph_management.match_terminal_relationship("REMOTE_UNIT")
@@ -217,12 +217,7 @@ if __name__ == "__main__":
    data_server_port = data_store_nodes[0]["port"]
    io_server_ip     = io_server_nodes[0]["ip"]
    io_server_port   = io_server_nodes[0]["port"]
-   # find ip and port for ip server
-   instrument  =  io_control_py3.new_instrument_py3.Modbus_Instrument()
-
-   instrument.set_ip(ip= io_server_ip, port = int(io_server_port))     
-   
-   remote_classes =construct_classes_py3.Construct_Access_Classes(instrument)
+   remote_classes = io_control_py3.construct_classes_py3.Construct_Access_Classes(io_server_ip,io_server_port)
 
    moisture_app_classes = graph_management.match_terminal_relationship( "MOISTURE_CTR")
    moisture_remote_classes = find_remotes_by_function(graph_management, "moisture")

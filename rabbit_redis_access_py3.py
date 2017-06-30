@@ -6,7 +6,7 @@ import time
 import os
 import redis
 import logging
-import farm_template_py3
+from redis_graph_py3 import farm_template_py3
 global connection
 
 

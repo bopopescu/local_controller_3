@@ -12,7 +12,7 @@ from load_files import *
 import redis
 from types import *
 
-import base64
+
 
 
 
@@ -117,14 +117,14 @@ class Statistics_Module:
    
    def get_schedule_data( self, *args):
      data           = self.redis_handle.hget("FILES:APP","sprinkler_ctrl.json")
-     data           = base64.b64decode(data)
+
      sprinkler_ctrl = json.loads(data)
      
      returnValue = {}
      for j in sprinkler_ctrl:
          print j["name"]
          data           = self.redis_handle.hget("FILES:APP",j["link"])
-         data           = base64.b64decode(data)
+
          temp = json.loads(data)
          
          j["step_number"], j["steps"], j["controller_pins"] = self.generate_steps(temp)
@@ -239,7 +239,7 @@ class Statistics_Module:
        return_data = []
        ###---
        data           = self.redis_handle.hget("FILES:SYS","global_sensors.json")
-       data           = base64.b64decode(data)
+
        temp           = json.loads(data)
 
        for i in temp:
@@ -253,7 +253,6 @@ class Statistics_Module:
        return_data = []
        ###---
        data           = self.redis_handle.hget("FILES:SYS","global_sensors.json")
-       data           = base64.b64decode(data)
        temp           = json.loads(data)
    
        for i in temp:
@@ -466,8 +465,8 @@ class Statistics_Module:
        return returnValue
 
    def get_controller_list( self ):
-       base64_object     = self.redis_handle.get(  "SPRINKLER_RESISTANCE_DICTIONARY")
-       json_string       = base64.b64decode(base64_object)
+       json_string     = self.redis_handle.get(  "SPRINKLER_RESISTANCE_DICTIONARY")
+       
        resistance_dictionary = json.loads(json_string)
        
        controllers = resistance_dictionary.keys()

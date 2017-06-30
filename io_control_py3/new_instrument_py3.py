@@ -551,7 +551,7 @@ if __name__ == "__main__":
     # Remove window fire wall before running this test
     #
     instrument = Modbus_Instrument()
-    instrument.set_ip("192.168.1.82",5005)
+    instrument.set_ip("192.168.1.84",5005)
     for i in range(0,1):
         print( instrument.read_bits( 100, 0x4063, 50 ,  functioncode=1))
     #print( instrument.write_bits( 100, 0x4063,  value = [ 1,1,0,0,0,0,0,1,1] ,functioncode=15))   

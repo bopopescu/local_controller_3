@@ -7,10 +7,10 @@
 import json
 
 import redis
-import farm_template_py3
+from . import farm_template_py3
 
 if __name__ == "__main__" :
-   
+   print( "constructing graph")
    cf = farm_template_py3.Construct_Farm()
    
    #

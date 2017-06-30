@@ -16,7 +16,7 @@
 import os
 from os import listdir
 from os.path import isfile, join
-import base64
+
 import redis
 import json
 import construct_graph
@@ -54,13 +54,11 @@ class APP_FILES():
        f = open(self.path+name, 'w')
        json_data = json.dumps(data)
        f.write(json_data)
-       compact_data = base64.b64encode(json_data)
-       self.redis.hset( self.key,name, compact_data)
+       self.redis.hset( self.key,name, json_data)
 
    def load_file( self, name ):
-       compact_data = self.redis.hget( self.key,name)
-       json_data = base64.b64decode(compact_data)
-       data      = json.loads(json_data)
+       json_data = self.redis.hget( self.key,name)
+       data      = json.loads(json_data.decode("utf-8"))
        return data
 
    def delete_file( self, name):
@@ -81,15 +79,17 @@ class SYS_FILES():
 
 
    def save_file( self, name, data ):
+       print("data",data)
        f = open(self.path+name, 'w')
        json_data = json.dumps(data)
        f.write(json_data)
-       compact_data = base64.b4encode(json_data)
-       self.redis.hset( self.key,name, compact_data)
+ 
+       self.redis.hset( self.key,name, json_data)
 
    def load_file( self, name ):
-       compact_data = self.redis.hget( self.key,name)
-       data = json.loads(base64.b64decode(compact_data))
+       json_data = self.redis.hget( self.key,name)
+       data = json.loads(json_data.decode("utf-8"))
+
        return data
 
    def delete_file( self, name):
@@ -117,7 +117,7 @@ if __name__ == "__main__":
        if fileExtension == ".json":
            f = open(app_files+i, 'r')
            data = f.read()
-           data = base64.b64encode(data)
+           
            redis.hset("FILES:APP", i , data)
    
 
@@ -130,7 +130,7 @@ if __name__ == "__main__":
        if fileExtension == ".json":
            f = open(sys_files+i, 'r')
            data = f.read()
-           data = base64.b64encode(data)
+           
            redis.hset("FILES:SYS", i , data)
            print "data","done"
 
@@ -152,9 +152,9 @@ if __name__ == "__main__":
    ####  Construct ETO Data QUEUES
    ####
 
-   file_data = redis.hget("FILES:APP","eto_site_setup.json")
-   temp          = base64.b64decode(file_data)
-   eto_site_data = json.loads(temp) 
+   json_data = redis.hget("FILES:APP","eto_site_setup.json")
+   eto_site_data = json.loads(json_data.decode("utf-8"))
+ 
 
    redis.delete("ETO_RESOURCE_A")
    for j in eto_site_data:

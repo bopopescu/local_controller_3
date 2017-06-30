@@ -20,7 +20,7 @@ import os
 import copy
 import load_files_py3
 import rabbit_cloud_status_publish_py3
-import farm_template_py3
+from redis_graph_py3 import farm_template_py3
 
 
 ONE_DAY = 24 * 3600

@@ -2,9 +2,9 @@ import json
 import redis
 
 import redis_graph_py3
-import redis_graph_py3.redis_graph_functions
-from redis_graph_py3.redis_graph_functions import Build_Configuration
-from redis_graph_py3.redis_graph_functions import Query_Configuration
+from .  import redis_graph_functions
+from   .redis_graph_functions  import Build_Configuration
+from    .redis_graph_functions  import Query_Configuration
 
 
 

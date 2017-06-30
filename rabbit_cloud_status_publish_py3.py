@@ -42,7 +42,7 @@ class Status_Queue():
 if __name__ == "__main__":
 
    import time
-   import farm_template_py3
+   from redis_graph_py3 import farm_template_py3
    import pika
    import json
    import time

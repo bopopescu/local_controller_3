@@ -357,6 +357,7 @@ class CF_Base_Interpreter():
 
     def define_chain(self, chain_name, auto_start):
         chain = {}
+        chain["reset_flag"] = True
         chain["name"] = chain_name
         chain["index"] = 0
         chain["links"] = []
@@ -401,6 +402,7 @@ class CF_Base_Interpreter():
         for i in chain:
             assert isinstance(i, str), "chain name is not a string"
             k = self.find_chain_object(i)
+            k["reset_flag"] = True
             k["link_index"] = 0
             links = k["links"]
             for m in links:
@@ -533,18 +535,11 @@ class CF_Base_Interpreter():
             else:
                 return
 
-    def execute_event_a(self, event):
-        for chain in self.chains:
-            if chain["active"]:
-                self.current_chain = chain
-                self.execute_chain(chain, event)
  
 
     def execute_event(self, event):
        name = event["name"]
-       if name == "__CHAIN_FLOW_START__":
-           self.execute_event_a(event)
-           return
+
        if name not in self.event_list:
            self.event_list[name] = []
 
@@ -554,6 +549,9 @@ class CF_Base_Interpreter():
            chain_name = chain["name"]
            if chain["active"] == False:
                continue
+           if chain["reset_flag"] == True:
+               chain["reset_flag"] == False
+               self.execute_chain( chain, event )          
            if chain_name in all_event_set:
                self.execute_chain( chain, event )
                continue

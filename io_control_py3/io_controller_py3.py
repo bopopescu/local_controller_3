@@ -23,7 +23,7 @@ import redis
 
 class IO_Controller(object):
     
-    def __init__(self,instrument  ):
+    def __init__(self, instrument  ):
         self.instrument = instrument
         self.m_tags = {}                          
         self.m_tags["modbus_statistics"] = self.get_modbus_statistics

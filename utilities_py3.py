@@ -21,9 +21,6 @@ import copy
 import load_files_py3
 import rabbit_cloud_status_publish_py3
 
-#from   eto_py3.eto import *
-#_from   eto_py3.cimis_request import *
-#import load_files
 
 
 
@@ -299,11 +296,7 @@ if __name__ == "__main__":
 
    import time
    import farm_template_py3
-   import construct_classes_py3
    import io_control_py3.new_instrument_py3
-   #from   linux_acquisition import construct_linux_acquisition_class
-   #from   linux_acquisition import add_chains
-
    gm = farm_template_py3.Graph_Management("PI_1","main_remote","LaCima_DataStore") 
    
 
@@ -323,17 +316,6 @@ if __name__ == "__main__":
    redis_new_handle = redis.StrictRedis( host = data_server_ip, port=data_server_port, db = 12 )
 
    redis_handle = redis.StrictRedis( host = data_server_ip, port=data_server_port, db = 0 )
-
-
-
-   io_server_ip     = io_server_nodes[0]["ip"]
-   io_server_port   = io_server_nodes[0]["port"]
-   # find ip and port for ip server
-
-   instrument  =  io_control_py3.new_instrument_py3.Modbus_Instrument()
-
-   #instrument.set_ip(ip= io_server_ip, port = int(io_server_port)) 
-   #linux_monitoring = construct_linux_acquisition_class( redis_new_handle, gm, instrument )
 
 
    action       = System_Monitoring( redis_handle )
@@ -393,8 +375,6 @@ if __name__ == "__main__":
    cf.insert_link( "link_4", "SendEvent",    [ "DAY_TICK", 1] )
 
 
-
-   #add_chains(cf, linux_monitoring)
 
 
  

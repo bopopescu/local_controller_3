@@ -57,13 +57,13 @@ class System_Status():
 
    def schedule_data( self, *args):
      data           = self.redis_handle.hget("FILES:APP","sprinkler_ctrl.json")
-     data           = base64.b64decode(data)
+
      sprinkler_ctrl = json.loads(data)
      returnValue = []
      for j in sprinkler_ctrl:
          ###---
          data           = self.redis_handle.hget("FILES:APP",j["link"])
-         data           = base64.b64decode(data)
+
          temp           = json.loads(data)
          print "temp",temp
          j["step_number"], j["steps"], j["controller_pins"] = self.generate_steps(temp)
@@ -75,13 +75,12 @@ class System_Status():
 
    def get_schedule_data( self, *args):
      data           = self.redis_handle.hget("FILES:APP","sprinkler_ctrl.json")
-     data           = base64.b64decode(data)
      sprinkler_ctrl = json.loads(data)
      returnValue = []
      for j in sprinkler_ctrl:
          ###---
          data           = self.redis_handle.hget("FILES:APP",j["link"])
-         data           = base64.b64decode(data)
+
          temp           = json.loads(data)
          j["step_number"], j["steps"], j["controller_pins"] = self.generate_steps(temp)
          returnValue.append(j)

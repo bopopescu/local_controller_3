@@ -4,7 +4,7 @@ import json
 import base64
 import redis
 import sys
-import farm_template_py3
+from redis_graph_py3 import farm_template_py3
 
 class Cloud_Event_Queue():
    def __init__(self,redis):

@@ -24,6 +24,7 @@ import redis
 class Click_Controller_Base_Class(object):
     
    def __init__(self,instrument, click_io = [], m_tags = {}):
+       print("instruement",instrument)
        self.instrument  = instrument
        self.click_reg_address = {}
        self.click_bit_address = {}
@@ -147,22 +148,22 @@ class Click_Controller_Base_Class(object):
       return self.instrument.read_bits(modbus_address, read_bit,1 )[0]
 
 
-   def read_mode_switch( self, modbus_address, input_list ):
+   def read_mode_switch( self, modbus_address ):
       read_bit      = self.click_bit_address["SC11"]
       return self.instrument.read_bits( modbus_address, read_bit,1 )[0]
 
-   def read_mode( self, modbus_address , input_list):
+   def read_mode( self, modbus_address ):
       read_bit      = self.click_bit_address["SC10"]
 
       return self.instrument.read_bits( modbus_address, read_bit,1 )[0]
 
   
-   def read_wd_flag( self, modbus_address, input_list ):
+   def read_wd_flag( self, modbus_address ):
       read_bit      = self.click_bit_address["C200"]
       return self.instrument.read_bits( modbus_address, read_bit,1 )[0]
       
 
-   def write_wd_flag( self, modbus_address , input_list):
+   def write_wd_flag( self, modbus_address ):
       write_bit      = self.click_bit_address["C200"]
       self.instrument.write_bits(modbus_address,write_bit, [1] )
 
@@ -246,13 +247,18 @@ class Click_Controller_Base_Class_22(Click_Controller_Base_Class):
 
 
            
-if __name__ == "__main__":     
-   instrument = {}
+if __name__ == "__main__":  
+   from  .new_instrument_py3 import Modbus_Instrument
+   instrument  =  Modbus_Instrument()
+   instrument.set_ip("192.168.1.84", 5005 )     
+
    x = Click_Controller_Base_Class_44( instrument )
    y = Click_Controller_Base_Class_22( instrument )  
    print (x.m_tags)
    print (y.m_tags)
-
+   print(x.read_wd_flag( 100 ))
+   x.write_wd_flag(100)
+   print(x.read_wd_flag( 100 ))
     
 
     
