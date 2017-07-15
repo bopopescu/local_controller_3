@@ -19,7 +19,7 @@ import json
 import os
 import copy
 import load_files_py3
-import rabbit_cloud_status_publish_py3
+#import rabbit_cloud_status_publish_py3
 
 
 
@@ -64,12 +64,6 @@ class Delete_Cimis_Email():
               self.imap.expunge()
 
 
-#
-#  This class schedules actions in the system action file
-#  self.app_files.load_file("system_actions.json")
-#
-#
-#
 class System_Monitoring():
    def __init__(self, redis_handle ):
      self.redis_handle         = redis_handle
@@ -295,8 +289,9 @@ class Ntpd():
 if __name__ == "__main__":
 
    import time
-   import farm_template_py3
-   import io_control_py3.new_instrument_py3
+   
+   from redis_graph_py3 import  farm_template_py3
+   
    gm = farm_template_py3.Graph_Management("PI_1","main_remote","LaCima_DataStore") 
    
 

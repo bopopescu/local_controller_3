@@ -1,6 +1,6 @@
 # 
 #
-# File: data_aquisition_py3.py
+# File: utilities.py
 #
 #
 #
@@ -15,14 +15,11 @@ import math
 import redis
 import base64
 import json
-
+import py_cf_py3
 import os
 import copy
 import load_files_py3
 import rabbit_cloud_status_publish_py3
-import farm_template_py3
-import io_control_py3.new_instrument_py3
-import construct_classes_py3
 
 #
 #
@@ -39,52 +36,53 @@ class Data_Acquisition(object):
        pass
 
    def process_fifteen_second_data( self, chainFlowHandle,chainOjb, parameters, event):
+       print ("received 15 second tick")
        self.common_process( self.fifteen_list, self.fifteen_store )
        return "CONTINUE"
 
    def process_minute_data( self,chainFlowHandle, chainOjb, parameters, event ):
-
+       print ("received minute_tick")
        self.common_process( self.minute_list, self.minute_store )
        return "CONTINUE"
 
    def process_hour_data( self,chainFlowHandle, chainOjb, parameters, event ):
-
+       print ("received hour tick")
        self.common_process( self.hour_list , self.hour_store)
   
        return "CONTINUE"
 
    def process_daily_data( self,chainFlowHandle, chainOjb, parameters, event ):
-       print( "received day tick")
+       print ("received day tick")
        self.common_process( self.daily_list , self.daily_store )
        return "CONTINUE"
 
    def common_process( self, data_list , store_element ):  
        if len(data_list) == 0:
           return
-       #print( "data_list", store_element['measurement'])
-       ##print "store_element",store_element
+       print( "data_list", store_element['measurement'] )
+       #print "store_element",store_element
 
        data_dict = {}
        for i in data_list:
            temp_data =   self.slave_interface( i)
            data_dict[i["name"]] = temp_data
-       data_dict["namespace"] = store_element["namespace"]
+       data_dict["namespace"] = self.gm.convert_namespace(store_element["namespace"])
        data_dict["time_stamp"] = time.strftime( "%b %d %Y %H:%M:%S",time.localtime(time.time()))
-       ##print data_dict
+       #print data_dict
        data_json           = json.dumps(data_dict)
        redis_key           = store_element["measurement"]
        redis_array_length  = store_element["length"]
-       #print( "redis_key",redis_key,redis_array_length )
-       ##print "data_json",data_json, redis_key,redis_array_length
+       print( "redis_key",redis_key,redis_array_length)
+       #print "data_json",data_json, redis_key,redis_array_length
        self.redis_handle.lpush(redis_key,data_json)
        self.redis_handle.ltrim(redis_key,0,redis_array_length)
-       #print( "print array length", self.redis_handle.llen(redis_key)
+       print( "print array length", self.redis_handle.llen(redis_key))
        # send data to influxdb
        self.status_queue_class.queue_message(store_element["routing_key"], data_dict )
 
    def execute_init_tags( self, data_list ):
         for i in data_list:
-           if "init_tag" in i == True:
+           if i.has_key("init_tag") == True:
                self.gm.execute_cb_handlers( i["init_tag"][0], None , i["init_tag"])
 
    def slave_interface( self, element_descriptor ):
@@ -96,7 +94,7 @@ class Data_Acquisition(object):
             return_value = action_function( modbus_address, element_descriptor["parameters"])
        else:
             return_value = None     
-       if "exec_tag" in element_descriptor:
+       if element_descriptor.has_key("exec_tag"):
               exec_tag = element_descriptor["exec_tag"]  
               return_value = self.gm.execute_cb_handlers( exec_tag[0], return_value,exec_tag )
               #print return_value
@@ -108,11 +106,11 @@ class Data_Acquisition(object):
        return_value = None
        
        remote = list_item["modbus_remote"]
-       if remote in self.slave_dict:
+       if self.slave_dict.has_key(remote):
            slave_element = self.slave_dict[remote]
            slave_class   = slave_element["class"]
            m_tags = slave_class.m_tags
-           if list_item["m_tag"] in m_tags:
+           if m_tags.has_key(list_item["m_tag"]):
               return_value = m_tags[list_item["m_tag"]]
 
        return return_value
@@ -136,25 +134,25 @@ class Data_Acquisition(object):
        #print "list_item",type(list_item),list_item
        try:
            remote = list_item["modbus_remote"]
-           #print "remote",remote
+           print( "remote",remote)
            if remote != "skip_controller":
                 slave_element = self.slave_dict[remote]
                 slave_class   = slave_element["class"]
                 m_tags        = slave_class.m_tags
                 m_tag_function = m_tags[list_item["m_tag"]]
-           if "init_tag" in list_item:
+           if list_item.has_key("init_tag"):
               init_tag = list_item["init_tag"][0]
               #print "init_tag", init_tag
               if self.gm.verify_handler( init_tag ) == False:
                   raise ValueError("Bad init tag "+list_item["init_tag"])     
-           if "exec_tag" in list_item:
+           if list_item.has_key("exec_tag"):
               exec_tag = list_item["exec_tag"][0]
               #print "exec_tag",exec_tag
               if self.gm.verify_handler( exec_tag ) == False:
                   raise ValueError("Bad exec tag "+list_item["exec_tag"]  )   
 
        except:
-           print( "list_item",list_item )
+           print( "list_item",list_item) 
            
            raise
 
@@ -162,13 +160,12 @@ class Data_Acquisition(object):
 class Modbus_Statistics( object ):
 
    def __init__( self ):
-       self.daily_stat = {}
+       pass
 
    def init_statistics( self, tag, value ,parameters ):
        self.daily_stat = {}
 
    def log_statistics( self, tag, value,parameters ):
-       print("log Statistics",tag,value,parameters)
        return self.daily_stat
 
    def accumulate_statistics( self, tag, input_value, parameters ):
@@ -176,7 +173,7 @@ class Modbus_Statistics( object ):
        #print "###############",input_value[1]
        value = json.loads(input_value[1])
        for j in value.keys():
-           if j in self.daily_stat == False:
+           if self.daily_stat.has_key(j) == False:
                self.daily_stat[j] = value[j]
                self.daily_stat[j]["address"] = j
            else:
@@ -194,7 +191,7 @@ class Legacy_Redis_DB_Issues( object):
        redis_host  = redis_config.get("REDIS_SERVER_IP")
        redis_port  = redis_config.get("REDIS_SERVER_PORT")
        redis_db    = redis_config.get("REDIS_SERVER_DB")
-       #print "redis",redis_host,redis_port,redis_db
+       print( "redis",redis_host,redis_port,redis_db)
        redis_handle = redis.StrictRedis( redis_host, redis_port, redis_db )
 
    def transfer_flow( self, tag, value, parameters ):
@@ -251,12 +248,12 @@ def construct_class( redis_handle,
    #
    #
 
-   status_stores = gm.match_terminal_relationship("CLOUD_STATUS_STORE")
+   status_stores = gm.match_relationship("CLOUD_STATUS_STORE",json_flag = True)
    queue_name    = status_stores[0]["queue_name"]
 
-   status_queue_class = rabbit_cloud_status_publish_py3.Status_Queue(redis_handle, queue_name )
+   status_queue_class = rabbit_cloud_status_publish.Status_Queue(redis_handle, queue_name )
 
-   slave_nodes  = gm.match_terminal_relationship(  "REMOTE_UNIT")
+   slave_nodes  = gm.match_relationship(  "REMOTE_UNIT", json_flag = True)
    slave_dict    = {}
    for i in slave_nodes:
      class_inst     = remote_classes.find_class( i["type"] )
@@ -341,16 +338,16 @@ def construct_daily_acquisition_class( redis_handle, gm, instrument):
    gm.add_cb_handler("transfer_controller_current",legacy.transfer_controller_current)
    gm.add_cb_handler("get_gpio", legacy.get_gpio)
 
-   remote_classes = construct_classes_py3.Construct_Access_Classes(instrument)
-   fifteen_store   =  gm.match_terminal_relationship( "FIFTEEN_SEC_ACQUISITION")[0]
-   minute_store    =  gm.match_terminal_relationship( "MINUTE_ACQUISITION")[0]
-   hour_store      =  gm.match_terminal_relationship( "HOUR_ACQUISTION" )[0]
-   daily_store     =  gm.match_terminal_relationship( "DAILY_ACQUISTION" )[0]
+   remote_classes = io_control.construct_classes.Construct_Access_Classes(instrument)
+   fifteen_store   =  gm.match_relationship( "FIFTEEN_SEC_ACQUISITION",json_flag = True)[0]
+   minute_store    =  gm.match_relationship( "MINUTE_ACQUISITION", json_flag = True )[0]
+   hour_store      =  gm.match_relationship( "HOUR_ACQUISTION", json_flag = True )[0]
+   daily_store     =  gm.match_relationship( "DAILY_ACQUISTION", json_flag = True )[0]
    
-   fifteen_list   =  gm.match_terminal_relationship( "FIFTEEN_SEC_ELEMENT")
-   minute_list     =  gm.match_terminal_relationship( "MINUTE_ELEMENT" )     
-   hour_list       =  gm.match_terminal_relationship( "HOUR_ELEMENT" )
-   daily_list      =  gm.match_terminal_relationship( "DAILY_ELEMENT" )
+   fifteen_list   =  gm.match_relationship( "FIFTEEN_SEC_ELEMENT",json_flag = True)
+   minute_list     =  gm.match_relationship( "MINUTE_ELEMENT", json_flag = True )     
+   hour_list       =  gm.match_relationship( "HOUR_ELEMENT", json_flag = True )
+   daily_list      =  gm.match_relationship( "DAILY_ELEMENT",   json_flag = True )
     
    data_acquisition= construct_class( redis_handle,
                                       gm,instrument,
@@ -369,7 +366,7 @@ def construct_daily_acquisition_class( redis_handle, gm, instrument):
 if __name__ == "__main__":
 
    import time
- 
+   import construct_graph 
 
    def list_filter( input_list):
       if len( input_list ) > 0:
@@ -377,7 +374,7 @@ if __name__ == "__main__":
       else:
           return []
 
-   gm = farm_template_py3.Graph_Management("PI_1","main_remote","LaCima_DataStore")
+   gm = construct_graph.Graph_Management("PI_1","main_remote","LaCima_DataStore")
   
    data_store_nodes = gm.find_data_stores()
    io_server_nodes  = gm.find_io_servers()
@@ -392,17 +389,14 @@ if __name__ == "__main__":
    io_server_port   = io_server_nodes[0]["port"]
    # find ip and port for ip server
 
-   instrument  =  io_control_py3.new_instrument_py3.Modbus_Instrument()
+   instrument  =  io_control.new_instrument.Modbus_Instrument()
 
    instrument.set_ip(ip= io_server_ip, port = int(io_server_port)) 
    data_acquisition = construct_daily_acquisition_class( redis_handle, gm, instrument)
    #
    # Adding chains
    #
-   from py_cf_py3.chain_flow import CF_Base_Interpreter
-   cf = CF_Base_Interpreter()
-
-
+   cf = py_cf.CF_Interpreter()
    cf.define_chain("test",True)
    cf.insert_link( "linkxx","Log",["test chain start"])
    cf.insert_link( "link_0", "SendEvent",  ["MINUTE_TICK",1] )
@@ -414,7 +408,9 @@ if __name__ == "__main__":
 
    add_chains(cf, data_acquisition)
 
-   cf.execute()
+   print( "starting chain flow")
+   cf_environ = py_cf.Execute_Cf_Environment( cf )
+   cf_environ.execute()
 
 
 

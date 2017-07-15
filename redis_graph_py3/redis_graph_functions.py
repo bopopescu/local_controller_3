@@ -200,6 +200,7 @@ class Query_Configuration(object):
           starting_set = self.match_relationship( relationship, label, starting_set )
       if property_values != None:
          starting_set = self.match_properties( starting_set, property_values )
+      
       if fetch_values == True:
            return_value = self.return_data( starting_set)
       else:

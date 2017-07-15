@@ -1,14 +1,27 @@
+#
+#  File: cloud_event_queue_py3
+#  This file has two purposes   
+#  1.  Called as a main file  with Two parameters
+#      A.  event
+#      B.  process 
+#      Store action in queue for pickup by cloud server
+#  2.  Called as a package.
+#      Used to store and action into a queue for pickup by cloud server
+#
+#  Need to straight out concepts for queues and add to the queue
+
+
+
 
 import time
 import json
 import base64
 import redis
 import sys
-from redis_graph_py3 import farm_template_py3
 
 class Cloud_Event_Queue():
-   def __init__(self,redis):
-        self.redis = redis
+   def __init__(self,redis_handle):
+        self.redis_handle = redis_handle
 
    def store_event_queue( self, event, data,status ="RED" ):
           log_data = {}
@@ -19,15 +32,17 @@ class Cloud_Event_Queue():
           json_data = json.dumps(log_data).encode()
           
           json_data = base64.b64encode(json_data)
-          self.redis.lpush( "QUEUES:CLOUD_ALARM_QUEUE", json_data)
-          self.redis.ltrim(  "QUEUES:CLOUD_ALARM_QUEUE", 0,800)
-          self.redis.lpush( "QUEUES:SYSTEM:PAST_ACTIONS", json_data)
-          self.redis.ltrim(  "QUEUES:SYSTEM:PAST_ACTIONS", 0,800)
+          self.redis_handle.lpush( "QUEUES:CLOUD_ALARM_QUEUE", json_data)
+          self.redis_handle.ltrim(  "QUEUES:CLOUD_ALARM_QUEUE", 0,800)
+          self.redis_handle.lpush( "QUEUES:SYSTEM:PAST_ACTIONS", json_data)
+          self.redis_handle.ltrim(  "QUEUES:SYSTEM:PAST_ACTIONS", 0,800)
           
 
 if __name__ == "__main__":
+
+   from   redis_graph_py3 import farm_template_py3
    graph_management = farm_template_py3.Graph_Management("PI_1","main_remote","LaCima_DataStore")
-   data_store_nodes = graph_management.find_data_stores()
+   data_store_nodes =graph_management.find_data_stores()
   
    # find ip and port for redis data store
    data_server_ip   = data_store_nodes[0]["ip"]

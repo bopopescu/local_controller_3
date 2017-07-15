@@ -59,7 +59,7 @@ class APP_FILES():
 
     def load_file(self, name):
         json_data= self.redis_handle.hget(self.key, name)
-        data = json.loads(json_data )
+        data = json.loads(json_data.decode("utf-8") )
         return data
 
     def delete_file(self, name):
@@ -83,7 +83,7 @@ class SYS_FILES():
         f = open(self.path + name, 'w')
         json_data = json.dumps(data)
         f.write(json_data)
-        self.redis_handle.hset(self.key, name, json_data)
+        self.redis_handle.hset(self.key, name, json_data.decode("utf-8"))
 
     def load_file(self, name):
         json_data = self.redis_handle.hget(self.key, name)

@@ -5,6 +5,12 @@ import time
 import redis
 import logging
 
+#
+# This server services a status queue defined by the graph terminal node "RABBITMQ_STATUS_QUEUE".
+#
+# 1. If used as a package the function queue_message is used to send a message to the cloud server
+# 2. If used as a main program the program takes messages from the queue and publishes it to a redis server located in the cloud
+
 
 
 class Status_Queue():

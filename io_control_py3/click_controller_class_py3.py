@@ -24,7 +24,7 @@ import redis
 class Click_Controller_Base_Class(object):
     
    def __init__(self,instrument, click_io = [], m_tags = {}):
-       print("instruement",instrument)
+       
        self.instrument  = instrument
        self.click_reg_address = {}
        self.click_bit_address = {}

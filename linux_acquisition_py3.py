@@ -10,18 +10,19 @@
 import datetime
 import time
 import string
-import urllib2
 import math
 import redis
 import base64
 import json
-import py_cf_py3
+from py_cf_py3.chain_flow import CF_Base_Interpreter
+
 import os
 import copy
 import load_files_py3
 import rabbit_cloud_status_publish_py3
-import construct_classes_py3
-import io_control_py3.new_instrument_py3
+from   io_control_py3 import io_controller_py3
+from   io_control_py3 import construct_classes_py3
+from   io_control_py3 import new_instrument_py3
 
 #
 #
@@ -30,12 +31,13 @@ import io_control_py3.new_instrument_py3
 #
 #
 
-from data_acquisition_py3 import Data_Acquisition
-from data_acquisition_py3 import add_chains
-from data_acquisition_py3 import construct_class
+from data_acquisition_py3 import data_scheduling_py3
+from data_acquisition_py3.data_scheduling_py3 import Data_Acquisition
+from data_acquisition_py3.data_scheduling_py3 import add_chains
+from data_acquisition_py3.data_scheduling_py3 import construct_class
 
 import os
-
+## os.system("sar -u 10 1 > sar_output.txt")
 class PI_Status( object ):
 
    def __init__( self, redis_handle ):
@@ -46,7 +48,7 @@ class PI_Status( object ):
       temp = temp.replace("temp=","").replace("'C\n","")
       temp = float(temp)
       temp = (9.0/5.0*temp)+32.
-      #print "temp",temp
+
       return temp
 
 
@@ -92,7 +94,7 @@ class PI_Status( object ):
        lines = data.split("\n")
        return_value = []
        for i in range(0,len(lines)):
-           #print lines[i]
+
            if i == 0:
                continue
            fields = lines[i].split()
@@ -101,13 +103,13 @@ class PI_Status( object ):
                for i in range(0,len(fields)):
                    temp_value[headers[i]] = fields[i]
                return_value.append( temp_value )
-       #print "return_value",return_value
+
        return return_value
 
    def log_redis_info( self, tag,value,parameters):
         return self.redis_handle.info()
 
-def construct_linux_acquisition_class( redis_handle, gm, instrument ):
+def construct_linux_acquisition_class( redis_handle, gm, io_server,io_server_port ):
    pi_stat = PI_Status( redis_handle )
    gm.add_cb_handler("pi_temperature",       pi_stat.measure_temperature )  
    gm.add_cb_handler("linux_memory_load",    pi_stat.measure_processor_load )
@@ -115,15 +117,19 @@ def construct_linux_acquisition_class( redis_handle, gm, instrument ):
    gm.add_cb_handler("linux_daily_redis",    pi_stat.log_redis_info )
    gm.add_cb_handler("linux_daily_memory",   pi_stat.measure_processor_ram)
 
-   remote_classes = io_control.construct_classes.Construct_Access_Classes(instrument)
+   instrument = new_instrument_py3.Modbus_Instrument()
+
+   
+   remote_classes = construct_classes_py3.Construct_Access_Classes(io_server,io_server_port)
    fifteen_store   =  []
    minute_store    =  []
-   hour_store      =  gm.match_relationship(  "LINUX_HOUR_ACQUISTION", json_flag = True )[0]
-   daily_store     =  gm.match_relationship(  "LINUX_DAILY_ACQUISTION", json_flag = True )[0]
+   hour_store      =  list(gm.match_terminal_relationship(  "LINUX_HOUR_ACQUISTION"))[0]
+   daily_store     =  list(gm.match_terminal_relationship("LINUX_DAILY_ACQUISTION" ))[0]
    fifteen_list   =  []
    minute_list     =  []     
-   hour_list       =  gm.match_relationship( "LINUX_HOUR_ELEMENT", json_flag = True )
-   daily_list      =  gm.match_relationship( "LINUX_DAILY_ELEMENT",   json_flag = True )
+   hour_list       =  list(gm.match_terminal_relationship( "LINUX_HOUR_ELEMENT" ))
+   daily_list      =  list(gm.match_terminal_relationship( "LINUX_DAILY_ELEMENT" ))
+
    return  construct_class( redis_handle,
                      gm,instrument,
                      remote_classes,
@@ -134,12 +140,13 @@ def construct_linux_acquisition_class( redis_handle, gm, instrument ):
                      fifteen_list,
                      minute_list,
                      hour_list,
-                     daily_list ) 
+                     daily_list,
+                     status_queue_class ) 
     
 if __name__ == "__main__":
 
    import time
-   import farm_template_py3 
+   from redis_graph_py3.farm_template_py3 import Graph_Management 
 
    def list_filter( input_list):
       if len( input_list ) > 0:
@@ -147,7 +154,7 @@ if __name__ == "__main__":
       else:
           return []
 
-   gm = farm_template_py3.Graph_Management("PI_1","main_remote","LaCima_DataStore")
+   gm =Graph_Management("PI_1","main_remote","LaCima_DataStore")
   
    data_store_nodes = gm.find_data_stores()
    io_server_nodes  = gm.find_io_servers()
@@ -161,20 +168,19 @@ if __name__ == "__main__":
    io_server_ip     = io_server_nodes[0]["ip"]
    io_server_port   = io_server_nodes[0]["port"]
    # find ip and port for ip server
+   status_server =  gm.match_terminal_relationship("RABBITMQ_STATUS_QUEUE")[0]
+   queue_name     = status_server[ "queue"]
 
-   instrument  =  io_control_py3.new_instrument_py3.Modbus_Instrument()
-
-   instrument.set_ip(ip= io_server_ip, port = int(io_server_port)) 
+   status_queue_class = rabbit_cloud_status_publish_py3.Status_Queue(redis_handle, queue_name ) 
    
-   
-   construct_linux_acquisition_class= construct_linux_acquisition_class( redis_handle, gm, instrument )
+   construct_linux_acquisition_class= construct_linux_acquisition_class( redis_handle, gm, io_server_ip, io_server_port )
 
    
 
    #
    # Adding chains
    #
-   cf = py_cf.CF_Interpreter()
+   cf = CF_Base_Interpreter()
    cf.define_chain("test",True)
    cf.insert_link( "linkxx","Log",["test chain start"])
    cf.insert_link( "link_0", "SendEvent",  ["MINUTE_TICK",1] )
@@ -186,7 +192,7 @@ if __name__ == "__main__":
 
    add_chains(cf, construct_linux_acquisition_class)
 
-   print "starting chain flow"
-   cf_environ = py_cf.Execute_Cf_Environment( cf )
-   cf_environ.execute()
+   print( "starting chain flow" )
+
+   cf.execute()
 
