@@ -20,7 +20,7 @@ import os
 import copy
 import load_files_py3
 #import rabbit_cloud_status_publish_py3
-
+import imaplib
 
 
 
@@ -64,18 +64,19 @@ class Delete_Cimis_Email():
               self.imap.expunge()
 
 
-class System_Monitoring():
+class System_Monitoring():    
    def __init__(self, redis_handle ):
      self.redis_handle         = redis_handle
      self.app_files    =  load_files_py3.APP_FILES(redis_handle)
-
 
 
     
    def check_schedule_flag( self, schedule_name ):
       
       data =  self.redis_handle.hget("SYSTEM_COMPLETED", schedule_name)
+ 
       data = data.decode()
+   
       try:
         data = json.loads( data)
 
@@ -140,15 +141,17 @@ class System_Monitoring():
       st_array = [temp.hour,temp.minute]
       sprinkler_ctrl = self.app_files.load_file("system_actions.json")
       for j in sprinkler_ctrl:
+          
           name     = j["name"]
           command  = j["command_string"]
           print( "checking schedule",name)
           if j["dow"][dow] != 0 :
-	    
+            
             start_time = j["start_time"]
             end_time   = j["end_time"]
     
             if self.determine_start_time( start_time,end_time ):
+                 print("j 3",j)
                  print( "made it past start time",start_time,end_time)
                  if self.check_schedule_flag( name ):
                      print( "queue in schedule ",name )
@@ -158,7 +161,7 @@ class System_Monitoring():
                      temp["step"]           = 0
                      temp["run_time"]       = 0
                      scratch = json.dumps(temp)
-                     #self.redis_handle.lpush("QUEUES:SPRINKLER:CTRL", base64.b64encode(scratch) )
+                     self.redis_handle.lpush("QUEUES:SPRINKLER:CTRL", base64.b64encode(scratch) )
                      temp = [1,time.time()+60*3600 ]  # +hour prevents a race condition
                      self.redis_handle.hset( "SYSTEM_COMPLETED",name,json.dumps(temp) ) 
 
@@ -271,7 +274,7 @@ class Schedule_Monitoring():
                      print("scheduled ",scratch)
                      scratch = str.encode(scratch)
                      scratch = base64.b64encode(scratch)
-                     #self.redis_handle.lpush("QUEUES:SPRINKLER:CTRL", scratch )
+                     self.redis_handle.lpush("QUEUES:SPRINKLER:CTRL", scratch )
                      temp = [1,time.time()+60*3600 ]  # +hour prevents a race condition
                      self.redis_handle.hset( "SCHEDULE_COMPLETED",name,json.dumps(temp) ) 
 
@@ -301,6 +304,7 @@ if __name__ == "__main__":
  
 
    delete_cimis_email = Delete_Cimis_Email(cimis_email_data)
+   
 
    data_store_nodes = gm.find_data_stores()
    io_server_nodes  = gm.find_io_servers()
