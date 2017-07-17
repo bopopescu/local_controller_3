@@ -37,7 +37,6 @@ from data_acquisition_py3.data_scheduling_py3 import add_chains
 from data_acquisition_py3.data_scheduling_py3 import construct_class
 
 import os
-## os.system("sar -u 10 1 > sar_output.txt")
 class PI_Status( object ):
 
    def __init__( self, redis_handle ):
@@ -107,15 +106,29 @@ class PI_Status( object ):
        return return_value
 
    def log_redis_info( self, tag,value,parameters):
-        return self.redis_handle.info()
+        data = self.redis_handle.info()
+        return_value= []
+        return_value.append("used_memory_human "+ str(data["used_memory_human"]))
+        return_value.append("uptime_in_seconds "+ str(data["uptime_in_seconds"]))
+        return_value.append("total_connections_received "+ str(data["total_connections_received"]))
+        return_value.append("config_file "+ str(data["config_file"]))
+        return_value.append("aof_last_write_status "+ str(data["aof_last_write_status"]))
+        return_value.append("total_commands_processed "+ str(data["total_commands_processed"]))
+        return return_value
+
+   def measure_free_cpu( self, tag, value, parameters):
+       f = os.popen("sar -u 10 1 ")
+       data = f.readlines()
+       return data
 
 def construct_linux_acquisition_class( redis_handle, gm, io_server,io_server_port ):
    pi_stat = PI_Status( redis_handle )
    gm.add_cb_handler("pi_temperature",       pi_stat.measure_temperature )  
-   gm.add_cb_handler("linux_memory_load",    pi_stat.measure_processor_load )
-   gm.add_cb_handler("linux_daily_disk",     pi_stat.measure_disk_space )
-   gm.add_cb_handler("linux_daily_redis",    pi_stat.log_redis_info )
-   gm.add_cb_handler("linux_daily_memory",   pi_stat.measure_processor_ram)
+   gm.add_cb_handler("python_processes",    pi_stat.measure_processor_load )
+   gm.add_cb_handler("linux_disk",     pi_stat.measure_disk_space )
+   gm.add_cb_handler("linux_redis",    pi_stat.log_redis_info )
+   gm.add_cb_handler("linux_memory",   pi_stat.measure_processor_ram)
+   gm.add_cb_handler("free_cpu",   pi_stat.measure_free_cpu)
 
    instrument = new_instrument_py3.Modbus_Instrument()
 
@@ -124,11 +137,11 @@ def construct_linux_acquisition_class( redis_handle, gm, io_server,io_server_por
    fifteen_store   =  []
    minute_store    =  []
    hour_store      =  list(gm.match_terminal_relationship(  "LINUX_HOUR_ACQUISTION"))[0]
-   daily_store     =  list(gm.match_terminal_relationship("LINUX_DAILY_ACQUISTION" ))[0]
+   daily_store     =  []
    fifteen_list   =  []
    minute_list     =  []     
    hour_list       =  list(gm.match_terminal_relationship( "LINUX_HOUR_ELEMENT" ))
-   daily_list      =  list(gm.match_terminal_relationship( "LINUX_DAILY_ELEMENT" ))
+   daily_list      =  []
 
    return  construct_class( redis_handle,
                      gm,instrument,

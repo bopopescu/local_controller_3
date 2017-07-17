@@ -1,0 +1,11 @@
+
+while [ 1 ]
+do
+   echo "executing utilities interface module"
+   python3 linux_acquisition_py3.py 2>  /tmp/linux_acquisition_py3.err 
+   python cloud_event_queue.py "reboot" linux_acquisition_py3
+   sleep 10
+   echo "dumping error file"
+   mv /tmp/linux_acquisition_py3.err  /tmp/linux_acquisition_py3.errr
+
+done

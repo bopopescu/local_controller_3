@@ -5,30 +5,19 @@
 	<link rel="shortcut icon" href="/static/favicon.ico">
         {% include 'include_files.html' %}
         
-<body>        
+<body>  
 <div data-role="page"> 
     
     {% include 'header.html' %}
     {% include 'menu.html' %}
+    <h1>Operational Parameters of Raspberry PI Controller</h1>
+    {% for key in keys %}
+    <h3>{{ key }} </h3>
+    {% for element in data[key] %}
+    {{ element }}<br>
+    {% endfor %}
 
-    
-       <h3>Time Stamp </h3>
-       <ol>
-       {{ data['time_stamp'] }}
-      </ol>
-   
-       <h3>Pi Temperature </h3>
-       <ol>
-       {{ data['pi_temperature_hourly'] }}
-      </ol>
-
-       <h3>Process Statistics </h3>
-       <ol>
-       {% for entry in data['linux_memory_load'] %}
-       <li><h2>{{entry }}</h2>
-       {% endfor %}
-      </ol>
-
+    {% endfor %}
 
 </div><!-- /page -->
 </body>

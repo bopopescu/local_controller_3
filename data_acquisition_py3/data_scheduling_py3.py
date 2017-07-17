@@ -52,6 +52,7 @@ class Data_Acquisition(object):
 
        data_dict = {}
        for i in data_list:
+           print(i)
            temp_data =   self.slave_interface( i)
            data_dict[i["name"]] = temp_data
        data_dict["namespace"] = store_element["namespace"]

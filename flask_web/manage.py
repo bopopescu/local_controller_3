@@ -795,7 +795,14 @@ def display_environmental_conditions():
 #           units.append( temp     )
        
        data = redis_data_handle.lindex("LINUX_HOUR_LIST_STORE",0)
-       return render_template( "display_environmental_conditions",data  = json.loads(data)) 
+       data = json.loads(data)
+       for i,item in data.items():
+           if isinstance(item, list):
+              pass
+           else:
+              data[i] = [ item ]
+
+       return render_template( "display_environmental_conditions",data  = data, keys = data.keys() ) 
 
                        
 @app.route('/modbus_statistics',methods=["GET"])
@@ -850,7 +857,7 @@ def overal_current_statistics(schedule_id):
 def eto_raw_data():
        eto_data =  redis_data_handle.get(eto_measurement)
        rain_data = redis_data_handle.get(rain_measurement)
-       return render_template( "eto_raw_data",eto_data = eto_data, rain_data = rain_data ) 
+       return render_template( "/eto_raw_data",eto_data = eto_data, rain_data = rain_data ) 
 
 
 @app.route('/soil_moisture_data',methods=["GET"])
