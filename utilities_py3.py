@@ -161,6 +161,7 @@ class System_Monitoring():
                      temp["step"]           = 0
                      temp["run_time"]       = 0
                      scratch = json.dumps(temp)
+                     scratch = str.encode(scratch)
                      self.redis_handle.lpush("QUEUES:SPRINKLER:CTRL", base64.b64encode(scratch) )
                      temp = [1,time.time()+60*3600 ]  # +hour prevents a race condition
                      self.redis_handle.hset( "SYSTEM_COMPLETED",name,json.dumps(temp) ) 
