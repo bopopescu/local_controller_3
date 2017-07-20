@@ -158,6 +158,7 @@ def add_chains( cf,data_acquisition ):
    cf.define_chain("minute_list",True)
    cf.insert_link( "link_1","WaitEvent",["MINUTE_TICK" ])
    cf.insert_link( "link_2","One_Step",[data_acquisition.process_minute_data])
+   cf.insert_link( "linx","Log",["Completed Minute_Tick"])
    cf.insert_link( "link_3","Reset",[])  
 
 

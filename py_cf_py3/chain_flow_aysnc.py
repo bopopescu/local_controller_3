@@ -115,6 +115,7 @@ class Opcodes():
             parameters[2] = 0
         else:
             if event["name"] == parameters[0]:
+                print("received_event",event["name"],parameters)
                 parameters[2] = parameters[2] + 1
                 if parameters[2] >= int(parameters[1]):
                     returnValue = "DISABLE"
@@ -770,25 +771,27 @@ class CF_Base_Interpreter():
        second = time_stamp.second
        day = time_stamp.day
        if old_second != second:
+         print(old_second,second)
          self.queue_event("TIME_TICK", second)
-       if old_minute != minute:
+         old_second = second
+       if old_minute !=  minute:
          self.queue_event("MINUTE_TICK", minute)
+         old_minute = minute
        if old_hour != hour:
-         self.queue_event("HOUR_TICK", minute)
+         self.queue_event("HOUR_TICK", hour)
+         old_hour = old_hour
        if old_day != day:
          self.queue_event("DAY_TICK", day)
+         old_day = day
 
-       old_hour = hour
-       old_minute = minute
-       old_second = second
-       old_day = day
+ 
        try:
           self.execute_queue()
        except:
           print( "chain flow exception")
-          print( "current chain is ", self.current_chain["name"] )
+          print( "current chain is ", self.current_chain )
           current_index = self.current_chain["link_index"]
-          current_link = self.current_chain["links"][current_index]
+          #current_link = self.current_chain["links"][current_index]
 
           print( "current link  is ", current_link)
           raise

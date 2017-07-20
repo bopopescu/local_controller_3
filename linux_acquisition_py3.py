@@ -30,6 +30,7 @@ from   io_control_py3 import new_instrument_py3
 # Monitors status of raspberry pi
 #
 #
+#add cat /proc/meminfo
 
 from data_acquisition_py3 import data_scheduling_py3
 from data_acquisition_py3.data_scheduling_py3 import Data_Acquisition
@@ -65,7 +66,7 @@ class PI_Status( object ):
           
            if len(fields) > 3:
               percent = float( fields[2] )/float( fields[1] )
-              temp_value = { "disk": fields[0], "used":percent }  
+              temp_value =  "disk "+str(fields[0])+ "   used % : "+str(percent)   
               return_value.append( temp_value )
        return return_value
 
@@ -77,11 +78,11 @@ class PI_Status( object ):
        return_value = []
        fields = lines[1].split()
        percent = float(fields[2])/float(fields[1])
-       temp_value = { "Component": fields[0], "used":percent }
+       temp_value = "Component:  " + str(fields[0])+" Available: "+str(fields[1])+" used: "+str(fields[2])+" used %: "+str(percent)
        return_value.append(temp_value )
        fields = lines[3].split()
        percent = float(fields[2])/float(fields[1])
-       temp_value = { "Component": fields[0], "used":percent }
+       temp_value = "Component:  " + str(fields[0])+" Available: "+str(fields[1])+" used: "+str(fields[2])+" used %: "+str(percent)
        return_value.append(temp_value )
        return return_value
 
@@ -101,7 +102,15 @@ class PI_Status( object ):
            if len(fields) <= len(headers):
                for i in range(0,len(fields)):
                    temp_value[headers[i]] = fields[i]
-               return_value.append( temp_value )
+               
+               if "PARAMETER1" in temp_value:
+                 
+                 temp_dict = {}
+                 temp_dict["python_process"] = temp_value["PARAMETER1"]
+                 temp_dict["pid"]            = temp_value["PID"]
+                 temp_dict["RSS"]            = temp_value["RSS"]
+                 temp_dict["%CPU"]           = temp_value["%CPU"]
+                 return_value.append( json.dumps(temp_dict) )
 
        return return_value
 
@@ -114,10 +123,31 @@ class PI_Status( object ):
         return_value.append("config_file "+ str(data["config_file"]))
         return_value.append("aof_last_write_status "+ str(data["aof_last_write_status"]))
         return_value.append("total_commands_processed "+ str(data["total_commands_processed"]))
+        return_value.append("used_memory_rss_human "+ str(data["used_memory_rss_human"]))
+        return_value.append("db0:keys "+ json.dumps(data["db0"]))
+        return_value.append("db1:keys "+ json.dumps(data["db1"]))
+        return_value.append("db2:keys "+ json.dumps(data["db2"]))
+        return_value.append("db3:keys "+ json.dumps(data["db3"]))
+        return_value.append("db11:keys "+ json.dumps(data["db11"]))
+        return_value.append("db12:keys "+ json.dumps(data["db12"]))
+        return_value.append("db14:keys "+ json.dumps(data["db14"]))
+        return_value.append("db15:keys "+ json.dumps(data["db15"]))
         return return_value
 
    def measure_free_cpu( self, tag, value, parameters):
-       f = os.popen("sar -u 10 1 ")
+       headers = [ "Time","cpu","%user" , "%nice", "%system", "%iowait" ,"%steal" ,"%idle" ]
+       return_value = []
+       f = os.popen("sar -u 360 1 ")
+       data = f.readlines()
+       fields = data[-1].split()
+       print(data)
+       print(fields)
+       for i in range(0,len(fields)):
+           return_value.append(headers[i]+"    "+str(fields[i]))
+       return return_value
+
+   def proc_memory( self, tag, value, parameters):
+       f = os.popen("cat /proc/meminfo ")
        data = f.readlines()
        return data
 
@@ -129,7 +159,7 @@ def construct_linux_acquisition_class( redis_handle, gm, io_server,io_server_por
    gm.add_cb_handler("linux_redis",    pi_stat.log_redis_info )
    gm.add_cb_handler("linux_memory",   pi_stat.measure_processor_ram)
    gm.add_cb_handler("free_cpu",   pi_stat.measure_free_cpu)
-
+   gm.add_cb_handler("proc_mem",   pi_stat.proc_memory)
    instrument = new_instrument_py3.Modbus_Instrument()
 
    

@@ -1,0 +1,11 @@
+
+while [ 1 ]
+do
+   echo "executing utilities interface module"
+   python3 irrigation_monitoring_py3.py 2>  /tmp/irrigation_monitoring_py3.err 
+   python cloud_event_queue.py "reboot" irrigation_monitoring_py3
+   sleep 10
+   echo "dumping error file"
+   mv /tmp/irrigation_monitoring_py3.err  /tmp/irrigation_monitoring_py3.errr
+
+done

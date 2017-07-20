@@ -133,31 +133,9 @@ if __name__ == "__main__" :
 
    cf.add_header_node( "DATA_ACQUISITION")
 
-   cf.add_header_node( "FIFTEEN_SEC_ACQUISITION",properties= {"measurement":"FIFTEEN_SEC_ACQUISITION","length":5760, "routing_key":"FIFTEEN_SEC_ACQUISITION" }  )
-
-   properties = {}
-   properties["units"] = ""
-   properties["modbus_remote"] = "satellite_1"
-   properties["m_tag"]          = "read_input_bit"
-   properties["parameters"]     = [ "X002"]
-   properties["exec_tag"  ]     = ["get_gpio","master_valve_set_switch"]
-   
-   cf.add_info_node( "FIFTEEN_SEC_ELEMENT","MASTER_VALVE_SWITCH_SET",properties=properties, json_flag=True)
-
-   properties = {}
-   properties["units"] = ""
-   properties["modbus_remote"] = "satellite_1"
-   properties["m_tag"]          = "read_input_bit"
-   properties["parameters"]     = [ "X003"]
-   properties["exec_tag"  ]     = ["get_gpio","master_valve_reset_switch"]
-   
-   cf.add_info_node( "FIFTEEN_SEC_ELEMENT","MASTER_VALVE_SWITCH_RESET",properties=properties, json_flag=True)
-
-
-   cf.end_header_node("FIFTEEN_SEC_ACQUISITION") #DATA_ACQUISITION
 
  
-   cf.add_header_node( "MINUTE_ACQUISITION",properties= {"measurement":"MINUTE_LIST_STORE","length":10000, "routing_key":"MINUTE_ACQUISTION" } , json_flag=True )
+   cf.add_header_node( "MINUTE_ACQUISITION",properties= {"measurement":"MINUTE_ACQUISITION","length":5760, "routing_key":"MINUTE_ACQUISITION" }  )
 
 
 
@@ -166,7 +144,7 @@ if __name__ == "__main__" :
    properties["modbus_remote"] = "satellite_1"
    properties["m_tag"]          = "measure_analog"
    properties["parameters"]     = [ "DF1",1.0]
-   properties["exec_tag"  ]     = ["transfer_controller_current"]
+   #properties["exec_tag"  ]     = ["transfer_controller_current"]
    
    cf.add_info_node( "MINUTE_ELEMENT","CONTROLLER_CURRENT",properties=properties, json_flag=True)
 
@@ -176,27 +154,66 @@ if __name__ == "__main__" :
    properties["modbus_remote"] = "satellite_1"
    properties["m_tag"]          = "measure_analog"
    properties["parameters"]     = ["DF2",1.0]
-   properties["exec_tag"]       = ["transfer_irrigation_current"]
+   #properties["exec_tag"]       = ["transfer_irrigation_current"]
    cf.add_info_node( "MINUTE_ELEMENT","IRRIGATION_VALVE_CURRENT",properties=properties, json_flag=True)
 
-   cf.add_header_node("FLOW_METER_LIST")
+  
    properties = {}
-   properties["units"]          = "GPM"
-   properties["modbus_remote"] =  "satellite_1"
-   properties["parameters"]     = ["DS301", "C201",.0224145939] # counter id
-   properties["m_tag"]          = "measure_counter"
-   properties["exec_tag"]       = ["transfer_flow",.0224145939]
+   properties["units"]         = "GPM"
+   properties["modbus_remote"] = "skip_controller"
+   properties["parameters"]   = []
+   properties["m_tag"]        = "no_controller"
+   properties["parameters"]   = [.0224145939]
+   properties["exec_tag"]     = ["measure_flow",.0224145939]
    cf.add_info_node( "MINUTE_ELEMENT","MAIN_FLOW_METER",properties=properties, json_flag=True)
 
-   cf.end_header_node("FLOW_METER_LIST") #FLOW_METER_LIST
+   
+   properties = {}
+   properties["units"]         = "AMPS"
+   properties["modbus_remote"] = "skip_controller"
+   properties["parameters"]   = []
+   properties["m_tag"]        = "no_controller"
+   properties["parameters"]   = [.0224145939]
+   properties["exec_tag"]     = ["well_controller_output"]
   
-   #cf.add_info_node( "MINUTE_ELEMENT","WELL_CONTROLLER_OUTPUT",properties={"units":"AMPS"}, json_flag = True )
-   #cf.add_info_node( "MINUTE_ELEMENT","WELL_CONTROLLER_INPUT", properties={"units":"AMPS" }, json_flag = True)
-   #cf.add_info_node( "MINUTE_ELEMENT","FILTER_PRESSURE", properties = { "units":"PSI" }, json_flag = True )
-   #cf.add_info_node( "MINUTE_ELEMENT", "WELL_PRESSURE", properties = {"units":"PSI" }, json_flag = True )
+   cf.add_info_node( "MINUTE_ELEMENT","WELL_CONTROLLER_OUTPUT",properties=properties, json_flag = True )
+
+   properties = {}
+   properties["units"]         = "AMPS"
+   properties["modbus_remote"] = "skip_controller"
+   properties["parameters"]   = []
+   properties["m_tag"]        = "no_controller"
+   properties["parameters"]   = [.0224145939]
+   properties["exec_tag"]     = ["well_controller_input"]
+   cf.add_info_node( "MINUTE_ELEMENT","WELL_CONTROLLER_INPUT", properties=properties, json_flag = True)
+
+   properties = {}
+   properties["units"]         = "AMPS"
+   properties["modbus_remote"] = "skip_controller"
+   properties["parameters"]   = []
+   properties["m_tag"]        = "no_controller"
+   properties["parameters"]   = [.0224145939]
+   properties["exec_tag"]     = ["filter_pressure"]
+   cf.add_info_node( "MINUTE_ELEMENT","FILTER_PRESSURE", properties=properties, json_flag = True )
+
+   properties = {}
+   properties["units"]         = "AMPS"
+   properties["modbus_remote"] = "skip_controller"
+   properties["parameters"]   = []
+   properties["m_tag"]        = "no_controller"
+   properties["parameters"]   = [.0224145939]
+   properties["exec_tag"]     = ["well_pressure"]
+   cf.add_info_node( "MINUTE_ELEMENT", "WELL_PRESSURE", properties=properties, json_flag = True )
    
    cf.end_header_node("MINUTE_ACQUISITION") #"MINUTE_ACQUISITION"
 
+
+
+
+
+   cf.end_header_node("DATA_ACQUISITION") #DATA_ACQUISITION
+   
+   cf.add_header_node("MODBUS_STATISTICS")
 
    cf.add_header_node( "HOUR_ACQUISTION",properties= {"measurement":"HOUR_LIST_STORE","length":300 , "routing_key":"HOUR_ACQUISTION"} , json_flag=True )
    properties = {}
@@ -219,10 +236,11 @@ if __name__ == "__main__" :
    cf.add_info_node( "DAILY_ELEMENT","daily_modbus_statistics", properties=properties,json_flag=True ) 
    cf.end_header_node("DAILY_ACQUISTION")  # Daily Acquistion
 
+   cf.end_header_node("MODBUS_STATISTICS") #MODBUS_STATISTICS
 
 
 
-   cf.end_header_node("DATA_ACQUISITION") #DATA_ACQUISITION
+
 
    cf.add_header_node( "LINUX_DATA_ACQUISITION")
 
@@ -273,6 +291,14 @@ if __name__ == "__main__" :
    properties["m_tag"]         =  "no_controller"
    properties["exec_tag"]      =  ["free_cpu"]
    cf.add_info_node( "LINUX_HOUR_ELEMENT","free_cpu", properties=properties,json_flag=True )
+
+
+   properties = {}
+   properties["modbus_remote"] = "skip_controller"
+   properties["parameters"]    = []
+   properties["m_tag"]         =  "no_controller"
+   properties["exec_tag"]      =  ["proc_mem"]
+   cf.add_info_node( "LINUX_HOUR_ELEMENT","proc_mem", properties=properties,json_flag=True )
 
    cf.end_header_node( "LINUX_HOUR_ACQUISTION") # HOUR_ACQUISTION
 
