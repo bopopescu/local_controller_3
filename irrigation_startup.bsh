@@ -1,12 +1,15 @@
 #!/bin/bash
 sleep 5  # let redis start up
-#python /home/pi/new_python/system_config.py
+###python /home/pi/new_python/system_config.py
 python /home/pi/passwords.py
 cd /home/pi/new_python
-python load_files.py
-python  io_build.py
-##./external_control.bsh&
-./moisture_monitoring.bsh&
+python contruct_graph.py
+python3 -m redis_graph_py3.construct_graph_py3 
+python3 load_files_py3.py  
+#python  io_build.py
+
+./linux_monitoring.bsh&
+#./moisture_monitoring.bsh&
 ./eto.bsh&
 ./python_udp_server_startup.bsh&
 ./rabbit_redis_access.bsh&
@@ -19,4 +22,5 @@ cd flask_web
 cd ..
 sleep 20 #let io server resolve 485 buses
 #start sprinkler control
+./irrigation_monitoring.bsh&
 ./irrigation_ctrl_startup.bsh
