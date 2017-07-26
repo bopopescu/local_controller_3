@@ -71,20 +71,10 @@ class PI_Status( object ):
        return return_value
 
    def measure_processor_ram( self ,tag, value, parameters ):
-       f = os.popen("free -m")
-       data = f.read()
+       f = os.popen("free -l")
+       data = f.readlines()
        f.close()
-       lines = data.split("\n")
-       return_value = []
-       fields = lines[1].split()
-       percent = float(fields[2])/float(fields[1])
-       temp_value = "Component:  " + str(fields[0])+" Available: "+str(fields[1])+" used: "+str(fields[2])+" used %: "+str(percent)
-       return_value.append(temp_value )
-       fields = lines[3].split()
-       percent = float(fields[2])/float(fields[1])
-       temp_value = "Component:  " + str(fields[0])+" Available: "+str(fields[1])+" used: "+str(fields[2])+" used %: "+str(percent)
-       return_value.append(temp_value )
-       return return_value
+       return data
 
    def measure_processor_load( self ,tag, value, parameters  ):
        headers = [ "USER","PID","%CPU","%MEM","VSZ","RSS","TTY","STAT","START","TIME","COMMAND", "PARAMETER1", "PARAMETER2" ]
@@ -191,11 +181,7 @@ if __name__ == "__main__":
    import time
    from redis_graph_py3.farm_template_py3 import Graph_Management 
 
-   def list_filter( input_list):
-      if len( input_list ) > 0:
-          return input_list[0]
-      else:
-          return []
+
 
    gm =Graph_Management("PI_1","main_remote","LaCima_DataStore")
   

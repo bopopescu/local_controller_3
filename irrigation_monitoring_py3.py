@@ -31,6 +31,9 @@ from   io_control_py3 import new_instrument_py3
 #
 #
 
+##cf.insert_link( "link_17",  "One_Step",         [ self.log_clean_filter ] )
+
+
 from data_acquisition_py3 import data_scheduling_py3
 from data_acquisition_py3.data_scheduling_py3 import Data_Acquisition
 from data_acquisition_py3.data_scheduling_py3 import add_chains

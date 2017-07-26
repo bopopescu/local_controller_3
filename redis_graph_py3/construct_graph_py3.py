@@ -123,6 +123,44 @@ if __name__ == "__main__" :
    cf.add_info_node( "RAIN_ENTRY","SRUC1_RAIN",properties=properties, json_flag=True)
    cf.end_header_node("RAIN_SOURCES")
 
+   cf.add_header_node("IRRIGATION_SUPPORT")
+
+
+   cf.add_header_node("MASTER_VALVES")
+   cf.add_info_node("MASTER_VALVE_CONTROLLER","satellite_1",json_flag = True,
+        properties = { "remote":"satellite_1","master_valve":43, "cleaning_valve":44 })
+
+   cf.end_header_node("MASTER_VALVES")
+       
+   cf.add_header_node("CURRENT_MEASUREMENT")
+
+   cf.add_info_node("CURRENT_DEVICE" ,"satellite_1",properties={ "remote":"satellite_1","register":"DF1", "conversion":1.0 },
+        json_flag = True)
+
+   cf.end_header_node("CURRENT_MEASUREMENT")
+
+   cf.add_header_node("FLOW_METERS")
+
+   cf.add_info_node( "FLOW_METER_CONTROL","main_flow_meter",json_flag = True,
+                       properties={ "type":"CLICK", "remote":"satellite_1", "latch_bit":"C201",
+                        "read_register":"DS301",  "conversion_factor":0.0224145939 }  )
+
+
+
+   cf.end_header_node("FLOW_METERS")
+
+
+   cf.add_header_node("IRRIGATION_DATA" )
+
+   cf.add_info_node( "IRRIGATION_DATA_ELEMENT","MASTER_VALVE",json_flag = True,
+                       properties={ "dict":"CONTROL_VARIBALES", "key":"MASTER_VALVE_SETUP"  }  )
+   cf.add_info_node( "IRRIGATION_DATA_ELEMENT","CURRENT",json_flag = True,
+                       properties={ "dict":"CONTROL_VARIBALES", "key":"coil_current"  }  )
+
+
+   cf.end_header_node("IRRIGATION_DATA")
+
+   cf.end_header_node("IRRIGATION_SUPPORT")
 
 
    cf.end_header_node("APPLICATION_SUPPORT")
@@ -339,6 +377,7 @@ if __name__ == "__main__" :
    
    cf.end_header_node("moisture_1") #moisture_1
    cf.end_header_node("MOISTURE_SENSOR_DATA") #MOISTURE_DATA
+
 
    cf.end_header_node("DATA_STORE")
 

@@ -125,6 +125,13 @@ class Query_Configuration(object):
         self.redis_handle = redis_handle
         basic_init(self)  
 
+   def to_dictionary( self, list, key ):
+       return_value = {}
+       for i in list:
+           return_value[i[key]] = i
+       return return_value
+
+
    def match_terminal_relationship( self, relationship, label= None , starting_set = None,property_values = None, data_flag = True ):
        return_value = None
        #print("initial starting set",starting_set)
