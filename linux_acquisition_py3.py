@@ -100,7 +100,7 @@ class PI_Status( object ):
                  temp_dict["pid"]            = temp_value["PID"]
                  temp_dict["RSS"]            = temp_value["RSS"]
                  temp_dict["%CPU"]           = temp_value["%CPU"]
-                 return_value.append( json.dumps(temp_dict) )
+                 return_value.append( json.dumps(temp_dict, sort_keys = True, indent = 5) )
 
        return return_value
 

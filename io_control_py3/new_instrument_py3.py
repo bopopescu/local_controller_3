@@ -110,6 +110,7 @@ class Modbus_Instrument:
 
 
     def write_bits(self, modbus_address, registeraddress, value, functioncode=15):
+        
         number_of_bits = len( value )
         
         bit_data = ""

@@ -29,6 +29,8 @@ if __name__ == "__main__":
    
    io_server_ip     = io_server_nodes[0]["ip"]
    io_server_port   = io_server_nodes[0]["port"]
-   instrument = new_instrument_py3.Modbus_Instrument()
+
    remote_classes = construct_classes_py3.Construct_Access_Classes(io_server_ip,io_server_port)
-   io_control  = IO_Control(gm,remote_classes, redis_old_handle,redis_new_handle, instrument)
+   io_control  = IO_Control(gm,remote_classes, redis_old_handle,redis_new_handle)
+   #io_control.disable_all_sprinklers()
+   io_control.measure_current()

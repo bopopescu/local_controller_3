@@ -2,35 +2,48 @@
 
 class IO_Control(object):
 
-   def __init__(self,  graph_management, construct_class, redis_old_handle, redis_new_handle,new_instrument ):
+   def __init__(self,  graph_management, construct_class, redis_old_handle, redis_new_handle ):
        self.gm              = graph_management
        self.construct_class = construct_class
        self.find_class      = construct_class.find_class
-       self.new_instrument  = new_instrument
-       temp_controllers     = self.gm.match_terminal_relationship(  "REMOTE_UNIT")
-       indexed_controllers  = {}
+       self.redis_old_handle = redis_old_handle
+       self.redis_new_handle = redis_new_handle
+       temp_controllers     = self.gm.match_terminal_relationship(  "REMOTE_UNIT")  #find remote controllers
+       self.indexed_controllers  = {}  #remote controllers in a dictionary keyed by remote nanot
        self.ir_ctrl         = [] #irrigation controllers
-       indexed_controllers = self.gm.to_dictionary(temp_controllers,"name")
+       #print("temp_controllers",temp_controllers)
+       self.indexed_controllers = self.gm.to_dictionary(temp_controllers,"name")
+       #print("indexed_controllers",indexed_controllers)
        for element in temp_controllers:
-           #indexed_controllers[element["name"]] = element
+           
            
            if "irrigation" in element["function"]:
-              self.ir_ctrl.append(element)
+              self.ir_ctrl.append(element)  # finding irrigation controllers.
 
-       self.mv_list = self.gm.match_terminal_relationship(  "MASTER_VALVE_CONTROLLER")
+       self.mv_list = self.gm.match_terminal_relationship(  "MASTER_VALVE_CONTROLLER")  #finding all master valves
        for i in self.mv_list:
            remote = i["remote"]
-           element = indexed_controllers[remote]
-           
-           
-           if "flow_meter"  in indexed_controllers[remote]["function"]:
+           if remote in self.indexed_controllers:
+               pass
+           else:   
+               raise ValueError("Remote does not support MASTER VALVE ")
+
+       self.fc_list = self.gm.match_terminal_relationship(  "FLOW_METER_CONTROL" )  #finding all master valves
+       for i in self.fc_list:
+           remote = i["remote"]
+           if remote in self.indexed_controllers:
+               pass
+           else:   
+               raise ValueError("Remote does not support MASTER VALVE ")
+           if "flow_meter"  in self.indexed_controllers[remote]["function"]:         
                 pass
            else:
                raise ValueError("Remote does not support MASTER VALVE ")
 
+
        self.current_device = self.gm.match_terminal_relationship( "CURRENT_DEVICE" )[0]
        remote = self.current_device["remote"]
-       if "valve_current"  in indexed_controllers[remote]["function"]:
+       if "valve_current"  in self.indexed_controllers[remote]["function"]:
            pass
        else:
            raise ValueError("Remote does not support MASTER VALVE ")
@@ -41,21 +54,23 @@ class IO_Control(object):
  
 
    def measure_current( self,*args):
-       controller = self.ir_ctrl[self.current_device["remote"]]
-       action_class = find_class( controller["type"] )
+
+       controller = self.indexed_controllers[self.current_device["remote"]]
+       action_class = self.find_class( controller["type"] )
        register     = self.current_device["register"]
        conversion   = self.current_device["conversion"]
        current      = action_class.measure_analog(  controller["modbus_address"], [register, conversion ] )
        redis_dict = self.ir_data["CURRENT"]["dict"]
        redis_key = self.ir_data["CURRENT"]["dict"]
-       self.redis_old_handle.hset(redis_dict,"redis_key","OFF")
+       print("current",current)
+       self.redis_old_handle.hset(redis_dict,"redis_key",current)
        
      
 
    def disable_all_sprinklers( self,*arg ):
       
-       for i,item in self.irrigation_controllers.items():
-           action_class = find_class(item["type"])
+       for item in self.ir_ctrl:
+           action_class = self.find_class(item["type"])
            action_class.disable_all_sprinklers( item["modbus_address"], [] )
 
               
