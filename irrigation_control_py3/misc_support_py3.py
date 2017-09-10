@@ -9,11 +9,10 @@ class IO_Control(object):
        self.redis_old_handle = redis_old_handle
        self.redis_new_handle = redis_new_handle
        temp_controllers     = self.gm.match_terminal_relationship(  "REMOTE_UNIT")  #find remote controllers
-       self.indexed_controllers  = {}  #remote controllers in a dictionary keyed by remote nanot
        self.ir_ctrl         = [] #irrigation controllers
        #print("temp_controllers",temp_controllers)
-       self.indexed_controllers = self.gm.to_dictionary(temp_controllers,"name")
-       #print("indexed_controllers",indexed_controllers)
+       self.irrigation_controllers = self.gm.to_dictionary(temp_controllers,"name")
+       #print("irrigation_controllers",irrigation_controllers)
        for element in temp_controllers:
            
            
@@ -23,7 +22,7 @@ class IO_Control(object):
        self.mv_list = self.gm.match_terminal_relationship(  "MASTER_VALVE_CONTROLLER")  #finding all master valves
        for i in self.mv_list:
            remote = i["remote"]
-           if remote in self.indexed_controllers:
+           if remote in self.irrigation_controllers:
                pass
            else:   
                raise ValueError("Remote does not support MASTER VALVE ")
@@ -31,11 +30,11 @@ class IO_Control(object):
        self.fc_list = self.gm.match_terminal_relationship(  "FLOW_METER_CONTROL" )  #finding all master valves
        for i in self.fc_list:
            remote = i["remote"]
-           if remote in self.indexed_controllers:
+           if remote in self.irrigation_controllers:
                pass
            else:   
                raise ValueError("Remote does not support MASTER VALVE ")
-           if "flow_meter"  in self.indexed_controllers[remote]["function"]:         
+           if "flow_meter"  in self.irrigation_controllers[remote]["function"]:         
                 pass
            else:
                raise ValueError("Remote does not support MASTER VALVE ")
@@ -43,7 +42,7 @@ class IO_Control(object):
 
        self.current_device = self.gm.match_terminal_relationship( "CURRENT_DEVICE" )[0]
        remote = self.current_device["remote"]
-       if "valve_current"  in self.indexed_controllers[remote]["function"]:
+       if "valve_current"  in self.irrigation_controllers[remote]["function"]:
            pass
        else:
            raise ValueError("Remote does not support MASTER VALVE ")
@@ -53,9 +52,9 @@ class IO_Control(object):
        print(self.ir_data.keys())
  
 
-   def measure_current( self,*args):
+   def measure_valve_current( self,*args):
 
-       controller = self.indexed_controllers[self.current_device["remote"]]
+       controller = self.irrigation_controllers[self.current_device["remote"]]
        action_class = self.find_class( controller["type"] )
        register     = self.current_device["register"]
        conversion   = self.current_device["conversion"]
@@ -76,35 +75,43 @@ class IO_Control(object):
               
  
    def turn_on_master_valves( self,*arg ):
+       
+       self.redis_old_handle.hset("CONTROL_VARIABLES","MASTER_VALVE_SETUP","ON")
+
        redis_dict = self.ir_data["MASTER_VALVE"]["dict"]
        redis_key = self.ir_data["MASTER_VALVE"]["key"]
        self.redis_old_handle.hset(redis_dict,"redis_key","ON")
-       for i,item in self.mv_list.items():
-           action_class = find_class(item["type"])
-           action_class.disable_all_sprinklers( item["modbus_address"], [] )
+       for item in self.mv_list:
+           controller = self.irrigation_controllers[item["remote"]]
+           action_class = self.find_class(controller["type"])
+           action_class.disable_all_sprinklers( controller["modbus_address"], [] )
            action_class.turn_on_valves( controller["modbus_address"], [item["master_valve"]] )
             
    def turn_off_master_valves( self,*arg ):
+       
+       self.redis_old_handle.hset("CONTROL_VARIABLES", "MASTER_VALVE_SETUP","OFF")
        redis_dict = self.ir_data["MASTER_VALVE"]["dict"]
        redis_key = self.ir_data["MASTER_VALVE"]["key"]
        self.redis_old_handle.hset(redis_dict,"redis_key","OFF")
-       for i,item in self.mv_list.items():
-            controller = self.ir_ctrl[item["remote"]]
-            action_class = find_class( controller["type"] )
+
+       for item in self.mv_list:
+            controller = self.irrigation_controllers[item["remote"]]
+            action_class = self.find_class( controller["type"] )
+            action_class.disable_all_sprinklers( controller["modbus_address"], [] )
             action_class.turn_off_valves(  controller["modbus_address"], [item["master_valve"]] )
 
 
    def turn_on_cleaning_valves( self,*arg ):
-       for i,item in self.mv_list.items():
+       for item in self.mv_list:
             controller = self.ir_ctrl[item["remote"]]
             action_class = find_class( controller["type"] )
             action_class.turn_on_valves(  controller["modbus_address"], [item["cleaning_valve"]] )
             
    def turn_off_cleaning_valves( self,*arg ):
-       for i,item in self.mv_list.items():
+       for item in self.mv_list:
             controller = self.ir_ctrl[item["remote"]]
             action_class = find_class( controller["type"] )
-            action_class.turn_off_valves( controller["modbus_address"], [item["cleaning_valve"]] )
+            action_class.turn_off_valves( controller["modbus_address"], [[item["cleaning_valve"]]] )
     
 
  
@@ -135,10 +142,31 @@ class IO_Control(object):
            action_class   = find_class( controller["type"] )
            action_class.turn_on_valves(  controller["modbus_address"], bits)
 
-
-
-      
-
-
+#properties={ "main_flow_meter" : "True",  "type":"CLICK", "remote":"satellite_1", 
+#                       "io_setup" : {"latch_bit":"C201",
+#                        "read_register":"DS301",  "conversion_factor":0.0224145939 } }  )
 
  
+   def measure_flow_rates ( self, *args ):
+       for i in  self.fc_list:
+           remote = i["remote"]
+           print("flow rate remote",remote)
+           controller     = self.irrigation_controllers[i["remote"]]
+           action_class   = self.find_class( controller["type"] )
+           print("i",i["io_setup"])
+           conversion_rate = i["io_setup"]["conversion_factor"]
+           flow_value = action_class.measure_counter( controller["modbus_address"], i["io_setup"] )
+           print("flow_value",flow_value)
+           self.redis_old_handle.lpush("QUEUES:SPRINKLER:FLOW:"+str(i),flow_value )
+           self.redis_old_handle.ltrim("QUEUES:SPRINKLER:FLOW:"+str(i),0,800)
+           if i["main_flow_meter"] == "True":
+               self.redis_old_handle.hset("CONTROL_VARIABLES","global_flow_sensor",flow_value )         
+               self.redis_old_handle.hset("CONTROL_VARIABLES","global_flow_sensor_corrected",flow_value*conversion_rate )
+
+   def measure_flow_rate( self, remote, io_setup ):           
+       controller     = self.irrigation_controllers[remote]
+       action_class   = self.find_class( controller["type"] )
+       flow_value     = action_class.measure_counter( remote, io_setup )
+
+
+
