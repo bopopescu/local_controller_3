@@ -92,8 +92,8 @@ class Help_Functions:
    def wait_event_count( self,event="TIME_TICK", count = 1 ):
        self.cf.insert_link("Wait_Event_Count",[event, count] )
 
-   def wait_function( self, fn ,*params):
-       list_data = [fn]
+   def wait_function( self, function ,*params):
+       list_data = [function]
        list_data.extend(params)
        self.cf.insert_link("Wait_Fn", list_data)
 

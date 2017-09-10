@@ -13,7 +13,7 @@ class Cluster_Control:
    def define_cluster( self, cluster_id, list_of_chains, initial_chain):
 
        set_chains = set(list_of_chains)
-       set_chains.add(initial_chain)
+       
        self.validate_chain_list(list_of_chains)
       
        self.validate_cluster(cluster_id, False)
@@ -65,11 +65,14 @@ class Cluster_Control:
    def reset_cluster(self, cf_handle, chainObj, parameters, event):
        cluster_id = parameters[1]
        self.disable_cluster_states(  self.cf, self.clusters[cluster_id]["chains"])
-       self.reset_cluster_states( self.cf, [self.clusters[cluster_id]["initial_chain"]] )
+       if  self.clusters[cluster_id]["initial_chain"] != None :
+           self.reset_cluster_states( self.cf, [self.clusters[cluster_id]["initial_chain"]] )
 
    def suspend_cluster(self, cf_handle, chainObj, parameters, event):
        cluster_id = parameters[1]
+       self.suspend_cluster_rt( cf_handle, cluster_id )
 
+   def suspend_cluster_rt( self, cf_handle, cluster_id ):
        if self.clusters[cluster_id]["suspension_state"] == False:
           self.clusters[cluster_id]["suspension_state"] = True
           for i in self.clusters[cluster_id]["chains"]:
@@ -80,6 +83,9 @@ class Cluster_Control:
 
    def resume_cluster(self, cf_handle, chainObj, parameters, event):
        cluster_id = parameters[1]
+       self.resume_cluster_rt(cf_handle,cluster_id)
+
+   def resume_cluster_rt( self, cf_handle,cluster_id ):
        if self.clusters[cluster_id]["suspension_state"] == True:
           self.clusters[cluster_id]["suspension_state"] = True
           for i in self.clusters[cluster_id]["chains"]:
@@ -90,16 +96,22 @@ class Cluster_Control:
               
    def disable_cluster(self, cf_handle, chainObj, parameters, event):
        cluster_id = parameters[1]
+       self.disable_cluster_rt( cf_handle,cluster_id )
+   
+   def disable_cluster_rt( self,cf_handle, cluster_id ):
        chains = self.clusters[cluster_id]["chains"]
        self.disable_cluster_states( cf_handle, chains)
                
 
    # parameter[1] is the cluster id
    # parameter[2] is the state id      
-   def set_configuration_reset(self, cf_handle, chainObj, parameters, event):
-      
+   def enable_cluster_reset(self, cf_handle, chainObj, parameters, event):
        cluster_id, state_id = self.validate_parameters( parameters)     
+       self.enable_cluster_reset_rt( cf_handle, cluster_id, state_id)
+
+   def enable_cluster_reset_rt( self, cf_handle, cluster_id, state_id ):
        enabled_states, disable_states = self.analyize_cluster_state( cluster_id, state_id)
+       
        self.disable_cluster_states( cf_handle, disable_states)
        self.reset_cluster_states( cf_handle, enabled_states)
        return "DISABLE"
@@ -109,8 +121,11 @@ class Cluster_Control:
    Not usefull right now
    # parameter[1] is the cluster id
    # parameter[2] is the state id
-   def set_configuration_no_reset( self, cf_handle, chainObj, parameters, event ):
-       cluster_id, state_id = self.validate_parameters( parameters)     
+   def enable_cluster_no_reset( self, cf_handle, chainObj, parameters, event ):
+       cluster_id, state_id = self.validate_parameters( parameters)   
+       self.enable_cluster_no_reset_rt(cf_handle, cluster_id, state_id)
+
+   def enable_cluster_no_reset_rt(self,cf_handle, cluster_id, state_id)         
        enabled_states, disable_states = self.analyize_cluster_state( cluster_id, state_id)
        print("++++++",enabled_states, disable_states)
        current_enabled_states = self.determine_enabled_states( cf_handle, enabled_states)
@@ -127,8 +142,10 @@ class Cluster_Control:
    def validate_parameters( self, parameters ):
        cluster_id = parameters[1]
        state_id   = parameters[2]
+       
        self.validate_cluster( cluster_id, True)
        self.validate_state_id( cluster_id, state_id, True)
+       
        return cluster_id,state_id
 
 
@@ -167,6 +184,7 @@ class Cluster_Control:
        
    def validate_state_id( self, cluster_id, state_id , flag = False):
        if flag == False:
+           
            if state_id  in self.clusters[cluster_id]["states"]:
                raise ValueError("duplicate definition for cluster %s and state_id %s ",(cluster_id,state_id))
        else:
@@ -199,11 +217,11 @@ if __name__ == "__main__":
 
    cf.define_chain("Control_Chain",False)
    cf.insert.wait_event_count(count = 5) # 5 second delay
-   cf.insert.one_step(cluster_control.set_configuration_reset,"test_cluster","state_1")
+   cf.insert.one_step(cluster_control.enable_cluster_reset,"test_cluster","state_1")
    cf.insert.wait_event_count(count=5 ) # 5 second delay
-   cf.insert.one_step(cluster_control.set_configuration_reset,"test_cluster","state_2")
+   cf.insert.one_step(cluster_control.enable_cluster_reset,"test_cluster","state_2")
    cf.insert.wait_event_count(count=5 ) # 5 second delay
-   cf.insert.one_step(cluster_control.set_configuration_reset,"test_cluster","state_3")
+   cf.insert.one_step(cluster_control.enable_cluster_reset,"test_cluster","state_3")
    cf.insert.wait_event_count(count=5 ) # 5 second delay
    cf.insert.one_step(cluster_control.suspend_cluster,"test_cluster")
    cf.insert.wait_event_count(count=5 ) # 5 second delay

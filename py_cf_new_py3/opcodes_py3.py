@@ -11,6 +11,7 @@ class Opcodes():
        self.opcodes = {}
        self.opcodes["Terminate"]          = self.terminate_code
        self.opcodes["Reset"]              = self.reset_code
+       self.opcodes["Halt"]               = self.halt_code
        self.opcodes["Enable_Chain"]       = self.enable_chain_code
        self.opcodes["Disable_Chain"]      = self.disable_chain_code
        self.opcodes["Suspend_Chain"]      = self.suspend_chain_code
@@ -43,6 +44,10 @@ class Opcodes():
 
     def reset_code(self, cf_handle, chainObj, parameters, event):
         return "RESET"
+
+    def halt_code(self, cf_handle, chainObj, parameters, event):
+        return "HALT"
+
 
 
 
@@ -108,11 +113,13 @@ class Opcodes():
 
 
     def check_event_code(self, cf_handle, chainObj, parameters, event):
+        
         if event["name"] == "INIT":
-            func = parameters[0]
+            
+            func = parameters[1]
             func(cf_handle, chainObj, parameters, event)
-        elif event["name"] == parameters[1]:
-            func = parameters[0]
+        elif event["name"] == parameters[0]:
+            func = parameters[1]
             func(cf_handle, chainObj, parameters, event)
         return "CONTINUE"
 
@@ -269,16 +276,19 @@ class Opcodes():
 
 
     def verify_fn_code(self, cf_handle, chainObj, parameters, event):
-        verifyFn     = parameters[0]
+        
         reset_event  = parameters[1]
         reset_flag   = parameters[2]
+        verifyFn     = parameters[0]
+        
         if verifyFn (cf_handle, chainObj, parameters, event):
             returnValue = "CONTINUE"
         else:
     
-            print("made it here", reset_event, reset_flag)
+            
             returnValue = self.verify_return_code( cf_handle, reset_event, reset_flag)
-            print(returnValue)
+            
+        
         return returnValue
 
 
