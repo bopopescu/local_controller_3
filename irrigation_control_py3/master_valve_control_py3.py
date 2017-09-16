@@ -104,7 +104,7 @@ class Master_Valve:
            self.deferred_enable = False
 
    def master_valve_off(self, cf_handle, chainObj, parameters, event):
-       
+       print("checking master valve")
        if self.redis_handle.hget("CONTROL_VARIABLES","MASTER_VALVE_SETUP").decode() == "ON":
           return_value = False
        else:

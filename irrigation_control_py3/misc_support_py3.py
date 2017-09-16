@@ -3,6 +3,7 @@
 class IO_Control(object):
 
    def __init__(self,  graph_management, construct_class, redis_old_handle, redis_new_handle ):
+       
        self.gm              = graph_management
        self.construct_class = construct_class
        self.find_class      = construct_class.find_class
@@ -59,16 +60,21 @@ class IO_Control(object):
        register     = self.current_device["register"]
        conversion   = self.current_device["conversion"]
        current      = action_class.measure_analog(  controller["modbus_address"], [register, conversion ] )
+ 
        redis_dict = self.ir_data["CURRENT"]["dict"]
-       redis_key = self.ir_data["CURRENT"]["dict"]
-       print("current",current)
-       self.redis_old_handle.hset(redis_dict,"redis_key",current)
+       redis_key = self.ir_data["CURRENT"]["key"]
+       self.redis_old_handle.hset(redis_dict,redis_key,current)
+       
+       return current
        
      
 
    def disable_all_sprinklers( self,*arg ):
-      
+       print("disable_all_sprinklers")
+       self.redis_old_handle.hset("CONTROL_VARIABLES","MASTER_VALVE_SETUP","OFF")
+
        for item in self.ir_ctrl:
+           
            action_class = self.find_class(item["type"])
            action_class.disable_all_sprinklers( item["modbus_address"], [] )
 
@@ -84,7 +90,6 @@ class IO_Control(object):
        for item in self.mv_list:
            controller = self.irrigation_controllers[item["remote"]]
            action_class = self.find_class(controller["type"])
-           action_class.disable_all_sprinklers( controller["modbus_address"], [] )
            action_class.turn_on_valves( controller["modbus_address"], [item["master_valve"]] )
             
    def turn_off_master_valves( self,*arg ):
@@ -103,15 +108,16 @@ class IO_Control(object):
 
    def turn_on_cleaning_valves( self,*arg ):
        for item in self.mv_list:
-            controller = self.ir_ctrl[item["remote"]]
-            action_class = find_class( controller["type"] )
+            controller = self.irrigation_controllers[item["remote"]]
+            action_class = self.find_class( controller["type"] )
             action_class.turn_on_valves(  controller["modbus_address"], [item["cleaning_valve"]] )
             
    def turn_off_cleaning_valves( self,*arg ):
        for item in self.mv_list:
-            controller = self.ir_ctrl[item["remote"]]
-            action_class = find_class( controller["type"] )
-            action_class.turn_off_valves( controller["modbus_address"], [[item["cleaning_valve"]]] )
+            
+            controller = self.irrigation_controllers[item["remote"]]
+            action_class = self.find_class( controller["type"] )
+            action_class.turn_off_valves( controller["modbus_address"], [item["cleaning_valve"]] )
     
 
  
@@ -120,31 +126,29 @@ class IO_Control(object):
    #  Clearing Duration counter is done through a falling edge
    #  going from 1 to 0 generates the edge
    def clear_duration_counters( self,*arg ):
-       for i,item in self.irrigation_controllers.items():
-           action_class = find_class(item["type"])
-           action_class.clear_duration_counters( item["modbus_address"], [] )
+       for item in self.ir_ctrl:
+           action_class = self.find_class(item["type"])
+           action_class.clear_duration_counters( item["modbus_address"] )
 
 
    def load_duration_counters( self, time_duration ,*arg):
-       for i,item in self.irrigation_controllers.items():
-           action_class = find_class(item["type"])
+       time_duration = (time_duration*60)+15  # convert minutes to seconds
+       for item in self.ir_ctrl:
+           
+           action_class = self.find_class(item["type"])
            action_class.load_duration_counters( item["modbus_address"], [time_duration] )
 
                
 
    def turn_on_valve( self ,io_setup ):
        # io_setup is a list of dict { "remote":xx , "bits":[1,2,3,4] }
-
+       print("turn_on_valve",io_setup)
        for i in io_setup:      
            remote        = i["remote"]
            bits          = i["bits"]  # list of outputs on remote to turn off
-           controller     = self.ir_ctrl[item["remote"]]
-           action_class   = find_class( controller["type"] )
+           controller     = self.irrigation_controllers[remote]
+           action_class   = self.find_class( controller["type"] )
            action_class.turn_on_valves(  controller["modbus_address"], bits)
-
-#properties={ "main_flow_meter" : "True",  "type":"CLICK", "remote":"satellite_1", 
-#                       "io_setup" : {"latch_bit":"C201",
-#                        "read_register":"DS301",  "conversion_factor":0.0224145939 } }  )
 
  
    def measure_flow_rates ( self, *args ):
