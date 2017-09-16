@@ -2,28 +2,32 @@
 
 
 class SprinklerControl():
-   def __init__(self, irrigation_control,alarm_queue,redis_handle,cf):
+   def __init__(self, irrigation_control,alarm_queue,redis_handle,
+                          cf,master_valve_ctrl,sprinkler_ctrl):
        self.irrigation_control                    = irrigation_control
        self.alarm_queue                           = alarm_queue
        self.redis_handle                          = redis_handle
+       self.cf                                    = cf
+       self.master_valve_ctrl                      = master_valve_ctrl
+       self.sprinkler_ctrl                          = sprinkler_ctrl
        self.commands = {}
        self.commands["OFFLINE"]                   = self.go_offline          
        self.commands["QUEUE_SCHEDULE"]            = self.queue_schedule
        self.commands["QUEUE_SCHEDULE_STEP"]       = self.queue_schedule_step     
        self.commands["QUEUE_SCHEDULE_STEP_TIME"]  = self.queue_schedule_step_time
-       self.commands["RESTART_PROGRAM"]           = self.restart_program         #tested   
+       self.commands["RESTART_PROGRAM"]           = self.restart_program  #ok          
        self.commands["NATIVE_SCHEDULE"]           = self.queue_schedule_step_time      
        self.commands["NATIVE_SPRINKLER"]          = self.direct_valve_control       
-       self.commands["CLEAN_FILTER"]              = self.clean_filter            #tested    
-       self.commands["OPEN_MASTER_VALVE"]         = self.open_master_valve       #tested     
-       self.commands["CLOSE_MASTER_VALVE"]        = self.close_master_valve      #tested    
-       self.commands["RESET_SYSTEM"]              = self.reset_system            #tested    
-       self.commands["CHECK_OFF"]                 = self.check_off               #tested          
-       self.commands["SUSPEND"]                   = self.suspend                 #tested   
-       self.commands["RESUME"  ]                  = self.resume                  #tested    
+       self.commands["CLEAN_FILTER"]              = self.clean_filter    # ok            
+       self.commands["OPEN_MASTER_VALVE"]         = self.open_master_valve   #ok        
+       self.commands["CLOSE_MASTER_VALVE"]        = self.close_master_valve  #ok       
+       self.commands["RESET_SYSTEM"]              = self.reset_system        #ok       
+       self.commands["CHECK_OFF"]                 = self.check_off           #ok              
+       self.commands["SUSPEND"]                   = self.suspend                    
+       self.commands["RESUME"  ]                  = self.resume                      
        self.commands["SKIP_STATION"]              = self.skip_station     
-       self.commands["RESISTANCE_CHECK"]          = self.resistance_check           
-       self.app_files                             = load_files_py3.APP_FILES(redis_handle)
+       self.commands["RESISTANCE_CHECK"]          = self.resistance_check   #ok        
+       self.app_files                             = load_files_py3.APP_FILES(redis_handle) 
        self.add_chains(cf)
 
    def dispatch_sprinkler_mode(self,chainFlowHandle, chainObj, parameters,event):
@@ -31,13 +35,13 @@ class SprinklerControl():
 
            #try: 
                length = self.redis_handle.llen( "QUEUES:SPRINKLER:CTRL")
-               
+               #print("--length",length)
                if length > 0:
                   data = self.redis_handle.rpop("QUEUES:SPRINKLER:CTRL") 
                   data = base64.b64decode(data)
                   object_data = json.loads(data.decode("utf-8") )
  
-                  print( "object_data",object_data )
+                 
                   if object_data["command"] in self.commands :
                        self.commands[object_data["command"]]( object_data,chainFlowHandle, chainObj, parameters,event )
                   else:
@@ -53,24 +57,27 @@ class SprinklerControl():
        self.alarm_queue.store_past_action_queue("SUSPEND_OPERATION","YELLOW"  )
        self.irrigation_control.turn_off_master_valves()
        self.irrigation_control.disable_all_sprinklers()
+       self.sprinkler_ctrl.suspend_operation()
+       self.cf.send_event("IRI_MASTER_VALVE_SUSPEND",None)
        self.redis_handle.hset("CONTROL_VARIABLES","SUSPEND","ON")
 
    def resume( self, *args ):
-       print("made it to resume")
+
+       self.sprinkler_ctrl.resume_operation()
+       self.cf.send_event("IRI_MASTER_VALVE_RESUME",None)
+
        self.alarm_queue.store_past_action_queue("RESUME_OPERATION","GREEN"  )
        self.redis_handle.hset("CONTROL_VARIABLES","SUSPEND","OFF")
 
    def skip_station( self, *args ):
-       self.alarm_queue.store_past_action_queue("SKIP_STATION","YELLOW" ,{"skip: on"} )
-       self.redis_handle.hset("CONTROL_VARIABLES","SKIP_STATION","ON" )
-
+       self.alarm_queue.store_past_action_queue("SKIP_STATION","YELLOW" ,{"skip": "action"} )
+       self.sprinkler_ctrl.skip_operation()
 
    def resistance_check( self, object_data, chainFlowHandle, chainObj, parameters, event ):
         json_object = {}
         json_object["type"]   = "RESISTANCE_CHECK"
         json_string = json.dumps( json_object)
-        compact_data = base64.b64encode(json_string)
-        self.redis_handle.lpush(  "QUEUES:SPRINKLER:IRRIGATION_QUEUE", compact_data )
+        self.redis_handle.lpush(  "QUEUES:SPRINKLER:IRRIGATION_QUEUE", json_string )
         alarm_queue.store_past_action_queue( "RESISTANCE_CHECK", "GREEN",  { "action":"start" } )        
 
 
@@ -78,7 +85,7 @@ class SprinklerControl():
         json_object = {}
         json_object["type"]            = "CHECK_OFF"
         json_string = json.dumps( json_object)
-        print("json string ",json_string)
+        
         self.redis_handle.lpush(  "QUEUES:SPRINKLER:IRRIGATION_QUEUE", json_string )
         alarm_queue.store_past_action_queue( "CHECK_OFF", "GREEN",  { "action":"start" } )        
 
@@ -86,8 +93,7 @@ class SprinklerControl():
         json_object = {}
         json_object["type"]  = "CLEAN_FILTER"
         json_string = json.dumps( json_object)
-        compact_data = base64.b64encode(json_string)
-        self.redis_handle.lpush(  "QUEUES:SPRINKLER:IRRIGATION_QUEUE", compact_data )
+        self.redis_handle.lpush(  "QUEUES:SPRINKLER:IRRIGATION_QUEUE", json_string )
         alarm_queue.store_past_action_queue( "CLEAN_FILTER", "GREEN",  { "action":"start" } )        
 
   
@@ -103,9 +109,11 @@ class SprinklerControl():
        self.redis_handle.hset( "CONTROL_VARIABLES","current_log_object",  None )
        self.redis_handle.hset( "CONTROL_VARIABLES","flow_log_object", None )          ### not sure of
        self.redis_handle.hset( "CONTROL_VARIABLES","SUSPEND","ON")
-       chainFlowHandle.disable_chain_base( ["monitor_irrigation_job_queue","monitor_irrigation_cell"])
-       chainFlowHandle.enable_chain_base( ["monitor_irrigation_job_queue"])
-  
+       self.sprinkler_ctrl.suspend_operation()
+       self.cf.send_event("IRI_MASTER_VALVE_SUSPEND",None)
+
+
+         
    def queue_schedule( self, object_data,chainFlowHandle, chainObj, parameters,event ):
        
        self.schedule_name =  object_data["schedule_name"]
@@ -142,13 +150,12 @@ class SprinklerControl():
 
  
        self.load_step_data( self.schedule_name, self.schedule_step, self.schedule_step_time,False ) 
-       self.redis_handle.hset("CONTROL_VARIABLES","SUSPEND","OFF")
-       self.redis_handle.hset("CONTROL_VARIABLES","SKIP_STATION","OFF")  
        
     
      
 
-   def direct_valve_control( self,  object_data,chainFlowHandle, chainObj, parameters,event ):      
+   def direct_valve_control( self,  object_data,chainFlowHandle, chainObj, parameters,event ): 
+       print("direct valve control")     
        remote                = object_data["controller"] 
        pin                   = object_data["pin"]         
        schedule_step_time    = object_data["run_time"]  
@@ -156,13 +163,14 @@ class SprinklerControl():
        pin = int(pin)
        schedule_step_time = int(schedule_step_time) 
        self.alarm_queue.store_past_action_queue("DIRECT_VALVE_CONTROL","YELLOW" ,{"remote":remote,"pin":pin,"time":schedule_step_time }) 
-       #print "made it here",object_data
+       
        self.irrigation_control.turn_off_master_valves()
        self.irrigation_control.disable_all_sprinklers()
        self.clear_redis_sprinkler_data()
        self.clear_redis_irrigate_queue()
-       #print "direct_valve_control",remote,pin,schedule_step_time
+       
        self.load_native_data( remote,pin,schedule_step_time)
+       
        self.redis_handle.hset("CONTROL_VARIABLES","SUSPEND","OFF")
        self.redis_handle.hset("CONTROL_VARIABLES","SKIP_STATION","OFF")  
  
@@ -266,9 +274,8 @@ class SprinklerControl():
            json_object["elasped_time"]    =  0
            json_object["eto_enable"]      =  eto_flag
            json_string = json.dumps( json_object)
-           compact_data = base64.b64encode(json_string)
            #print "load step data ===== step data is queued"
-           self.redis_handle.lpush(  "QUEUES:SPRINKLER:IRRIGATION_QUEUE", compact_data )
+           self.redis_handle.lpush(  "QUEUES:SPRINKLER:IRRIGATION_QUEUE", json_string )
           
        else:
            self.store_event_queue( "non_existant_schedule", json_object )
@@ -278,8 +285,9 @@ class SprinklerControl():
 
    # this is for loading user specified data
    def load_native_data( self, remote,bit,time ):
+       print("load native_data")
        json_object = {}
-       json_object["type"]            =  "IRRIGATION_STEP"
+       json_object["type"]            =  "BASIC_IRRIGATION_STEP"
        json_object["schedule_name"]   =  "MANUAL"
        json_object["step"]            =  1
        json_object["io_setup"]        =  [{ "remote":remote, "bits":[bit] }]
@@ -287,10 +295,7 @@ class SprinklerControl():
        json_object["elasped_time"]    =  0
        json_object["eto_enable"]      =  False
        json_string = json.dumps( json_object)    
-       compact_data = base64.b64encode(json_string)
-       #print "native load",json_string
-       self.redis_handle.lpush( "QUEUES:SPRINKLER:IRRIGATION_QUEUE", compact_data)
-       #print self.redis_handle.llen("QUEUES:SPRINKLER:IRRIGATION_QUEUE")
+       self.redis_handle.lpush( "QUEUES:SPRINKLER:IRRIGATION_QUEUE", json_string)
 
 
    def get_schedule_data( self, schedule_name, schedule_step):
@@ -326,7 +331,8 @@ class SprinklerControl():
    def add_chains( self, cf ):
    
        cf.define_chain( "sprinkler_command_queue", True ) 
-       cf.insert.wait_event_count(count = 2 ) # wait 1 seconds
+       #cf.insert.log("sprinkler_command_queue")
+       cf.insert.wait_event_count(count = 1 ) # wait 1 seconds
        cf.insert.one_step(  self.dispatch_sprinkler_mode  ) 
        cf.insert.reset()
   
@@ -354,8 +360,6 @@ if __name__ == "__main__":
    
 
 
-   app_files        =  load_files_py3.APP_FILES(redis)     
-   sys_files        =  load_files_py3.SYS_FILES(redis)
 
    gm =Graph_Management("PI_1","main_remote","LaCima_DataStore")
 
@@ -365,9 +369,14 @@ if __name__ == "__main__":
    # find ip and port for redis data store
    data_server_ip   = data_store_nodes[0]["ip"]
    data_server_port = data_store_nodes[0]["port"]
+   
    redis_new_handle = redis.StrictRedis( host = data_server_ip, port=data_server_port, db = 12 )
-   redis_old_handle  = redis.StrictRedis( host = '192.168.1.84', port=6379, db = 0 )
+   redis_old_handle  = redis.StrictRedis( host = data_server_ip, port=data_server_port, db = 0 )
 
+   
+
+   app_files        =  load_files_py3.APP_FILES(redis_old_handle)     
+   sys_files        =  load_files_py3.SYS_FILES(redis_old_handle)
 
    
    io_server_ip     = io_server_nodes[0]["ip"]
@@ -380,10 +389,12 @@ if __name__ == "__main__":
    cluster_control = Cluster_Control(cf)
 
 
-   sprinkler_control = SprinklerControl(io_control, alarm_queue, redis_old_handle,cf)
    master_valve = Master_Valve( "MASTER_VALVE",cf, cluster_control, io_control, redis_old_handle )
    irrigation_queue_management =  Irrigation_Queue_Management( "IRRIGATION_CONTROL", cf, cluster_control, 
-                                  io_control, redis_old_handle, alarm_queue, app_files, sys_files )
+                                  io_control, redis_old_handle, alarm_queue, app_files, 
+                                  sys_files )
                                     
+   sprinkler_control = SprinklerControl(io_control, alarm_queue, 
+                           redis_old_handle,cf,master_valve,irrigation_queue_management )
 
    cf.execute()
