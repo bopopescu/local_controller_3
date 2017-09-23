@@ -51,6 +51,26 @@ class IO_Control(object):
        temp_data = self.gm.match_terminal_relationship("IRRIGATION_DATA_ELEMENT" )
        self.ir_data = self.gm.to_dictionary(temp_data,"name")
        print(self.ir_data.keys())
+
+   def read_wd_flag(self,*args ):
+       for item in self.ir_ctrl:           
+           action_class = self.find_class(item["type"])
+           action_class.read_wd_flag( item["modbus_address"] )
+
+   def write_wd_flag(self,*args):
+       for item in self.ir_ctrl:          
+           action_class = self.find_class(item["type"])
+           action_class.write_wd_flag( item["modbus_address"] )
+
+   def read_mode_switch( self,*args ):
+       for item in self.ir_ctrl:           
+           action_class = self.find_class(item["type"])
+           action_class.read_mode( item["modbus_address"] )
+
+   def read_mode( self,*args ):
+       for item in self.ir_ctrl:          
+           action_class = self.find_class(item["type"])
+           action_class.read_mode_switch( item["modbus_address"])
  
 
    def measure_valve_current( self,*args):
@@ -132,7 +152,9 @@ class IO_Control(object):
 
 
    def load_duration_counters( self, time_duration ,*arg):
-       time_duration = (time_duration*60)+15  # convert minutes to seconds
+       print("################################time_duration",time_duration)
+       time_duration = 10*(time_duration*60)+15  # convert minutes to seconds
+       time_duration = int(time_duration+.5)
        for item in self.ir_ctrl:
            
            action_class = self.find_class(item["type"])
@@ -171,6 +193,5 @@ class IO_Control(object):
        controller     = self.irrigation_controllers[remote]
        action_class   = self.find_class( controller["type"] )
        flow_value     = action_class.measure_counter( remote, io_setup )
-
 
 

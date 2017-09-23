@@ -22,6 +22,7 @@ class Valve_Resistance_Check:
        cf.insert.one_step( self.assemble_relevant_valves )
        cf.insert.enable_chains(["test_each_valve"])
        cf.insert.wait_event_count( event = "IR_V_Valve_Check_Done" )
+       cf.insert.log("event IR_V_Valve_Check_Done")
        cf.insert.send_event("RELEASE_IRRIGATION_CONTROL" ) 
        cf.insert.send_event("IRI_MASTER_VALVE_RESUME",None)
        cf.insert.terminate() 
@@ -105,10 +106,12 @@ class Valve_Resistance_Check:
 
    def check_queue( self,*args ):
        length = self.redis_handle.llen(  "QUEUES:SPRINKLER:RESISTANCE_CHECK_QUEUE" )
+       print("check_queue",length)
        if length > 0:
            return_value = True
        else:
            return_value = False
+       print("return_value",return_value)
        return return_value
 
    def valve_setup(self, *args ):
