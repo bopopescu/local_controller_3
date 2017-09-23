@@ -354,7 +354,7 @@ if __name__ == "__main__":
 
    from   io_control_py3 import construct_classes_py3
    from   io_control_py3 import new_instrument_py3
-   from   irrigation_control_py3.alarm_queue import AlarmQueue
+   from   irrigation_control_py3.alarm_queue_py3 import AlarmQueue
    from   py_cf_new_py3.chain_flow_py3 import CF_Base_Interpreter
    from   py_cf_new_py3.cluster_control_py3 import Cluster_Control
    
@@ -389,10 +389,11 @@ if __name__ == "__main__":
    cluster_control = Cluster_Control(cf)
 
 
+
    master_valve = Master_Valve( "MASTER_VALVE",cf, cluster_control, io_control, redis_old_handle )
    irrigation_queue_management =  Irrigation_Queue_Management( "IRRIGATION_CONTROL", cf, cluster_control, 
-                                  io_control, redis_old_handle, alarm_queue, app_files, 
-                                  sys_files )
+                                  io_control, redis_old_handle, redis_new_handle, gm,
+                                  alarm_queue, app_files, sys_files )
                                     
    sprinkler_control = SprinklerControl(io_control, alarm_queue, 
                            redis_old_handle,cf,master_valve,irrigation_queue_management )
