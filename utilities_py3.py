@@ -72,13 +72,11 @@ class System_Monitoring():
 
     
    def check_schedule_flag( self, schedule_name ):
-      
-      data =  self.redis_handle.hget("SYSTEM_COMPLETED", schedule_name)
- 
-      data = data.decode()
-   
       try:
-        data = json.loads( data)
+         data =  self.redis_handle.hget("SYSTEM_COMPLETED", schedule_name)
+ 
+         data = data.decode()
+         data = json.loads( data)
 
       except:
          data = [ 0 , -3 ]
@@ -178,11 +176,11 @@ class Schedule_Monitoring():
 
     
    def check_schedule_flag( self, schedule_name ):
-      
-      data =  self.redis_handle.hget("SCHEDULE_COMPLETED", schedule_name)
-      data = data.decode()
-      try:
-        data = json.loads( data)
+      try:      
+         data =  self.redis_handle.hget("SCHEDULE_COMPLETED", schedule_name)
+         data = data.decode()
+ 
+         data = json.loads( data)
 
       except:
            

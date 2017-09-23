@@ -106,22 +106,26 @@ class PI_Status( object ):
 
    def log_redis_info( self, tag,value,parameters):
         data = self.redis_handle.info()
+        print("data",data)
         return_value= []
-        return_value.append("used_memory_human "+ str(data["used_memory_human"]))
-        return_value.append("uptime_in_seconds "+ str(data["uptime_in_seconds"]))
-        return_value.append("total_connections_received "+ str(data["total_connections_received"]))
-        return_value.append("config_file "+ str(data["config_file"]))
-        return_value.append("aof_last_write_status "+ str(data["aof_last_write_status"]))
-        return_value.append("total_commands_processed "+ str(data["total_commands_processed"]))
-        return_value.append("used_memory_rss_human "+ str(data["used_memory_rss_human"]))
-        return_value.append("db0:keys "+ json.dumps(data["db0"]))
-        return_value.append("db1:keys "+ json.dumps(data["db1"]))
-        return_value.append("db2:keys "+ json.dumps(data["db2"]))
-        return_value.append("db3:keys "+ json.dumps(data["db3"]))
-        return_value.append("db11:keys "+ json.dumps(data["db11"]))
-        return_value.append("db12:keys "+ json.dumps(data["db12"]))
-        return_value.append("db14:keys "+ json.dumps(data["db14"]))
-        return_value.append("db15:keys "+ json.dumps(data["db15"]))
+        try:
+           return_value.append("used_memory_human "+ str(data["used_memory_human"]))
+           return_value.append("uptime_in_seconds "+ str(data["uptime_in_seconds"]))
+           return_value.append("total_connections_received "+ str(data["total_connections_received"]))
+           return_value.append("config_file "+ str(data["config_file"]))
+           return_value.append("aof_last_write_status "+ str(data["aof_last_write_status"]))
+           return_value.append("total_commands_processed "+ str(data["total_commands_processed"]))
+           return_value.append("used_memory_rss_human "+ str(data["used_memory_rss_human"]))
+           return_value.append("db0:keys "+ json.dumps(data["db0"]))
+           return_value.append("db1:keys "+ json.dumps(data["db1"]))
+           return_value.append("db2:keys "+ json.dumps(data["db2"]))
+           return_value.append("db3:keys "+ json.dumps(data["db3"]))
+           return_value.append("db11:keys "+ json.dumps(data["db11"]))
+           return_value.append("db12:keys "+ json.dumps(data["db12"]))
+           return_value.append("db14:keys "+ json.dumps(data["db14"]))
+           return_value.append("db15:keys "+ json.dumps(data["db15"]))
+        except:
+            pass
         return return_value
 
    def measure_free_cpu( self, tag, value, parameters):

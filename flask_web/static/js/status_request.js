@@ -16,6 +16,7 @@ function system_state_init()
        var temp
        var temp_1
        var tempDate
+      
 
        var date = new Date( data.sprinkler_time_stamp  * 1000);
        tempDate = new Date()

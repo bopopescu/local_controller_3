@@ -46,9 +46,20 @@ class Irrigation_Monitoring( object ):
        self.redis_handle     = redis_handle
        self.redis_old_handle = redis_old_handle
 
-   def measure_flow( self, tag, value, parameters ):
-      data =  self.redis_old_handle.hget("CONTROL_VARIABLES","global_flow_sensor" )
-      return  float(parameters[1])*float(data)
+
+   def measure_flow( self, tag, flow_value, parameters ):
+       print("parameters",parameters)
+       conversion_rate = parameters[1]
+       queue           = parameters[2]
+       corrected_flow_rate = flow_value*conversion_rate
+       self.redis_old_handle.hset("CONTROL_VARIABLES","global_flow_sensor",flow_value )         
+       self.redis_old_handle.hset("CONTROL_VARIABLES","global_flow_sensor_corrected",corrected_flow_rate )
+       self.redis_old_handle.hset("FLOW_METERS","main_flow_meter",corrected_flow_rate)
+       self.redis_old_handle.lpush("QUEUES:SPRINKLER:FLOW:"+queue,flow_value )
+       self.redis_old_handle.ltrim("QUEUES:SPRINKLER:FLOW:"+queue,0,800)
+ 
+       print("corrected_flow_rate",corrected_flow_rate)
+       return corrected_flow_rate
  
    def well_controller_output( self, tag, value, parameters  ):
        return 0.0
@@ -62,15 +73,38 @@ class Irrigation_Monitoring( object ):
    def well_pressure( self, tag,value,parameters):
         return 0.0
 
+   def transfer_irrigation_current( self, tag, current ,parameters):
+
+       print( "valve current",current)
+       key = "coil_current"
+       self.redis_old_handle.lpush( "QUEUES:SPRINKLER:CURRENT:"+key,current )
+       self.redis_old_handle.ltrim( "QUEUES:SPRINKLER:CURRENT:"+key,0,800)
+       self.redis_old_handle.hset( "CONTROL_VARIABLES",key, current )
+       return current
+
+   def transfer_controller_current( self, tag, current , parameters):
+
+       print( "controller_current ", current)
+       key = "plc_current"
+       self.redis_old_handle.lpush( "QUEUES:SPRINKLER:CURRENT:"+key,current )
+       self.redis_old_handle.ltrim( "QUEUES:SPRINKLER:CURRENT:"+key,0,800)
+       self.redis_old_handle.hset( "CONTROL_VARIABLES",key, current )
+       return current
+  
+
+
 
 def construct_irrigation_monitoring_class( redis_handle,redis_old_handle, gm, io_server,io_server_port ):
+  
    irrigation_monitoring = Irrigation_Monitoring( redis_handle,redis_old_handle )
    gm.add_cb_handler("measure_flow",    irrigation_monitoring.measure_flow )
    gm.add_cb_handler("well_controller_output",     irrigation_monitoring.well_controller_output )
    gm.add_cb_handler("well_controller_input",    irrigation_monitoring.well_controller_input )
    gm.add_cb_handler("filter_pressure",   irrigation_monitoring.filter_pressure)
    gm.add_cb_handler("well_pressure",   irrigation_monitoring.well_pressure)
-
+   gm.add_cb_handler("transfer_irrigation_current",   irrigation_monitoring.transfer_irrigation_current)
+   gm.add_cb_handler("transfer_controller_current",   irrigation_monitoring.transfer_controller_current)
+  
    instrument = new_instrument_py3.Modbus_Instrument()
 
    
@@ -101,6 +135,7 @@ if __name__ == "__main__":
 
    import time
    from redis_graph_py3.farm_template_py3 import Graph_Management 
+   from irrigation_control_py3.misc_support_py3 import IO_Control
 
    def list_filter( input_list):
       if len( input_list ) > 0:
@@ -126,6 +161,12 @@ if __name__ == "__main__":
    # find ip and port for ip server
    status_server =  gm.match_terminal_relationship("RABBITMQ_STATUS_QUEUE")[0]
    queue_name     = status_server[ "queue"]
+
+
+   remote_classes = construct_classes_py3.Construct_Access_Classes(io_server_ip,io_server_port)
+   io_control  = IO_Control(gm,remote_classes, redis_old_handle,redis_handle)
+
+
 
    status_queue_class = rabbit_cloud_status_publish_py3.Status_Queue(redis_handle, queue_name ) 
    

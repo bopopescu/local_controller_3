@@ -926,23 +926,21 @@ class Monitor():
 
 
    def measure_flow_rate ( self, *args ):
-    
+
+     return
      deltat = time.time()-self.counter_time_ref
      self.counter_time_ref = time.time()
 
-     for i in counter_devices.keys():
-        
-        flow_value = self.basic_io_control.measure_counter(deltat,i)  
+
+     for i in self.redis.hkeys("FLOW_METERS"):
+        flow_value = self.redis.hget("FLOW_METERS",i)
+ 
         self.redis.lpush("QUEUES:SPRINKLER:FLOW:"+str(i),flow_value )
         self.redis.ltrim("QUEUES:SPRINKLER:FLOW:"+str(i),0,800)
-
-        if i == "main_sensor":
-          self.redis.hset("CONTROL_VARIABLES","global_flow_sensor",flow_value )
-          conversion_rate = counter_devices[i]["conversion_factor"]
-          self.redis.hset("CONTROL_VARIABLES","global_flow_sensor_corrected",flow_value*conversion_rate )
     
 
    def measure_current( self, *args ):
+       return
        for i in  analog_devices.keys():
            current = self.basic_io_control.get_analog( i )
            self.redis.lpush( "QUEUES:SPRINKLER:CURRENT:"+i,current )
@@ -1239,7 +1237,7 @@ if __name__ == "__main__":
                   parameters[2] = json_object[0]
                   parameters[3] = json_object[1]
            else:
-               monitor.measure_current()
+               monitor.measure_current_a()
                try:
                   coil_current = float( redis.hget( "CONTROL_VARIABLES","coil_current" ))
                   print "coil current",coil_current
@@ -1463,7 +1461,7 @@ if __name__ == "__main__":
    cf.insert_link( "link_2",  "Code",           [ sprinkler_queue.load_irrigation_cell ] )
    cf.insert_link( "link_3",  "Code",           [ sprinkler_element.start] )
    cf.insert_link( "link_4",  "WaitTime",       [ 1,0,0,0] ) # wait 1 seconds
-   cf.insert_link( "link_5",  "One_Step",       [ monitor.measure_current ] )
+   cf.insert_link( "link_5",  "One_Step",       [ monitor.measure_current_a ] )
    cf.insert_link( "link_6",  "Code",            [ sprinkler_element.check_current ] )
    cf.insert_link( "link_7",  "Enable_Chain",   [["monitor_irrigation_cell","monitor_current_sub" ]])
    cf.insert_link( "link_8",  "WaitEvent",      ["CELL_DONE" ] )

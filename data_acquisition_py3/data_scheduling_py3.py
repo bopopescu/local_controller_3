@@ -47,12 +47,12 @@ class Data_Acquisition(object):
        if len(data_list) == 0:
           return
        
-       print( "data_list", store_element['measurement'] )
+       #print( "data_list", store_element['measurement'] )
 
 
        data_dict = {}
        for i in data_list:
-           print(i)
+           #print(i)
            temp_data =   self.slave_interface( i)
            data_dict[i["name"]] = temp_data
        data_dict["namespace"] = store_element["namespace"]
@@ -61,11 +61,11 @@ class Data_Acquisition(object):
        data_json           = json.dumps(data_dict)
        redis_key           = store_element["measurement"]
        redis_array_length  = store_element["length"]
-       print( "redis_key",redis_key,redis_array_length)
+       #print( "redis_key",redis_key,redis_array_length)
 
        self.redis_handle.lpush(redis_key,data_json)
        self.redis_handle.ltrim(redis_key,0,redis_array_length)
-       print( "print array length", self.redis_handle.llen(redis_key))
+       #print( "print array length", self.redis_handle.llen(redis_key))
        # send data to influxdb
        self.status_queue_class.queue_message(store_element["routing_key"], data_dict )
 

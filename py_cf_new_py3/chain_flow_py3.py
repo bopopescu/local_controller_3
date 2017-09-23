@@ -101,7 +101,7 @@ class CF_Base_Interpreter():
             k = self.find_chain_object(i)
             k["link_index"] = 0
             k["active"] = False
-            if k["init_function"] != None:
+            if k["term_function"] != None:
                k["term_function"](self,k)
            
  
@@ -118,7 +118,8 @@ class CF_Base_Interpreter():
             k = self.find_chain_object(i)
             if k["active"] == False:
                if k["init_function"] != None:
-                   k["init_function"](self,k)
+                   if k["init_function"](self,k) == False:
+                       return # abort enabling chain
  
             k["link_index"] = 0
             k["active"] = True

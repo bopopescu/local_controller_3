@@ -101,6 +101,7 @@ class Click_Controller_Base_Class(object):
        
    def disable_all_sprinklers( self, modbus_address, input_list ):
       write_bit      = self.click_bit_address["C1"]
+      
       self.instrument.write_bits(modbus_address,write_bit, [0] )
       self.instrument.write_bits(modbus_address,write_bit, [1] )
       self.instrument.write_bits(modbus_address,write_bit, [0] )
@@ -108,16 +109,15 @@ class Click_Controller_Base_Class(object):
 
 
    def turn_on_valves( self, modbus_address, input_list ):
-       valve_list = input_list[0]
-       for valve in valve_list:  
+
+       for valve in input_list:  
           valve           = valve -1
           bit_symbol      = self.click_io[ valve ]
           bit_address     = self.click_bit_address[bit_symbol]
           self.instrument.write_bits( modbus_address, bit_address,[1])
 
    def turn_off_valves( self,  modbus_address, input_list  ):
-       valve_list = input_list[0]
-       for valve in valve_list:  
+       for valve in input_list:  
           valve           = valve -1
           bit_symbol      = self.click_io[ valve ]
           bit_address     = self.click_bit_address[bit_symbol]
@@ -127,16 +127,16 @@ class Click_Controller_Base_Class(object):
    def load_duration_counters( self, modbus_address,input_list  ):
         duration = input_list[0]
         write_bit      = self.click_bit_address["C2"]
-        write_register = self.self.click_reg_address["DS2"]
+        write_register = self.click_reg_address["DS2"]
         self.instrument.write_registers( modbus_address, write_register, [duration] )
         self.instrument.write_bits( modbus_address, write_bit,[0])
         self.instrument.write_bits( modbus_address, write_bit,[1])
 
        
                          
-   def clear_duration_counters( self, modbus_address ,input_list ):
+   def clear_duration_counters( self, modbus_address  ):
         write_bit      = self.click_bit_address["C2"]
-        write_register = self.self.click_reg_address["DS2"]
+        write_register = self.click_reg_address["DS2"]
         self.instrument.write_registers( modbus_address, write_register, [0] )
         self.instrument.write_bits( modbus_address, write_bit,[0])
  
@@ -167,9 +167,30 @@ class Click_Controller_Base_Class(object):
       write_bit      = self.click_bit_address["C200"]
       self.instrument.write_bits(modbus_address,write_bit, [1] )
 
+
+      
+
+   def measure_counter( self, modbus_address, io_dict ):
+ 
+       counter_register    = io_dict["read_register"]      
+
+       latch_bit           = io_dict["latch_bit"]
        
+      
+       write_bit      = self.click_bit_address[ latch_bit ]
 
+       # These three statements create a rising pulse
+       self.instrument.write_bits( modbus_address, write_bit,[0])
+       self.instrument.write_bits( modbus_address, write_bit,[1]) 
+       self.instrument.write_bits( modbus_address, write_bit,[0])
+       time.sleep(.1)
 
+       read_register = self.click_reg_address[ counter_register ]  
+           
+       counter_value = self.instrument.read_registers( modbus_address, read_register ,1 )[0]
+         
+      
+       return counter_value
 
 
 
@@ -201,33 +222,11 @@ class Click_Controller_Base_Class_44(Click_Controller_Base_Class):
            register           = self.click_reg_address[read_register]
        
        value              = self.instrument.read_floats( modbus_address, register,1 )
+ 
        
        conv_value         = value[0] * conversion_factor
        return conv_value
     
-   def measure_counter( self, modbus_address, list_input ):
-       counter_register    = list_input[0]
-       conversion_factor   = list_input[2]
-       
-       
-       latch_bit = list_input[1]
-
-       conversion_value = list_input[1]
-       read_register = self.click_reg_address[ counter_register ]
-       write_bit      = self.click_bit_address[ latch_bit ]
-     
-       # These three statements create a rising pulse
-       self.instrument.write_bits( modbus_address, write_bit,[0])
-       self.instrument.write_bits( modbus_address, write_bit,[1]) 
-       self.instrument.write_bits( modbus_address, write_bit,[0])
-
-       read_register = self.click_reg_address[ counter_register ]  
-           
-       counter_value = self.instrument.read_registers( modbus_address, read_register ,1 )
-
-      
-       counter_value = (counter_value[0] * conversion_factor ) 
-       return counter_value
        
         
 

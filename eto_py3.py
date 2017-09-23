@@ -33,12 +33,14 @@ class Eto_Management(object):
         self.redis_handle = redis_handle
         self.redis_old = redis.StrictRedis(
             host='192.168.1.84', port=6379, db=0)
-
-        eto_update_flag = int(
-            self.redis_handle.hget(
-                "ETO_VARIABLES",
-                "ETO_UPDATE_FLAG"))
-
+        try:
+             eto_update_flag = int(
+                  self.redis_handle.hget(
+                  "ETO_VARIABLES",
+                   "ETO_UPDATE_FLAG"))
+        except:
+            self.redis_handle.hset("ETO_VARIABLES", "ETO_UPDATE_FLAG", 0)
+            eto_update_flag = 0
         if eto_update_flag is None:
 
             self.redis_handle.hset("ETO_VARIABLES", "ETO_UPDATE_FLAG", 0)
@@ -51,6 +53,7 @@ class Eto_Management(object):
             parameters,
             event):
         print( "check_for_eto_update")
+        return
         eto_update_flag = int(
             self.redis_handle.hget(
                 "ETO_VARIABLES",
@@ -696,7 +699,7 @@ def construct_eto_instance(gm, redis_handle):
     eto.status_queue_class = rabbit_cloud_status_publish_py3.Status_Queue(
         redis_handle, queue_name)
 
-    eto.eto_default = .20
+    #eto.eto_default = .20
     return eto
 
 
@@ -708,24 +711,28 @@ def add_eto_chains(eto, cf):
     cf.insert_link("link_3", "Reset", [])
 
     cf.define_chain("enable_measurement", True)
+    cf.insert_link("link_0", "Log", ["starting enable_measurement"])
+
     cf.insert_link("link_1", "WaitTodGE", ["*", 8, "*", "*"])
     cf.insert_link("link_2", "Enable_Chain", [["eto_make_measurements"]])
+    cf.insert_link("link_0", "Log", ["enambleing making_measurement"])
+
     cf.insert_link("link_3", "WaitTodGE", ["*", 18, "*", "*"])
-    cf.insert_link("link_4", "One_Step", [eto.check_for_eto_update])
+    #cf.insert_link("link_4", "One_Step", [eto.check_for_eto_update])
     cf.insert_link("link_5", "Disable_Chain", [["eto_make_measurements"]])
     cf.insert_link("link_6", "WaitEvent", ["HOUR_TICK"])
  
     cf.insert_link("link_7", "Reset", [])
 
     cf.define_chain("eto_make_measurements", False)
-    cf.insert_link("link_0", "Log", ["Enabling chain"])
+    cf.insert_link("link_0", "Log", ["starting make measurement"])
     cf.insert_link("link_1", "Code", [eto.make_measurement])
     cf.insert_link("link_2", "WaitEvent", ["HOUR_TICK"])
     cf.insert_link("link_3","Log",["Receiving Hour tick"])
     cf.insert_link("link_4", "Reset", [])
 
     cf.define_chain("test_generator", False)
-    cf.insert_link("link_1", "SendEvent", ["DAY_TICK", 0])
+    #cf.insert_link("link_1", "SendEvent", ["DAY_TICK", 0])
     #cf.insert_link("rrr", "Log", ["Sending Day Tick"])
     cf.insert_link("link_2", "WaitEvent", ["TIME_TICK"])
     cf.insert_link("link_3", "Enable_Chain", [["eto_make_measurements"]])

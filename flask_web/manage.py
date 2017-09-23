@@ -13,15 +13,15 @@ from app.template_support       import *
 import os
 import redis
 import json
-redis_config = redis.StrictRedis('localhost', port=6379, db=2)
-redis_server_ip    = redis_config.get("REDIS_SERVER_IP")
-redis_server_db    = redis_config.get("REDIS_SERVER_DB")
-redis_server_port  = redis_config.get("REDIS_SERVER_PORT")
-redis_password_ip = redis_config.get("PASSWORD_SERVER_IP")
-redis_password_db = redis_config.get("PASSWORD_SERVER_DB")
-redis_password_port = redis_config.get("PASSWORD_SERVER_PORT")
-
-redis_startup         = redis.StrictRedis( redis_password_ip, redis_password_port, redis_password_db )
+#redis_config = redis.StrictRedis('localhost', port=6379, db=2)
+#redis_server_ip    = redis_config.get("REDIS_SERVER_IP")
+#redis_server_db    = redis_config.get("REDIS_SERVER_DB")
+#redis_server_port  = redis_config.get("REDIS_SERVER_PORT")
+#redis_password_ip = redis_config.get("PASSWORD_SERVER_IP")
+#redis_password_db = redis_config.get("PASSWORD_SERVER_DB")
+#redis_password_port = redis_config.get("PASSWORD_SERVER_PORT")
+#print redis_server_db
+redis_startup         = redis.StrictRedis(  )
 startup_dict          = redis_startup.hgetall("web")
 
 
@@ -32,9 +32,9 @@ from io_control.new_instrument import Modbus_Instrument
 client_driver = Modbus_Instrument()
 controller_classes = Build_Controller_Classes(client_driver)
   
-udp_ping_client = controller_classes.get_controller_class( "192.168.1.84" )
+#udp_ping_client = controller_classes.get_controller_class( "192.168.1.84" )
 
-redis_handle    = redis.StrictRedis(redis_server_ip, redis_server_port  , redis_server_db)
+redis_handle    = redis.StrictRedis()
 sys_files = load_files.SYS_FILES(redis_handle)
 app_files = load_files.APP_FILES(redis_handle)
 

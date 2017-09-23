@@ -31,6 +31,12 @@ class Opcodes():
        self.opcodes["Verify_Tod_LE"]     = self.verify_tod_le_code 
        self.opcodes["Verify_Not_Event_Count"]       = self.verify_not_event_count_code 
        self.opcodes["Verify_Fn"]                    = self.verify_fn_code
+       self.opcodes["Assert_Tod"]         = self.assert_tod_code 
+       self.opcodes["Assert_Tod_GE"]      = self.assert_tod_ge_code 
+       self.opcodes["Assert_Tod_LE"]     = self.assert_tod_le_code 
+       self.opcodes["Assert_Not_Event_Count"]       = self.assert_not_event_count_code 
+       self.opcodes["Assert_Fn"]                    = self.assert_fn_code
+
 
     def get_opcode(self, opcode_name):
         return self.opcodes[opcode_name]
@@ -420,6 +426,170 @@ class Opcodes():
             return self.verify_return_code( cf_handle, reset_event, reset_flag)
 
         return "CONTINUE"
+
+
+    def verify_fn_code(self, cf_handle, chainObj, parameters, event):
+        
+        reset_event  = parameters[1]
+        reset_flag   = parameters[2]
+        verifyFn     = parameters[0]
+        
+        if verifyFn (cf_handle, chainObj, parameters, event):
+            returnValue = "CONTINUE"
+        else:
+    
+            
+            returnValue = self.verify_return_code( cf_handle, reset_event, reset_flag)
+            
+        
+        return returnValue
+
+
+      
+    def assert_not_event_count_code(self, cf_handle, chainObj, parameters, event):
+        reset_flag = parameters[3]
+        reset_event = parameters[2]
+        returnValue = "DISABLE"
+        if event["name"] == "INIT":
+            parameters.append(0)
+        else:
+            if event["name"] == parameters[0]:
+                parameters[-1] = parameters[-1] + 1
+                if parameters[-1] >= int(parameters[1]):
+                    returnValue = self.verify_return_code( cf_handle, reset_event, reset_flag)
+
+        return returnValue
+
+
+    def assert_tod_code(self, cf_handle, chainObj, parameters, event):
+
+        returnValue = "DISABLE"
+        dow = parameters[0]
+        hour = parameters[1]
+        minute = parameters[2]
+        second = parameters[3]
+        reset_event        = parameters[4]
+        reset_flag   = parameters[5]
+
+        #
+        # prevent excessive calculations
+        if event["name"] != "TIME_TICK":
+           return returnValue 
+
+
+        time_stamp = datetime.datetime.today()
+
+        if ((dow == time_stamp.weekday()) or
+                (dow == "*")) == False:
+            return self.verify_return_code( cf_handle, reset_event, reset_flag)
+
+
+        if ((hour == time_stamp.hour) or
+                (hour == "*")) == False:
+            return self.verify_return_code( cf_handle, reset_event, reset_flag)
+
+
+        if ((minute == time_stamp.minute) or
+                (minute == "*")) == False:
+            return self.verify_return_code( cf_handle, reset_event, reset_flag)
+
+
+        if ((second == time_stamp.second) or
+                (second == "*")) == False:
+            return self.verify_return_code( cf_handle, reset_event, reset_flag)
+
+        return "CONTINUE"
+
+    def assert_tod_le_code(self, cf_handle, chainObj, parameters, event):
+
+        returnValue = "DISABLE"
+        dow = parameters[0]
+        hour = parameters[1]
+        minute = parameters[2]
+        second = parameters[3]
+        reset_event        = parameters[4]
+        reset_flag   = parameters[5]
+
+        #
+        # prevent excessive calculations
+        if event["name"] != "TIME_TICK":
+           return returnValue 
+
+
+        time_stamp = datetime.datetime.today()
+        
+
+        if ((dow == "*") or
+                (dow >= time_stamp.weekday())) == False:
+            return self.verify_return_code( cf_handle, reset_event, reset_flag)
+
+        if ((hour == "*") or
+                (hour >= time_stamp.hour)) == False:
+            return self.verify_return_code( cf_handle, reset_event, reset_flag)
+
+        if ((minute == "*") or
+                (minute >= time_stamp.minute)) == False:
+            return self.verify_return_code( cf_handle, reset_event, reset_flag)
+
+
+        if ((second == "*") or
+                (second >= time_stamp.second)) == False:
+            return self.verify_return_code( cf_handle, reset_event, reset_flag)
+     
+        return "CONTINUE"
+
+    def assert_tod_ge_code(self, cf_handle, chainObj, parameters, event):
+
+        returnValue = "DISABLE"
+        dow = parameters[0]
+        hour = parameters[1]
+        minute = parameters[2]
+        second = parameters[3]
+        reset_event  = parameters[4]
+        reset_flag   = parameters[5]
+
+        #
+        # prevent excessive calculations
+        if event["name"] != "TIME_TICK":
+           return returnValue 
+
+
+        time_stamp = datetime.datetime.today()
+
+        if ((dow == "*") or
+                (dow <= time_stamp.weekday())) == False:
+            return self.verify_return_code( cf_handle, reset_event, reset_flag)
+
+        if ((hour == "*") or
+                (hour <= time_stamp.hour)) == False:
+            return self.verify_return_code( cf_handle, reset_event, reset_flag)
+
+        if ((minute == "*") or
+                (minute <= time_stamp.minute)) == False:
+            return self.verify_return_code( cf_handle, ereset_vent, reset_flag)
+
+        if ((second == "*") or
+                (second <= time_stamp.second)) == False:
+            return self.verify_return_code( cf_handle, reset_event, reset_flag)
+
+        return "CONTINUE"
+
+    def assert_fn_code(self, cf_handle, chainObj, parameters, event):
+        
+        reset_event  = parameters[1]
+        reset_flag   = parameters[2]
+        verifyFn     = parameters[0]
+        
+        if verifyFn (cf_handle, chainObj, parameters, event):
+            returnValue = "DISABLE"
+        else:
+    
+            
+            returnValue = self.verify_return_code( cf_handle, reset_event, reset_flag)
+            
+        
+        return returnValue
+
 
 
     def test_for_duplicate_functions(self):

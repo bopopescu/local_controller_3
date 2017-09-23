@@ -54,7 +54,7 @@ if __name__ == "__main__":
    import time
    import os
 
-   redis_startup       = redis.StrictRedis( host = "localhost", port=6379, db = 2 )
+   redis_startup       = redis.StrictRedis( host = "localhost", port=6379, db = 0 )
 
    rabbit_user_name = redis_startup.hget("status_gateway", "user_name" )
    rabbit_password  = redis_startup.hget("status_gateway", "password"  )

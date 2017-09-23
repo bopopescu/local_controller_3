@@ -141,6 +141,49 @@ class Help_Functions:
        self.cf.insert_link("Verify_Fn", list_data)
 
 
+   #
+   #   Assert Reset  Functions
+   #
+
+   def assert_tod_reset( self, dow="*",hour="*",minute="*",second="*", reset_event = None, reset_data = None ):
+       self.cf.insert_link("Assert_Tod",[dow,hour,minute,second,[reset_event,reset_data], True] )
+
+   def assert_tod_ge_reset( self, dow="*",hour="*",minute="*",second="*",reset_event = None, reset_data = None ):
+       self.cf.insert_link("Assert_Tod_GE",[dow,hour,minute,second,[reset_event,reset_data],True] )
+
+   def assert_tod_le_reset( self,dow="*",hour="*",minute="*",second="*",reset_event = None , reset_data = None):
+       self.cf.insert_link("Assert_Tod_LE",[dow,hour,minute,second,[reset_event,reset_data],True] )
+
+   def assert_not_event_count_reset( self,event="TIME_TICK", count = 1, reset_event = None, reset_data = None ):
+       self.cf.insert_link("Assert_Not_Event_Count",[event, count, [reset_event,reset_data], True] )
+
+   def assert_function_reset( self, reset_event,reset_event_data, function, *params):
+       list_data = [function,[reset_event,reset_event_data], True]  
+       list_data.extend(params)
+
+       self.cf.insert_link("Assert_Fn", list_data)
+
+   #
+   #   Assert Terminate  Functions
+   #
+   def assert_tod_terminate( self, dow="*",hour="*",minute="*",second="*", reset_event = None, reset_data = None ):
+       self.cf.insert_link("Assert_Tod",[dow,hour,minute,second,[reset_event,reset_data], False] )
+
+   def assert_tod_ge_terminate( self, dow="*",hour="*",minute="*",second="*",reset_event = None , reset_data = None):
+       self.cf.insert_link("Assert_Tod_GE",[dow,hour,minute,second,[reset_event,reset_data],False] )
+
+   def assert_tod_le_terminate( self,dow="*",hour="*",minute="*",second="*",reset_event = None, reset_data = None ):
+       self.cf.insert_link("Assert_Tod_LE",[dow,hour,minute,second,[reset_event,reset_data],False] )
+
+   def assert_not_event_count_terminate( self,event="TIME_TICK", count = 1, reset_event = None , reset_data = None):
+       self.cf.insert_link("Assert_Not_Event_Count",[event, count, [reset_event,reset_data] ,False] )
+
+   def assert_function_terminate( self, reset_event ,reset_event_data, function, *params):
+       list_data = [function,[reset_event,reset_event_data], False] 
+       list_data.extend(params)
+       self.cf.insert_link("Assert_Fn", list_data)
+
+
 
 if __name__ == "__main__":
    pass

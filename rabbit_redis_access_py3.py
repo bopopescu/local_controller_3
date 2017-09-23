@@ -283,7 +283,7 @@ if __name__ == "__main__":
    data_server_port = data_store_nodes[0]["port"]
    # find ip and port for ip server
    print( "data_server_ip",data_server_ip,data_server_port)
-   redis_handle = redis.StrictRedis( host = data_server_ip, port=data_server_port, db = 2 )
+   redis_handle = redis.StrictRedis( host = data_server_ip, port=data_server_port, db = 0 )
    
 
    user_name = redis_handle.hget("redis_gateway", "user_name" ).decode("utf-8") 
