@@ -1,5 +1,5 @@
 
-class Check_Off:
+class Check_Off(object):
 
    def __init__( self,cf,cluster_control,   io_control, redis_handle, alarm_queue):
        self.cf = cf

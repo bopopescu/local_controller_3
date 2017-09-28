@@ -1,4 +1,4 @@
-class Help_Functions:
+class Help_Functions(object):
 
    def __init__(self,cf):
        self.cf = cf
@@ -61,8 +61,9 @@ class Help_Functions:
    #   Opcode which acts on an event
    #
 
-   def check_event( self, function, event, *params ):
-       list_data = [ function, event ]
+   def check_event( self, event, function, *params ):
+       
+       list_data = [ event, function ]
        list_data.extend(params)
        self.cf.insert_link("Check_Event",list_data)
 

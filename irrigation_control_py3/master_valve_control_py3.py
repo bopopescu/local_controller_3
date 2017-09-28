@@ -1,5 +1,5 @@
 
-class Master_Valve:
+class Master_Valve(object):
 
    def __init__( self, cluster_id, cf,cluster_control, irrigation_io, redis_handle ):
        self.cf = cf

@@ -150,8 +150,9 @@ app.static_folder             = 'static'
 
 authDB = FlaskRealmDigestDB(startup_dict["RealmDigestDB"])
 temp =  json.loads(startup_dict["users"])
-for i in temp:
-    authDB.add_user(i["user"], i["password"] )
+for i in temp.keys():
+    print(temp[i])
+    authDB.add_user(i, temp[i] )
 
 
 from flask import request, session

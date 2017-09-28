@@ -1,7 +1,7 @@
 
 
 
-class Cluster_Control:
+class Cluster_Control(object):
 
    def __init__( self , cf):
       self.clusters       = {}

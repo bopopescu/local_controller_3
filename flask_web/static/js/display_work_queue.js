@@ -26,7 +26,7 @@ $(document).ready(
        
        queue_values = data
         $("#queue_elements").empty();
-       
+
        if( data.length == 0 )
        {
         var html = "";
@@ -43,8 +43,9 @@ $(document).ready(
 
           for( i = 0; i < data.length; i++ )
           {
-            temp = atob(data[i])
 
+            //temp = atob(data[i])
+            temp = data[i]
 	    temp  = JSON.parse(temp)
             temp_index = i +1;    
 	    

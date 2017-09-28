@@ -1,4 +1,4 @@
-   
+import time   
 import json
 from  .master_valve_control_py3 import Master_Valve
 
@@ -13,7 +13,7 @@ from  .irrigation_logging_py3   import Irrigation_Logging
 
 
 
-class Irrigation_Queue_Management:
+class Irrigation_Queue_Management(object):
 
    def __init__( self, cluster_id, cf,cluster_control, 
                        irrigation_io, redis_handle,redis_new_handle, gm,
@@ -44,7 +44,19 @@ class Irrigation_Queue_Management:
                                     hooks_15, hooks_60, hooks_start, hooks_term,
                                     logging_obj,user_data)
   
-      
+       #
+       # This chain strobes the plc watchdog timers
+       #
+       cf.define_chain("plc_watch_dog", True ) 
+       cf.insert.one_step( irrigation_io.read_wd_flag   )
+       cf.insert.one_step( irrigation_io.write_wd_flag )
+       cf.insert.wait_event_count( count = 30 ) # wait 30 second
+       cf.insert.reset()
+
+       cf.define_chain("controller_time_stamp",True)
+       cf.insert.one_step( self.update_time_stamp)
+       cf.insert.wait_event_count( count = 10 )
+       cf.insert.reset()      
 
        cf.define_chain("QC_Startup", True )
        cf.insert.one_step(cluster_control.disable_cluster, cluster_id )
@@ -59,16 +71,8 @@ class Irrigation_Queue_Management:
        cf.insert.one_step( self.check_for_unfinished_job )
        cf.insert.terminate()
 
-       #
-       # This chain strobes the plc watchdog timers
-       #
-       cf.define_chain("plc_watch_dog", True ) 
-       cf.insert.one_step( irrigation_io.read_wd_flag   )
-       cf.insert.one_step( irrigation_io.write_wd_flag )
-       cf.insert.wait_event_count( count = 30 ) # wait 30 second
-       cf.insert.reset()
-
-
+        
+ 
        cf.define_chain("QC_Finish_Job", False )
        cf.insert.log( "Finishing Job" )
        cf.insert.one_step( self.start_unfinished_job )
@@ -225,6 +229,10 @@ class Irrigation_Queue_Management:
 
    def write_wd_flag( self,value,*arg ):
        irrigation_io.write_wd_flag()  
+
+   def update_time_stamp( self, *args ):
+       self.redis_handle.hset( "CONTROL_VARIABLES", "sprinkler_time_stamp", time.time() )
+
 
 if __name__ == "__main__":
    pass

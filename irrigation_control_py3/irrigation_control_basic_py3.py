@@ -1,6 +1,6 @@
 
 import json
-class Irrigation_Control_Basic:
+class Irrigation_Control_Basic(object):
 
    def __init__( self,   cf,cluster_control,io_control,  
                         redis_handle, alarm_queue, 
@@ -27,6 +27,11 @@ class Irrigation_Control_Basic:
        #
        #  Define Chain
        #
+       cf.define_chain("IR_D_monitor",False)
+       cf.insert.wait_event_count(event = "MINUTE_TICK")
+       cf.insert.one_step(self.check_to_clean_filter)
+       cf.insert.reset()
+
        cf.define_chain("IR_D_start_irrigation_step", False ) # tested
 
        # retreive json data from redis data base
@@ -79,6 +84,7 @@ class Irrigation_Control_Basic:
 
        cf.define_chain("IR_D_monitor_irrigation_step", False )
        cf.insert.wait_event_count(event = "MINUTE_TICK")
+       
 
        cf.insert.assert_function_terminate(  reset_event = "IR_D_END_IRRIGATION",
                                              reset_event_data=None,
@@ -110,14 +116,14 @@ class Irrigation_Control_Basic:
        cf.insert.send_event( "RELEASE_IRRIGATION_CONTROL")
        cf.insert.terminate()
 
-       return [ "IR_D_start_irrigation_step","IR_D_monitor_current_sub",
+       return ["IR_D_monitor", "IR_D_start_irrigation_step","IR_D_monitor_current_sub",
                 "IR_D_monitor_irrigation_step","IR_D_end_irrigation" ]
 
 
 
    def construct_clusters( self, cluster, cluster_id, state_id ):
        cluster.define_state( cluster_id, state_id,
-                          ["IR_D_start_irrigation_step","IR_D_end_irrigation"]  )
+                          ["IR_D_monitor","IR_D_start_irrigation_step","IR_D_end_irrigation"]  )
 
 
    #
@@ -344,3 +350,19 @@ class Irrigation_Control_Basic:
            dictionary[i] = int(dictionary[i] )
        return dictionary
                                  
+   def check_to_clean_filter( self, chainFlowHandle, chainObj, parameters,event ):
+       if event["name"] == "INIT":
+          return True
+       cleaning_interval = self.redis_handle.hget("CONTROL_VARIABLES","CLEANING_INTERVAL")
+       cleaning_interval = float( cleaning_interval.decode())
+       flow_value   =  float( self.check_redis_value( "global_flow_sensor_corrected" ) )
+       cleaning_sum =  float( self.check_redis_value( "cleaning_sum") )
+       cleaning_sum = cleaning_sum + flow_value
+       self.redis_handle.hset("CONTROL_VARIABLES","cleaning_sum",cleaning_sum)
+       if cleaning_interval == 0 :
+           return True  # no cleaning interval active
+
+       if cleaning_sum > cleaning_interval :
+           return False
+       else:
+           return True

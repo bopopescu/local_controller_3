@@ -142,15 +142,15 @@ class System_Monitoring():
           
           name     = j["name"]
           command  = j["command_string"]
-          print( "checking schedule",name)
+          #print( "checking schedule",name)
           if j["dow"][dow] != 0 :
             
             start_time = j["start_time"]
             end_time   = j["end_time"]
     
             if self.determine_start_time( start_time,end_time ):
-                 print("j 3",j)
-                 print( "made it past start time",start_time,end_time)
+                 #print("j 3",j)
+                 #print( "made it past start time",start_time,end_time)
                  if self.check_schedule_flag( name ):
                      print( "queue in schedule ",name )
                      temp = {}
@@ -242,12 +242,15 @@ class Schedule_Monitoring():
       dow = datetime.datetime.today().weekday()
       dow = dow_array[dow]
       st_array = [temp.hour,temp.minute]
-      rain_day = self.redis_handle.hget("CONTROL_VARIABLES" ,"rain_day" )
+      
       try:
+          rain_day = self.redis_handle.hget("CONTROL_VARIABLES" ,"rain_day" )
           rain_day = int( rain_day )
       except:
+          print("exception")
           rain_day = 0
-          self.redis_handle.set("CONTROL_VARIABLES", "rain_day", rain_day)
+          #self.redis_handle.delete("CONTROL_VARIABLES")
+          self.redis_handle.hset("CONTROL_VARIABLES", "rain_day", rain_day)
      
       if rain_day != 0:
           return
@@ -261,7 +264,7 @@ class Schedule_Monitoring():
             end_time   = j["end_time"]
     
             if self.determine_start_time( start_time,end_time ):
-                 print( "made it past start time",start_time,end_time )
+                 #print( "made it past start time",start_time,end_time )
                  if self.check_schedule_flag( name ):
                      print( "queue in schedule ",name )
                      temp = {}
@@ -327,28 +330,28 @@ if __name__ == "__main__":
    #
    # Adding chains
    #
-   from py_cf_py3.chain_flow import CF_Base_Interpreter
+   from py_cf_new_py3.chain_flow_py3 import CF_Base_Interpreter
    cf = CF_Base_Interpreter()
 
 
 
    cf.define_chain("delete_cimis_email_data",True)
-   cf.insert_link( "link_1","WaitTod",["*",9,"*","*" ])
-   cf.insert_link( "link_2","One_Step",[delete_cimis_email.delete_email_files])
-   cf.insert_link( "link_3","WaitTod",["*",10,"*","*" ])
-   cf.insert_link( "link_4","Reset",[])  
+   cf.insert.wait_tod( hour=9 )
+   cf.insert.one_step( delete_cimis_email.delete_email_files)
+   cf.insert.wait_tod_ge( hour=10 )
+   cf.insert.reset()
 
    cf.define_chain( "plc_auto_mode", True )
-   cf.insert_link(  "link_1",  "One_Step", [ action.check_for_active_schedule ] )
-   cf.insert_link(  "link_2",  "One_Step", [ sched.check_for_active_schedule ] )
-   cf.insert_link(  "link_3",  "WaitEvent",[ "MINUTE_TICK" ] )
-   cf.insert_link(  "link_4",  "Reset",[] )
+   cf.insert.one_step( action.check_for_active_schedule  )
+   cf.insert.one_step( sched.check_for_active_schedule  )
+   cf.insert.wait_event_count( event =  "MINUTE_TICK"  )
+   cf.insert.reset()
     
    cf.define_chain("clear_done_flag",True)
-   cf.insert_link(  "link_1",  "One_Step", [action.clear_done_flag ] )
-   cf.insert_link(  "link_2",  "One_Step", [sched.clear_done_flag ] )
-   cf.insert_link(  "link_3",  "WaitEvent",[ "MINUTE_TICK" ] )
-   cf.insert_link(  "link_4",  "Reset",[] )
+   cf.insert.one_step(action.clear_done_flag )
+   cf.insert.one_step(sched.clear_done_flag )
+   cf.insert.wait_event_count( event =  "MINUTE_TICK"  )
+   cf.insert.reset()
 
    #
    #
@@ -357,20 +360,21 @@ if __name__ == "__main__":
    #
   
    cf.define_chain("ntpd",True)
-   cf.insert_link( "link_1","Log",["ntpd"] )
-   cf.insert_link(  "link_2",  "One_Step", [ntpd.get_time] )
-   cf.insert_link(  "link_3", "Log",["got time"] )
-   cf.insert_link(  "link_4",  "WaitEvent",[ "HOUR_TICK" ] )
-   cf.insert_link(  "link_5",  "Reset",[] )
+   cf.insert.log("ntpd")
+   cf.insert.one_step(ntpd.get_time )
+   cf.insert.log("got time" )
+   cf.insert.wait_event_count( event =  "HOUR_TICK"  )
+   cf.insert.reset()
 
 
-   cf.define_chain("linux_test",False)
-   cf.insert_link( "linkxx","Log",["test chain start"])
-   cf.insert_link( "link_0", "SendEvent",  ["MINUTE_TICK",1] )
-   cf.insert_link( "link_1", "WaitEvent",  ["TIME_TICK"] )
-   cf.insert_link( "link_2", "SendEvent",    [ "HOUR_TICK",1 ] )
-   cf.insert_link( "link_3", "WaitEventCount", ["TIME_TICK",2,0])
-   cf.insert_link( "link_4", "SendEvent",    [ "DAY_TICK", 1] )
+   cf.define_chain("eto_test",False)
+   cf.insert.log("test chain start")
+   cf.insert.send_event("MINUTE_TICK",1 )
+   cf.insert.wait_event_count( event =  "TIME_TICK", count = 1  )
+   cf.insert.send_event( "HOUR_TICK",1 )
+   cf.insert.wait_event_count( event =  "TIME_TICK", count = 2  )
+   cf.insert.send_event( "DAY_TICK", 1 )
+   cf.insert.terminate()
 
 
 

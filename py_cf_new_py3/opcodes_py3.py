@@ -4,7 +4,7 @@ import time
 
 
 
-class Opcodes():
+class Opcodes(object):
 
     def __init__(self):
 
@@ -103,23 +103,25 @@ class Opcodes():
 
 
     def send_event_code(self, cf_handle, chainObj, parameters, event):
-        # print "send event ",parameters[0]
-        event_name = parameters[0]
-        if len(parameters) > 1:
-            event_data = parameters[1]
-        else:
-            event_data = None
+        if event["name"] != "INIT":
+           # print "send event ",parameters[0]
+           event_name = parameters[0]
+           if len(parameters) > 1:
+               event_data = parameters[1]
+           else:
+               event_data = None
 
-        event = {}
-        event["name"] = event_name
-        event["data"] = event_data
-        cf_handle.event_queue.append(event)
+           event = {}
+           event["name"] = event_name
+           event["data"] = event_data
+           cf_handle.event_queue.append(event)
+       
 
         return "DISABLE"
 
 
     def check_event_code(self, cf_handle, chainObj, parameters, event):
-        
+
         if event["name"] == "INIT":
             
             func = parameters[1]
@@ -579,14 +581,16 @@ class Opcodes():
         reset_event  = parameters[1]
         reset_flag   = parameters[2]
         verifyFn     = parameters[0]
-        
+ 
+              
         if verifyFn (cf_handle, chainObj, parameters, event):
             returnValue = "DISABLE"
         else:
     
-            
-            returnValue = self.verify_return_code( cf_handle, reset_event, reset_flag)
-            
+           if event["name"] != "INIT":
+               returnValue = self.verify_return_code( cf_handle, reset_event, reset_flag)
+           else:
+              returnValue = "CONTINUE" 
         
         return returnValue
 

@@ -62,8 +62,6 @@ class APP_FILES():
         data = json.loads(json_data.decode("utf-8") )
         return data
 
-    def delete_file(self, name):
-        os.remove(self.path + name)
 
 
 class SYS_FILES():

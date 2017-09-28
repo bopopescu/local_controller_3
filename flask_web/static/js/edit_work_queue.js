@@ -110,9 +110,9 @@ $(document).ready(
 
           for( i = 0; i < data.length; i++ )
           {
-            temp = atob(data[i])
+            
            
-	    temp  = JSON.parse(temp);
+	    temp  = JSON.parse(data[i]);
             temp_index = i +1;    
 	    html +=   '<label for=qid'+i+'  >Schedule '+temp.schedule_name+"    Step: "+temp.step+"   Run Time "+temp.run_time +"</label>"
 	    html +=   '<input type=checkbox   id=qid'+i+' />';

@@ -1,6 +1,6 @@
 
 import time
-class Clean_Filter:
+class Clean_Filter(object):
 
    def __init__( self,cf,cluster_control,irrigation_io, redis_handle, alarm_queue):
 

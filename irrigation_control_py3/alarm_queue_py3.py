@@ -4,7 +4,7 @@ import json
 import base64
 import time
 
-class AlarmQueue():
+class AlarmQueue(object):
    def __init__(self,redis_server, alarm_queue = "QUEUES:CLOUD_ALARM_QUEUE", action_queue = "QUEUES:SPRINKLER:PAST_ACTIONS"):
        self.redis = redis_server
        self.alarm_queue = alarm_queue

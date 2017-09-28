@@ -7,7 +7,7 @@ from .logging_object_py3 import Logging_Object
 
 
 
-class Irrigation_Logging:
+class Irrigation_Logging(object):
 
    def __init__( self, redis_handle, redis_new_handle,gm,alarm_queue ):
        self.redis_handle     = redis_handle

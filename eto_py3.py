@@ -15,7 +15,7 @@ import math
 import redis
 import base64
 import json
-import py_cf_py3
+
 import os
 import copy
 import load_files_py3
@@ -125,7 +125,7 @@ class Eto_Management(object):
             return "CONTINUE"
 
         #print( "make measurements", self.eto_sources)
-        return_value = "DISABLE"
+        return_value = True
         self.start_sensor_integration()
         for i in self.eto_sources:
             print( i["measurement_tag"])
@@ -167,7 +167,7 @@ class Eto_Management(object):
                 self.store_cloud_data()
                 self.update_all_bins(eto_data)
 
-            return_value = "DISABLE"
+            return_value = True
         #print "return_value", return_value
 
         return return_value
@@ -704,48 +704,46 @@ def construct_eto_instance(gm, redis_handle):
 
 
 def add_eto_chains(eto, cf):
+
     cf.define_chain("eto_time_window", True)
-    cf.insert_link("link_1", "WaitEvent", ["DAY_TICK"])
-    cf.insert_link("xxx", "Log", ["Got Day Tick"])
-    cf.insert_link("link_2", "One_Step", [eto.generate_new_sources])
-    cf.insert_link("link_3", "Reset", [])
+    cf.insert.wait_event_count( event = "DAY_TICK" )
+    cf.insert.log("Got Day Tick")
+    cf.insert.one_step(eto.generate_new_sources)
+    cf.insert.reset()
 
     cf.define_chain("enable_measurement", True)
-    cf.insert_link("link_0", "Log", ["starting enable_measurement"])
-
-    cf.insert_link("link_1", "WaitTodGE", ["*", 8, "*", "*"])
-    cf.insert_link("link_2", "Enable_Chain", [["eto_make_measurements"]])
-    cf.insert_link("link_0", "Log", ["enambleing making_measurement"])
-
-    cf.insert_link("link_3", "WaitTodGE", ["*", 18, "*", "*"])
-    #cf.insert_link("link_4", "One_Step", [eto.check_for_eto_update])
-    cf.insert_link("link_5", "Disable_Chain", [["eto_make_measurements"]])
-    cf.insert_link("link_6", "WaitEvent", ["HOUR_TICK"])
- 
-    cf.insert_link("link_7", "Reset", [])
+    cf.insert.log("starting enable_measurement")
+    cf.insert.wait_tod_ge( hour =  8 )
+    cf.insert.enable_chains(["eto_make_measurements"])
+    cf.insert.log("enabling making_measurement")
+    cf.insert.wait_tod_ge( hour =  18 )
+    #cf.insert.one_step(eto.check_for_eto_update])
+    cf.insert.disable_chains(["eto_make_measurements"])
+    cf.insert.wait_event_count( event = "HOUR_TICK" )
+    cf.insert.reset()
 
     cf.define_chain("eto_make_measurements", False)
-    cf.insert_link("link_0", "Log", ["starting make measurement"])
-    cf.insert_link("link_1", "Code", [eto.make_measurement])
-    cf.insert_link("link_2", "WaitEvent", ["HOUR_TICK"])
-    cf.insert_link("link_3","Log",["Receiving Hour tick"])
-    cf.insert_link("link_4", "Reset", [])
+    cf.insert.log("starting make measurement")
+    cf.insert.one_step( eto.make_measurement )
+    cf.insert.wait_event_count( event = "HOUR_TICK" )
+    cf.insert.log("Receiving Hour tick")
+    cf.insert.reset()
 
     cf.define_chain("test_generator", False)
-    #cf.insert_link("link_1", "SendEvent", ["DAY_TICK", 0])
-    #cf.insert_link("rrr", "Log", ["Sending Day Tick"])
-    cf.insert_link("link_2", "WaitEvent", ["TIME_TICK"])
-    cf.insert_link("link_3", "Enable_Chain", [["eto_make_measurements"]])
-    cf.insert_link("link_4", "Log", ["Enabling chain"])
-    cf.insert_link("link_5", "SendEvent", ["HOUR_TICK", 0])
-    cf.insert_link("link_6", "WaitEventCount", ["TIME_TICK", 2, 0])
-    cf.insert_link("link_7", "Log", ["TIME TICK DONE"])
-    cf.insert_link("link_8", "Disable_Chain", [["eto_make_measurements"]])
-    cf.insert_link("link_9", "Log", ["DISABLE CHAIN DONE"])
-    cf.insert_link( "link_10","One_Step",[eto.print_result_1] )
-    cf.insert_link("link_11", "Log", ["DISABLE CHAIN DONE"])
-    cf.insert_link("link_12", "SendEvent", ["HOUR_TICK", 0])
-    cf.insert_link("link_13", "Halt", [])
+    #insert.send_event("DAY_TICK", 0)
+    #cf.insert.log("Sending Day Tick")
+    cf.insert.wait_event_count( event = "TIME_TICK" ,count = 1)
+    cf.insert.enable_chains(["eto_make_measurements"])
+    cf.insert.log("Enabling chain")
+    cf.insert.send_event("HOUR_TICK", 0)
+    cf.insert.wait_event_count( event = "TIME_TICK" ,count = 2)
+    cf.insert.log("TIME TICK DONE")
+    cf.insert.disable_chains( ["eto_make_measurements"] )
+    cf.insert.log("DISABLE CHAIN DONE")
+    cf.insert.one_step(eto.print_result_1)
+    cf.insert.log("DISABLE CHAIN DONE")
+    cf.insert.send_event("HOUR_TICK", 0)
+    cf.insert.terminate()
 
 
 if __name__ == "__main__":
@@ -753,7 +751,7 @@ if __name__ == "__main__":
     import time
     import datetime
 
-    from py_cf_py3.chain_flow import CF_Base_Interpreter
+    from py_cf_new_py3.chain_flow_py3 import CF_Base_Interpreter
 
     gm = farm_template_py3.Graph_Management(
         "PI_1", "main_remote", "LaCima_DataStore")

@@ -19,7 +19,7 @@ import time
 ## {"controller":"satellite_1", "pin": 9,  "recharge_eto": 0.216, "recharge_rate":0.245 },
 ## eto_site_data
 
-class Manage_Eto:
+class Manage_Eto(object):
 
    def __init__( self, redis_handle,alarm_queue, app_files ):
        self.redis_handle = redis_handle

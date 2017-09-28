@@ -2,7 +2,7 @@ import json
 import base64
 import time
 
-class Valve_Resistance_Check:
+class Valve_Resistance_Check(object):
 
    def __init__( self, cf, cluster_control,io_control, redis_handle,
                 alarm_queue, app_files, sys_files):

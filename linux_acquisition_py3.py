@@ -14,7 +14,7 @@ import math
 import redis
 import base64
 import json
-from py_cf_py3.chain_flow import CF_Base_Interpreter
+from py_cf_new_py3.chain_flow_py3 import CF_Base_Interpreter
 
 import os
 import copy
@@ -214,14 +214,14 @@ if __name__ == "__main__":
    # Adding chains
    #
    cf = CF_Base_Interpreter()
-   cf.define_chain("test",True)
-   cf.insert_link( "linkxx","Log",["test chain start"])
-   cf.insert_link( "link_0", "SendEvent",  ["MINUTE_TICK",1] )
-   cf.insert_link( "link_1", "WaitEvent",  ["TIME_TICK"] )
-   cf.insert_link( "link_2", "SendEvent",    [ "HOUR_TICK",1 ] )
-   cf.insert_link( "link_3", "WaitEventCount", ["TIME_TICK",2,0])
-   cf.insert_link( "link_4", "SendEvent",    [ "DAY_TICK", 1] )
-
+   cf.define_chain("test",False)
+   cf.insert.log( "test chain start")
+   cf.insert.send_event("MINUTE_TICK",1 )
+   cf.insert.wait_event_count( event = "TIME_TICK", count = 1 )
+   cf.insert.send_event( "HOUR_TICK",1  )
+   cf.insert.wait_event_count( event = "TIME_TICK", count = 1 )
+   cf.insert.send_event("DAY_TICK", 1 )
+   cf.insert.terminate()
 
    add_chains(cf, construct_linux_acquisition_class)
 

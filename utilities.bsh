@@ -2,10 +2,10 @@
 while [ 1 ]
 do
    echo "executing utilities interface module"
-   python3 utilities_py3.py 2>  /tmp/utilities.err 
-   python cloud_event_queue.py "reboot" "utilities"
+   python3 utilities_py3.py 2>  /tmp/utilities_py3.err 
+   python3 cloud_event_queue_py3.py "reboot" "utilities"
    sleep 10
    echo "dumping error file"
-   mv /tmp/utilities.err /tmp/utilities.errr
+   mv /tmp/utilities_py3.err /tmp/utilities_py3.errr
 
 done

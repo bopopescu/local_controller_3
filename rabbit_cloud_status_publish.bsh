@@ -3,8 +3,8 @@ do
    for i in {1..60}
    do
       echo "executing rabbit_cloud_status_publish $i"
-      /usr/bin/python3 rabbit_cloud_status_publish_py3.py 2>  /tmp/rabbit_cloud_status_publish.err  
-      mv /tmp/rabbit_cloud_status_publish.err /tmp/rabbit_cloud_status_publish.errr
+      /usr/bin/python3 rabbit_cloud_status_publish_py3.py 2>  /tmp/rabbit_cloud_status_publish_py3.err  
+      mv /tmp/rabbit_cloud_status_publish_py3.err /tmp/rabbit_cloud_status_publish_py3.errr
       sleep 5
    done
    python3 cloud_event_queue_py3.py "reboot" "rabbit_cloud_status_publish"

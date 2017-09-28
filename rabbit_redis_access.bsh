@@ -3,10 +3,10 @@ do
    for i in {1..60}
    do
        echo "executing rabbitmq redis gateway $i"
-       /usr/bin/python3 rabbit_redis_access_py3.py  2>  /tmp/rabbit_redis_access.err   
+       /usr/bin/python3 rabbit_redis_access_py3.py  2>  /tmp/rabbit_redis_access_py3.err   
      
-        mv /tmp/rabbit_redis_access.err /tmp/rabbit_redis_access.errr
+        mv /tmp/rabbit_redis_access_py3.err /tmp/rabbit_redis_access_py3.errr
         sleep 5
    done
-   python3 cloud_event_queue_py3.py "reboot" "rabbit_redis_access"
+   python3 cloud_event_queue_py3.py "reboot" "rabbit_redis_access_py3"
 done

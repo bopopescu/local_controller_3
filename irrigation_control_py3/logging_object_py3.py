@@ -10,7 +10,7 @@ from scipy.optimize import curve_fit
 
 
 
-class Logging_Object:
+class Logging_Object(object):
 
    def __init__( self, data_offset = 4 ):
        self.offset = data_offset

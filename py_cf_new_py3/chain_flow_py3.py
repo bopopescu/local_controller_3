@@ -1,11 +1,12 @@
 import datetime
 import time
+import sys
 
 from .opcodes_py3 import Opcodes
 from .help_functions_py3 import Help_Functions
 
 
-class CF_Base_Interpreter():
+class CF_Base_Interpreter(object):
 
     def __init__(self):
         self.chains = []
@@ -28,10 +29,12 @@ class CF_Base_Interpreter():
     # Chain and link construction
     #
 
-    def define_chain(self, chain_name, auto_start, init_function = None, term_function = None):
+    def define_chain(self, chain_name, auto_start, init_function = None, 
+                           term_function = None, except_function = None):
         chain = {}
         chain["init_function"] = init_function
         chain["term_function"] = term_function
+        chain["except_function"] = except_function
         chain["name"] = chain_name
         chain["index"] = 0
         chain["links"] = []
@@ -196,7 +199,18 @@ class CF_Base_Interpreter():
         while loopFlag:
             loopFlag = self.execute_link(chain, event)
 
-    def execute_link(self, chain, event):
+    def execute_link( self, chain, event ):
+        try:
+           return self.execute_link_a( chain, event )
+        except: 
+           if chain["except_function"] != None:
+               chain["except_function"](self,chain,event)
+           exc_info = sys.exc_info()     
+           raise exc_info[0].with_traceback(exc_info[1], exc_info[2])
+           
+
+
+    def execute_link_a(self, chain, event):
         link_index = chain["link_index"]
         self.current_link = link_index
         

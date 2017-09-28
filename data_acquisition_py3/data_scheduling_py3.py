@@ -149,28 +149,30 @@ def add_chains( cf,data_acquisition ):
 
 
    cf.define_chain("fifteen_second_list",True)
-   cf.insert_link( "link_1","One_Step",[data_acquisition.process_fifteen_second_data])
-   cf.insert_link( "link_2", "WaitEventCount", ["TIME_TICK",15,0])
-   cf.insert_link( "link_3","Reset",[])  
+   cf.insert.one_step( data_acquisition.process_fifteen_second_data )
+   cf.insert.wait_event_count( event ="TIME_TICK", count = 15 )
+   cf.insert.reset()
 
 
 
    cf.define_chain("minute_list",True)
-   cf.insert_link( "link_1","WaitEvent",["MINUTE_TICK" ])
-   cf.insert_link( "link_2","One_Step",[data_acquisition.process_minute_data])
-   cf.insert_link( "linx","Log",["Completed Minute_Tick"])
-   cf.insert_link( "link_3","Reset",[])  
+   cf.insert.wait_event_count( event ="MINUTE_TICK" )
+   cf.insert.one_step( data_acquisition.process_minute_data)  
+   cf.insert.reset()
+  
 
 
    cf.define_chain("hour_list",True)
-   cf.insert_link( "link_1","WaitEvent",["HOUR_TICK" ])
-   cf.insert_link( "link_2","One_Step",[data_acquisition.process_hour_data])
-   cf.insert_link( "link_3","Reset",[])  
+   cf.insert.wait_event_count( event ="HOUR_TICK" )
+   cf.insert.one_step( data_acquisition.process_hour_data)
+   cf.insert.reset()
+  
 
    cf.define_chain("daily_list",True)
-   cf.insert_link( "link_1","WaitEvent",["DAY_TICK" ])
-   cf.insert_link( "link_2","One_Step",[data_acquisition.process_daily_data])
-   cf.insert_link( "link_3","Reset",[])  
+   cf.insert.wait_event_count( event ="DAY_TICK" )
+   cf.insert.one_step( data_acquisition.process_daily_data)
+   cf.insert.reset()
+ 
 
 def construct_class( redis_handle,
                      gm,instrument,
