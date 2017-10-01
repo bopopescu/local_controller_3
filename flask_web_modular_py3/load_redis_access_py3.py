@@ -183,20 +183,20 @@ class Load_Redis_Access(object):
            return_value[i] = { "keys":temp }
        return json.dumps( return_value )
 
-   def redis_hget(self ):
+   def redis_hget(self ):  # tested
        return_value = {}
        param = self.request.get_json()
-       for i in params:     
-           temp = self.redis_handle.hget( i, items["key"] )
-           return_value[i] = { "key": items["key"], "value": temp }
+       for i in param["key_list"]:    
+           temp = self.redis_handle.hget( param["hash_name"], i )
+           return_value[i.decode()] = temp.decode()
        return json.dumps( return_value )
 
-   def redis_hgetall(self ):
+   def redis_hgetall(self ): #tested
        return_value = {}
        param = self.request.get_json()
-       for i in params:     
-           temp = self.redis_handle.hgetall( i)
-           return_value[i] = temp
+       temp = self.redis_handle.hgetall(param)
+       for i,item in temp.items():
+           return_value[i.decode()] = item.decode()
        return json.dumps( return_value )
 
    def redis_hexist(self ):

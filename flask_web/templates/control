@@ -17,7 +17,7 @@
         {% endif %}
      
 
-	<title>{{title_name}}</title>
+	       <title>{{title_name}}</title>
         {% include 'include_files.html' %}
 	
 	
