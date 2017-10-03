@@ -22,6 +22,7 @@ class Load_App_Sys_Files(object):
 
    def get_system_file(self, file_name):   
        data = self.sys_files.load_file(file_name)
+      
        return json.dumps(data)
 
    def get_app_file(self,file_name):

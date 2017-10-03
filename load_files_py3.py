@@ -20,29 +20,12 @@ import redis
 import json
 from redis_graph_py3 import farm_template_py3
 
-
-
-graph_management = farm_template_py3.Graph_Management(
-    "PI_1", "main_remote", "LaCima_DataStore")
-data_store_nodes = graph_management.find_data_stores()
-# find ip and port for redis data store
-data_server_ip = data_store_nodes[0]["ip"]
-data_server_port = data_store_nodes[0]["port"]
-print(data_server_ip,data_server_port)
-
-redis_handle = redis.StrictRedis(data_server_ip, data_server_port, db=0)
 app_files = "/home/pi/new_python/app_data_files/"
 sys_files = "/home/pi/new_python/system_data_files/"
 
 
-app_list = redis_handle.hkeys("APP_FILES")
-sys_list = redis_handle.hkeys("SYS_FILES")
-
-
-class APP_FILES():
+class BASIC_FILES( object ):
     def __init__(self, redis_handle):
-        self.path = app_files
-        self.key = "FILES:APP"
         self.redis_handle = redis_handle
 
     def file_directory(self):
@@ -59,77 +42,73 @@ class APP_FILES():
 
     def load_file(self, name):
         json_data= self.redis_handle.hget(self.key, name)
+        print("****************",json_data)
         data = json.loads(json_data.decode("utf-8") )
         return data
 
 
+class APP_FILES( BASIC_FILES ):
+   def __init__( self, redis_handle ):
+       BASIC_FILES.__init__(self,redis_handle )
+       self.path = app_files
+       self.key = "FILES:APP"
 
-class SYS_FILES():
+class SYS_FILES(BASIC_FILES):
     def __init__(self, redis_handle):
-
+        BASIC_FILES.__init__(self,redis_handle )
         self.path = sys_files
         self.key = "FILES:SYS"
-        self.redis_handle = redis_handle
+        
 
-    def file_directory(self):
-        return self.redis_handle.hkeys(self.key)
-
-    def delete_file(self, name):
-        self.redis_handle.hdel(self.key, name)
-
-    def save_file(self, name, data):
-        f = open(self.path + name, 'w')
-        json_data = json.dumps(data)
-        f.write(json_data)
-        self.redis_handle.hset(self.key, name, json_data.decode("utf-8"))
-
-    def load_file(self, name):
-        json_data = self.redis_handle.hget(self.key, name)
-        data = json.loads(json_data.decode("utf-8") )
-        return data
-
-    def delete_file(self, name):
-        os.remove(self.path + name)
 
 
 if __name__ == "__main__":
-   # delete APP FILES DATA
-   print("made it here")
-   if len(app_list) > 0:
-        redis_handle.hdel("FILES:APP", app_list)
 
-   # delete SYS FILES DATA
-   if len(sys_list) > 0:
-        redis_handle.hdel("FILES:SYS", sys_list)
+
+   def load_file( file_list,path, redis_key):
+       for i in files:
+           fileName, fileExtension = os.path.splitext(i)
+           if fileExtension == ".json":
+               f = open(path+i, 'r')
+               data = f.read()
+               temp = json.dumps(data) # test to ensure data has json format
+               redis_handle.hset( redis_key, i , data)
+
+
+
+
+
+   graph_management = farm_template_py3.Graph_Management(
+           "PI_1", "main_remote", "LaCima_DataStore")
+   data_store_nodes = graph_management.find_data_stores()
+   # find ip and port for redis data store
+   data_server_ip = data_store_nodes[0]["ip"]
+   data_server_port = data_store_nodes[0]["port"]
+   print(data_server_ip,data_server_port)
+
+   redis_handle = redis.StrictRedis(data_server_ip, data_server_port, db=0)
+
+   redis_handle.delete("APP_FILES")
+   redis_handle.delete("SYS_FILES")
+
 
    files = [f for f in listdir(app_files)]
 
+   load_file( files,app_files,"FILES:APP" )
+
    # load app files
-   for i in files:
-
-       fileName, fileExtension = os.path.splitext(i)
-
-       if fileExtension == ".json":
-           f = open(app_files+i, 'r')
-           data = f.read()
-           redis_handle.hset("FILES:APP", i , data)
-
 
    # load sys files
 
    files = [ f for f in listdir(sys_files)  ]
-   for i in files:
+   load_file( files,sys_files, "FILES:SYS" )
        
-       fileName, fileExtension = os.path.splitext(i)
-       if fileExtension == ".json":
-           f = open(sys_files+i, 'r')
-           data = f.read()
-           redis_handle.hset("FILES:SYS", i , data)
-          
 
 
 
- 
+   #
+   #  the rest of this will be moved to a new manager
+   #
    ####
    # INSURING THAT ETO_MANAGEMENT FLAG IS DEFINED
    ####

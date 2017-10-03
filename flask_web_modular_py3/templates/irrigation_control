@@ -37,19 +37,24 @@
    <h3>Manually Control System</h3>     
    <h4>Select Operating Mode</h4> 
 	  <select id="op_mode">
-	     <option value="OFFLINE">Empty Irrigation Queue</option>
+	     <option value="CLEAR">Stop Irrigation / Empty Queue</option>
+      <option value="SKIP_STATION">Skip Current Irrigation Step  </option>
 	     <option value="QUEUE_SCHEDULE">Queue Schedule</option>
 	     <option value="QUEUE_SCHEDULE_STEP">Queue Schedule Step</option>
-	     <option value="CLEAN_FILTER">Clean Filter</option> 
+
 	     <option value="OPEN_MASTER_VALVE">Open Master Valve</option>
 	     <option value="CLOSE_MASTER_VALVE">Close Master Valve</option> 
-      <option value="RESTART_PROGRAM">Restart Irrigation Control</option>
-      <option value="RESET_SYSTEM">Reset System</option>
+	     <option value="CLEAN_FILTER">Clean Filter</option> 
+      <option value="RESISTANCE_CHECK">Valve Resistance Check </option>
       <option value="CHECK_OFF">Check Off Condition</option>
       <option value="SUSPEND">Suspend Operation </option> 
       <option value="RESUME">Resume Operation  </option> 
-      <option value="SKIP_STATION">Skip Irrigation Station  </option>
-      option value="RESISTANCE_CHECK">Valve Resistance Check </option>        
+              
+
+      <option value="RESTART_PROGRAM">Restart Irrigation Control</option>
+      <! Last Commands will be moved to system level stuff >
+
+      <option value="RESET_SYSTEM">Reset System</option>
 	 </select>
 
   

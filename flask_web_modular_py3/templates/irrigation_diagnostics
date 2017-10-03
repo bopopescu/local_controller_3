@@ -60,7 +60,7 @@
        <h4>Select Operating Function</h4> 
        <select id="op_mode">
 	         <option value="CLEAR">Clear</option>
-	         <option value="NATIVE_SCHEDULE">Queue Schedule Step Time</option>
+	         <option value="QUEUE_SCHEDULE_STEP_TIME">Queue Schedule Step Time</option>
 	         <option value="OPEN_MASTER_VALVE">Open Master Valve</option>
 	         <option value="CLOSE_MASTER_VALVE">Close Master Valve</option>
 	     </select>
@@ -90,7 +90,7 @@
         <h4>Select Operating Function</h4> 
        <select id="op_mode">
 	         <option value="CLEAR">Clear</option>
-	         <option value="CONTROLLER_PIN">Queue Controller/Pin Step Time</option>
+	         <option value="DIRECT_VALVE_CONTROL">Queue Controller/Pin Step Time</option>
 	         <option value="OPEN_MASTER_VALVE">Open Master Valve</option>
 	         <option value="CLOSE_MASTER_VALVE">Close Master Valve</option>
 	     </select>
@@ -115,23 +115,29 @@
    {% endif %}
 
    {% if filename == "valve_group" %}
-       <h4>Select Operating Function</h4> 
+      <h4>Select Operating Function</h4> 
        <select id="op_mode">
 	         <option value="CLEAR">Clear</option>
-	         <option value="NATIVE_SCHEDULE">Queue Schedule Step Time</option>
+	         <option value="DIRECT_VALVE_CONTROL">Queue Valve Group/Valve Time</option>
 	         <option value="OPEN_MASTER_VALVE">Open Master Valve</option>
 	         <option value="CLOSE_MASTER_VALVE">Close Master Valve</option>
 	     </select>
 
-      
-    <!  currently not implemented >
-    <h4 id="schedule_controller">Select Valve Group</h4> 
-	   <select id="controller_select">
-	   </select>
-    <h4 id="step_pin">Select Valve</h4> 
-	   <select id="select_pin">
-	   </select>
-         
+     
+       <div id = "schedule_div"> 
+       <h4 >Select Valve Group</h4> 
+	      <select id="valve_group_select">
+	      </select>
+
+
+       <h4 id="step_pin">Select Valve</h4> 
+	      <select id="valve_select">
+	      </select>  
+
+       <h4 id ="run_label">Select Run Time (1 to 60 Minutes) </h4> 
+       <select id="run_time">
+       </select>
+      </div>
          
    {% endif %}
 

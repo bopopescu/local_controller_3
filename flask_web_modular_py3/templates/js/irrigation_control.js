@@ -77,80 +77,80 @@ function op_mode_change(event, ui)
 	  temp_index = $("#op_mode")[0].selectedIndex;	
 	  switch( temp_index)
 	  {
-	    
-	     case  0:  // Offline
+   
+	     case  0:  // CLEAR
 	         $("#schedule_div").hide()
           $("#manual_div").hide()
           $("#run_div").hide()
 	         break;
 	    
-	     case 1:  // Queue Schedule
-	         $("#schedule_div").show()
+	     case 1:  // SKIP_STATION
+	         $("#schedule_div").hide()
           $("#manual_div").hide()
           $("#run_div").hide()
           break;
 	    
-	     case 2: // Queue Mode Schedule Step
+	     case 2: // QUEUE_SCHEDULE
+	         $("#schedule_div").show()
+          $("#manual_div").hide()
+          $("#run_div").hide()
+          break;
+
+	     case 3:  // QUEUE_SCHEDULE_STEP
 	         $("#schedule_div").show()
           $("#manual_div").show()
           $("#run_div").hide()
-          break;
+	         break;
 
-	     case 3:  // Clean Filter
+       case 4:  // OPEN_MASTER_VALVE
 	         $("#schedule_div").hide()
           $("#manual_div").hide()
           $("#run_div").hide()
 	         break;
 
-       case 4:  // open Master Valve
+       case 5: // CLOSE_MASTER_VALVE
 	         $("#schedule_div").hide()
           $("#manual_div").hide()
           $("#run_div").hide()
 	         break;
 
-       case 5: // Close Master Valve
+       case 6: // CLEAN_FILTER
 	         $("#schedule_div").hide()
           $("#manual_div").hide()
           $("#run_div").hide()
 	         break;
 
-       case 6: // Restart Program
+       case 7: // RESISTANCE_CHECK
 	         $("#schedule_div").hide()
           $("#manual_div").hide()
           $("#run_div").hide()
 	         break;
 
-       case 7: // Reset Program
+       case 8: // CHECK OFF
 	         $("#schedule_div").hide()
           $("#manual_div").hide()
           $("#run_div").hide()
 	         break;
 
-       case 8: // check off
+       case 9: // SUSPEND
 	         $("#schedule_div").hide()
           $("#manual_div").hide()
           $("#run_div").hide()
 	         break;
 
-       case 9: // shut down
+       case 10: // RESUME
 	         $("#schedule_div").hide()
           $("#manual_div").hide()
           $("#run_div").hide()
 	         break;
 
-       case 10: // Turn on
+       case 11: // RESTART_PROGRAM
 	         $("#schedule_div").hide()
           $("#manual_div").hide()
           $("#run_div").hide()
 	         break;
 
-       case 11: // Skip
-	         $("#schedule_div").hide()
-          $("#manual_div").hide()
-          $("#run_div").hide()
-	         break;
-
-       case 12: // Resistance Check
+       case 12: // RESET_SYSTEM
 	         $("#schedule_div").hide()
           $("#manual_div").hide()
           $("#run_div").hide()
@@ -172,7 +172,7 @@ function schedule_irrigation_event(event, ui)
 
        json_object["command"]         = $("#op_mode").val()
        json_object["schedule_name"]   =  $("#manual_schedule").val()
-       stepjson_object["step"]        = $("#manual_step").val() 
+       json_object["step"]        = $("#manual_step").val() 
        json_object["run_time"]        = $("#run_time").val()
       
        ajax_post_confirmation('/ajax/mode_change', json_object, "Do you want to make mode change", 
@@ -185,42 +185,15 @@ function schedule_irrigation_event(event, ui)
 $(document).ready(
  function()
  {
-     schedules_pins = {}
-     schedules = []
-     schedules_steps = {}
-     schedules_start_times = {}
-     schedules_end_times = {}
-     schedules_dow = {}
-     controller_pin_data = {}
-     composite_limit_values = {}
+   schedules_pins = {}
+   schedules = []
+   schedules_steps = {}
+   schedules_start_times = {}
+   schedules_end_times = {}
+   schedules_dow = {}
+   controller_pin_data = {}
+   composite_limit_values = {}
      
-     
-
-      
-    
- 
-    
-        
-      schedule_request = function()
-      {
-	
-         $.ajax(
-         {
-                    type: "GET",
-                    url: '/ajax/schedule_data',
-                    dataType: 'json',
-                    async: true,
-                    //json object to sent to the authentication url
-                    success: ajax_schedule_success,
-              
-                    error: function () 
-		    {
-                       alert('/ajax/schedule_data' +"   "+"Server Error Change not made");
-		       
-		       
-                    }
-         });
-      }
      
             
    $("#schedule_div").hide()

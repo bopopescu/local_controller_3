@@ -1,5 +1,5 @@
 [
-   { "name":1, "pins":
+   { "name":"valve group 1", "valves":
       [
            "Flowers along side walk",
            "Well Water Drip Line",
@@ -20,7 +20,7 @@
           { "controller":"satellite_1"   ,"pin":16 }
        ]
      },
-     { "name":2, "pins":
+     { "name":"valve group 2", "valves":
       [
            "Lemon Tree Drip Line near Steps",
            "Middle Clover Near Well",
@@ -35,12 +35,12 @@
           { "controller":"satellite_1"   ,"pin":11 }
        ]
      },
-     { "name":3, "pins":
+     { "name":"valve group 3", "valves":
       [
            "Flowers Toward Garage",
-           "Flowers on Opposite Side of Garage"
+           "Flowers on Opposite Side of Garage",
            "Grass Zone Away From Door",
-           "Grass Toward Door",
+           "Grass Toward Door"
            
        ],
        "io":
@@ -51,7 +51,7 @@
           { "controller":"satellite_1"   ,"pin":23 }
        ]
      },
-     { "name":4, "pins":
+     { "name":"valve group 4", "valves":
       [
            "Upper area Near Property Line",
            "On Property Side of Valve #3",
@@ -72,7 +72,7 @@
 
        ]
      },  
-     { "name":5, "pins":
+     { "name":"valve group 5", "valves":
       [
            "Fruit Trees on Block #9",
            "Waters Bank Closest to House",
@@ -89,7 +89,7 @@
            { "controller":"satellite_1"   ,"pin":6  }
        ]
      },
-     { "name":6, "pins":
+     { "name":"valve group 6", "valves":
       [
            "Avocado Block #4",
            "Avocado Block #10",
@@ -111,7 +111,7 @@
 
        ]
      },  
-     { "name":7, "pins":
+     { "name":"valve group 7", "valves":
       [
            "Bank Sprayers Down Hill",
            "Bank Sprayers Down Hill",
@@ -134,7 +134,7 @@
        ]
      },  
 
-     { "name":8, "pins":
+     { "name":"valve group 8", "valves":
       [
            "Avocado Block #1",
            "Avocado Block #2",
@@ -156,7 +156,7 @@
 
        ]
      },  
-     { "name":9, "pins":
+     { "name":"valve group 9", "valves":
       [
            "Bottom Hill on Cindy's House Side",
            "Bottom Hill on the opposite site of drive way"
@@ -168,7 +168,7 @@
       
        ]
      },  
-     { "name":10, "pins":
+     { "name":"valve group 10", "valves":
       [
            "Not Connected",
            "Drip line along side of Road",

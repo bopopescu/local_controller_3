@@ -26,9 +26,8 @@
         <ul data-role="listview">
             <li><a href="/diagnostics/schedule_control" target="_self">Turn On/Off By Schedule Step</a></li>
             <li><a href="/diagnostics/controller_pin" target="_self">Turn On/Off By Controller Pin</a></li>
-            
-
-
+             <li><a href="/diagnostics/valve_group" target="_self">Turn On/Off By Valve Group</a></li>
+           
 
         </ul>
    </div>
@@ -41,7 +40,7 @@
         <ul data-role="listview">
            <li><a href ='/control/display_past_alerts' target="_self">Past Alerts</a></li>
            <li><a href ='/control/display_past_actions' target="_self">Past Actions</a></li>
-           <li><a href="/control/display_irrigation_queue" target="_self">Pending Actions</a></li>
+           <li><a href="/control/display_irrigation_queue" target="_self">Pending Irrigation Actions</a></li>
             <li><a href ='/sel_chart/flow' target="_self">Recent Flow History</a></li>
             <li><a href="/strip_chart/coil" target="_self">Recent Coil History</a></li>
             

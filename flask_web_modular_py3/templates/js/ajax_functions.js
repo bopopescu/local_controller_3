@@ -8,9 +8,22 @@
 */
 
 
+function set_status_bar( text )
+{
+   $("#page_status").text(text)
+}
+
+var user_function 
+function status_successful( data )
+{
+   set_status_bar("Current Status: Fetch operation successful")
+   user_function(data)
+}
+
 function ajax_get( url_path, error_message, success_function )
 {
-	
+   user_function = success_function
+	  $("#page_status").text("Current Status: Operation in Progress")
    $.ajax(
    {
        type: "GET",
@@ -18,11 +31,11 @@ function ajax_get( url_path, error_message, success_function )
        dataType: 'json',
        async: true,
        //json object to sent to the authentication url
-       success: success_function,
+       success: status_successful,
               
        error: function () 
 		    {
-           alert(error_message);  // replace this
+           set_status_bar("Current Status: "+error_message)  
 		       
 		       
       }
@@ -36,6 +49,8 @@ function ajax_post_confirmation(url_path, data, confirmation_string,
    var result = confirm("Do you want to make mode change");  // change this
    if( result == true )
    {
+       $("#page_status").text("Current Status: Operation in Progress")
+
        var json_string = JSON.stringify(data);
        $.ajax ({  type: "POST",
                   url: url_path,
@@ -45,13 +60,14 @@ function ajax_post_confirmation(url_path, data, confirmation_string,
                   data: json_string,
                   success: function () 
 		                {
-                       alert(success_message);  // fix this
+                       set_status_bar(success_message)
+
 		                 },
 
                    error: function () 
 		                {
-                       alert(error_message);  // fix this
-		                 }
+                       set_status_bar(error_message) 	                
+                  }
            })
    }
 }
@@ -59,6 +75,8 @@ function ajax_post_confirmation(url_path, data, confirmation_string,
 function ajax_post_get(url_path, data, success_function, error_message) 
 {
      var json_string = JSON.stringify(data);
+     $("#page_status").text("Current Status: Operation in Progress")
+     user_function = success_function
 
      $.ajax ({  type: "POST",
                   url: url_path,
@@ -66,11 +84,11 @@ function ajax_post_get(url_path, data, success_function, error_message)
 	                 contentType: "application/json",
                   async: true,
                   data: json_string,
-                  success: success_function,
+                  success: status_successful,
 
                    error: function () 
 		                {
-                       alert(error_message);  // fix this
+                       set_status_bar("Current Status: "+error_message)  
 		                 }
            })
    

@@ -11,13 +11,14 @@ class SprinklerControl():
        self.master_valve_ctrl                      = master_valve_ctrl
        self.sprinkler_ctrl                          = sprinkler_ctrl
        self.commands = {}
-       self.commands["OFFLINE"]                   = self.go_offline          
+       self.commands["OFFLINE"]                   = self.clear # command to be removed
+       self.commands["CLEAR"]                     = self.clear                   
        self.commands["QUEUE_SCHEDULE"]            = self.queue_schedule
        self.commands["QUEUE_SCHEDULE_STEP"]       = self.queue_schedule_step     
        self.commands["QUEUE_SCHEDULE_STEP_TIME"]  = self.queue_schedule_step_time
        self.commands["RESTART_PROGRAM"]           = self.restart_program  #ok          
-       self.commands["NATIVE_SCHEDULE"]           = self.queue_schedule_step_time      
-       self.commands["NATIVE_SPRINKLER"]          = self.direct_valve_control       
+       self.commands["NATIVE_SCHEDULE"]           = self.queue_schedule_step_time  ###command soon to be deleted    
+       self.commands["DIRECT_VALVE_CONTROL"]      = self.direct_valve_control       
        self.commands["CLEAN_FILTER"]              = self.clean_filter    # ok            
        self.commands["OPEN_MASTER_VALVE"]         = self.open_master_valve   #ok        
        self.commands["CLOSE_MASTER_VALVE"]        = self.close_master_valve  #ok       
@@ -33,7 +34,7 @@ class SprinklerControl():
    def dispatch_sprinkler_mode(self,chainFlowHandle, chainObj, parameters,event):
 
 
-           #try: 
+           try: 
                length = self.redis_handle.llen( "QUEUES:SPRINKLER:CTRL")
                #print("--length",length)
                if length > 0:
@@ -47,9 +48,9 @@ class SprinklerControl():
                   else:
                       self.alarm_queue.store_past_action_queue("Bad Irrigation Command","RED",object_data  )
                       raise
-           #except:
-               #print "exception in dispatch mode"
-               #quit()
+           except:
+               print( "exception in dispatch mode") # issue log message
+               #raise
       
 
 
@@ -98,19 +99,10 @@ class SprinklerControl():
 
   
  
-   def go_offline( self, object_data,chainFlowHandle, chainObj, parameters,event ):
-       self.alarm_queue.store_past_action_queue("OFFLINE","RED"  )
-       self.redis_handle.hset("CONTROL_VARIABLES","sprinkler_ctrl_mode","OFFLINE")
-       self.irrigation_control.turn_off_master_valves()
-       self.irrigation_control.disable_all_sprinklers()
+   def clear( self, object_data,chainFlowHandle, chainObj, parameters,event ):
        self.clear_redis_sprinkler_data()
        self.clear_redis_irrigate_queue()
-       self.redis_handle.hset( "CONTROL_VARIABLES","schedule_name","OFFLINE")
-       self.redis_handle.hset( "CONTROL_VARIABLES","current_log_object",  None )
-       self.redis_handle.hset( "CONTROL_VARIABLES","flow_log_object", None )          ### not sure of
-       self.redis_handle.hset( "CONTROL_VARIABLES","SUSPEND","ON")
-       self.sprinkler_ctrl.suspend_operation()
-       self.cf.send_event("IRI_MASTER_VALVE_SUSPEND",None)
+       self.sprinkler_ctrl.skip_operation()       
 
 
          
@@ -137,18 +129,11 @@ class SprinklerControl():
 
  
    def queue_schedule_step_time( self, object_data,chainFlowHandle, chainObj, parameters,event ):
-       self.schedule_name              = object_data["schedule_name"]
-       self.schedule_step        =  object_data["step"]
-       self.schedule_step_time   =  object_data["run_time"]
-       self.alarm_queue.store_past_action_queue("DIAGNOSTICS_SCHEDULE_STEP_TIME","YELLOW" , {"schedule_name":self.schedule_name, "schedule_step":self.schedule_step,"schedule_time":self.schedule_step_time})
+       self.schedule_name             = object_data["schedule_name"]
+       self.schedule_step             =  object_data["step"]
+       self.schedule_step_time        =  object_data["run_time"]
        self.schedule_step             = int(self.schedule_step)
        self.schedule_step_time        = int(self.schedule_step_time)  
-       self.irrigation_control.turn_off_master_valves()
-       self.irrigation_control.disable_all_sprinklers()
-       self.clear_redis_sprinkler_data()
-       self.clear_redis_irrigate_queue()
-
- 
        self.load_step_data( self.schedule_name, self.schedule_step, self.schedule_step_time,False ) 
        
     
@@ -158,21 +143,11 @@ class SprinklerControl():
        print("direct valve control")     
        remote                = object_data["controller"] 
        pin                   = object_data["pin"]         
-       schedule_step_time    = object_data["run_time"]  
-       
+       schedule_step_time    = object_data["run_time"]        
        pin = int(pin)
-       schedule_step_time = int(schedule_step_time) 
-       self.alarm_queue.store_past_action_queue("DIRECT_VALVE_CONTROL","YELLOW" ,{"remote":remote,"pin":pin,"time":schedule_step_time }) 
-       
-       self.irrigation_control.turn_off_master_valves()
-       self.irrigation_control.disable_all_sprinklers()
-       self.clear_redis_sprinkler_data()
-       self.clear_redis_irrigate_queue()
-       
+       schedule_step_time = int(schedule_step_time)  
        self.load_native_data( remote,pin,schedule_step_time)
        
-       self.redis_handle.hset("CONTROL_VARIABLES","SUSPEND","OFF")
-       self.redis_handle.hset("CONTROL_VARIABLES","SKIP_STATION","OFF")  
  
        
 
@@ -287,9 +262,9 @@ class SprinklerControl():
    def load_native_data( self, remote,bit,time ):
        print("load native_data")
        json_object = {}
-       json_object["type"]            =  "BASIC_IRRIGATION_STEP"
-       json_object["schedule_name"]   =  "MANUAL"
-       json_object["step"]            =  1
+       json_object["type"]            =  "IRRIGATION_STEP"
+       json_object["schedule_name"]   =  remote
+       json_object["step"]            =  bit
        json_object["io_setup"]        =  [{ "remote":remote, "bits":[bit] }]
        json_object["run_time"]        =  time
        json_object["elasped_time"]    =  0

@@ -96,9 +96,9 @@ function bind_change_mode()
        json_object["schedule_name"] = schedule_name;
        json_object["step"] = step;
        json_object["run_time"] = run_time;
-       ajax_post('/ajax/diag_mode_change', json_object, 
+       ajax_post_confirmation('/ajax/mode_change', json_object, 
                   "Do You Wish to Make Change","Changes Made", 
-                  '/ajax/mode_change'+"  Server Error Change not made" )
+                  "Server Error" )
        
      });// change start time
  
@@ -117,14 +117,14 @@ function bind_op_mode_change()
 	      switch( temp_index)
 	      {
 	         case  0:  // CLEAR
-              console.log("clear")
+              
 	             $("#schedule_div").hide()
               $("#manual_div").hide()
               $("#run_div").hide()
 	             break;
 	    
 	         case 1:  // Queue Schedule  Step Time
-              console.log("queue schedule step")
+              
 	             $("#schedule_div").show()
               $("#manual_div").show()
               $("#run_div").show()

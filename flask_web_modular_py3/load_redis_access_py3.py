@@ -30,12 +30,14 @@ class Load_Redis_Access(object):
                       # list operations
                       ["redis_llen"      , self.redis_llen    ],
                       ["redis_rpush"     , self.redis_rpush   ],
-                      ["redis_rop"       , self.redis_rop     ],
+                      ["redis_rpop"       , self.redis_rpop     ],
                       ["redis_lpush"     , self.redis_lpush   ],
-                      ["redis_lop"       , self.redis_lpop    ],
+                      ["redis_lpop"       , self.redis_lpop    ],
                       ["redis_lget"      , self.redis_lget    ],
                       ["redis_lset"      , self.redis_lset    ],
                       ["redis_ldelete"   , self.redis_ldelete ],
+                      ["redis_lrange"     , self.redis_lrange  ],
+                      ["redis_ltrim"      , self.redis_ltrim    ],
                       # hash operations
                       [ "redis_hkeys",              self.redis_hkeys   ],
                       [ "redis_hget",               self.redis_hget    ],
@@ -111,7 +113,7 @@ class Load_Redis_Access(object):
            self.redis_handle.rpush( i,item )
        return json.dumps('SUCCESS')
 
-   def redis_rop( self ):
+   def redis_rpop( self ):
        return_value = {}
        param = self.request.get_json()
        for i in param:     
@@ -153,11 +155,33 @@ class Load_Redis_Access(object):
    def redis_ldelete(self ):
        param = self.request.get_json()
        token = "------------~~~~~~~~~~~~~~~~~~-----------------"
-       for i,items in param.items():
-           for j in items:
-               self.redis_handle.lset(i,j,token)
-           self.redis_handle.lrem(i,0,token)
+       key = param["key"]
+       list_indexes = param["list_indexes"]
+       for i in list_indexes:
+           
+           self.redis_handle.lset( key, i, token)
+       self.redis_handle.lrem(key,0,token)
        return json.dumps('SUCCESS')
+
+   def redis_lrange( self ):
+       return_value = []
+       param    = self.request.get_json()
+       key      = param["key"]
+       start    = param["start"]
+       end      = param["end"]
+       temp  = self.redis_handle.lrange(key,start,end) 
+       for i in temp:
+          return_value.append(i.decode())
+       return json.dumps(return_value)
+
+   def redis_ltrim( self ):
+       param    = self.request.get_json()
+       key      = param["key"]
+       start    = param["start"]
+       end      = param["end"]
+       self.redis_handle.ltrim(key,start,end)
+       return json.dumps('SUCCESS')
+
 
 
    #

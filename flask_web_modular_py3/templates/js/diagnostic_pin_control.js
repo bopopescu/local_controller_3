@@ -47,12 +47,12 @@ function send_irrigation_event(event, ui)
        run_time        = $("#run_time").val()
       
        var json_object = {}
-       json_object["command"]     = mode;
-       json_object["controller"]  = controller;
-       json_object["pin"]         = pin;
-       json_object["run_time"]     = run_time;
-       ajax_post_confirmation("/ajax/diagnostic_irrigation_controller_pin", 
-                              json_object, "Do you want to make mode change", 
+       json_object["command"]     = $("#op_mode").val();
+       json_object["controller"]  = $("#controller_select").val();
+       json_object["pin"]         = $("#select_pin").val()
+       json_object["run_time"]     = $("#run_time").val()
+       ajax_post_confirmation("/ajax/mode_change", json_object,
+                              "Do you want to make mode change", 
                                        "Changes Made", "Server Error" )
 }   
    
@@ -100,7 +100,7 @@ $(document).ready(
    
    $("#controller_select").bind("change", new_controller_event )
    
-   $("#controller_pin_turn_on").bind("click",send_irrigation_event )
+   $("#change_mode").bind("click",send_irrigation_event )
      
    $("#op_mode" ).bind( "change",mode_change );
    

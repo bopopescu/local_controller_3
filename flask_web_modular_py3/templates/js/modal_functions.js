@@ -2,6 +2,7 @@
 // $.alert(message, title)
 function add_alert_function()
 {
+  alert("extending jquery")
 $.extend({ alert: function (message, title) {
   $("<div></div>").dialog( {
     buttons: { "Ok": function () { $(this).dialog("close"); } },
