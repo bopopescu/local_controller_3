@@ -52,13 +52,21 @@
         <h3>Automatic Operations </h3>
         <ul data-role="listview">
          <li><a href="/control/control" target="_self">Control Operation</a></li>
-         <li><a href="/control/set_rain_day" target="_self">Set Rain Day</a></li>
-         <li><a href="/control/eto_management" target="_self">Set Eto Management</a></li>
-         <li><a href="/control/eto_values" target="_self">Manage Eto Values</a></li>
+         <li><a href="/control/parameters" target="_self">Manage Parameters</a></li>
          <li><a href="/control/irrigation_queue" target="_self">Manage Irrigation Queue</a></li>
 
         </ul>
     </div>
+   <div data-role="collapsible" data-theme="a"  data-iconpos="right" data-collapsed="True" data-content-theme="c">
+        <h3>ETO Management </h3>
+        <ul data-role="listview">
+         <li><a href="/eto/eto_values" target="_self">Manage ETO Valve Valuesq</a></li>
+         <li><a href="/eto/eto_setup" target="_self">Setup ETO Valvesq</a></li>
+         <li><a href="/eto/daily_values" target="_self">Manage ETO Daily Valuesq</a></li>
+
+        </ul>
+    </div>
+
    <div data-role="collapsible" data-theme="a"  data-iconpos="right" data-collapsed="True" data-content-theme="c">
         <h3>Schedule Statistics</h3>
         <ul data-role="listview">
@@ -89,9 +97,6 @@
         <h3>Misc Config</h3>
         <ul data-role="listview">
             <li><a href="/system_actions"   target="_self">Configure System Actions </a></li>
-            <li><a href="/eto_setup"        target="_self">ETO Configuration </a></li>
-            <li><a href="/configure_filter_cleaning"  target="_self">Configure Filter Cleaning Interval </a></li>
-            <li><a href="/configure_max_flow_rate"  target="_self">Configure Max Flow Rate Cutoff </a></li>
         </ul>
     </div>
 
@@ -100,7 +105,7 @@
         <ul data-role="listview">
             <li><a href ='/overall_resistance/0' target="_self">Coil Resistance</a></li>
             <li><a href ='/overal_resistance_limits/0' target="_self">Coil Resistance Limits</a></li>
-            <li><a href ='/eto_raw_data' target="_self">ETO Raw Data</a></li>
+ 
             <li><a href ='/soil_moisture_data' target="_self">Soil Moisture Data</a></li>
 
             

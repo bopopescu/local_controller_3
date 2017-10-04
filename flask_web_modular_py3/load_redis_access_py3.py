@@ -210,9 +210,10 @@ class Load_Redis_Access(object):
    def redis_hget(self ):  # tested
        return_value = {}
        param = self.request.get_json()
-       for i in param["key_list"]:    
+       for i in param["key_list"]:             
            temp = self.redis_handle.hget( param["hash_name"], i )
-           return_value[i.decode()] = temp.decode()
+           print("***********",param["hash_name"],i,temp)
+           return_value[i] = temp.decode()
        return json.dumps( return_value )
 
    def redis_hgetall(self ): #tested

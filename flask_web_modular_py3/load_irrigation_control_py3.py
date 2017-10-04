@@ -33,33 +33,29 @@ class Load_Irrigation_Pages(object):
        a1= auth.login_required( self.display_irrigation_queue )
        app.add_url_rule("/control/display_irrigation_queue","display_irrigation_queue",a1)
 
-       a1= auth.login_required( self.set_rain_day )
-       app.add_url_rule("/control/set_rain_day","set_rain_day",a1)
+       a1= auth.login_required( self.manage_parameters )
+       app.add_url_rule("/control/parameters","manage_parameters",a1)
 
-       a1= auth.login_required( self.eto_management )
-       app.add_url_rule("/control/eto_management","eto_management",a1)
 
    def irrigation_control(self):
-       return self.render_template("irrigation_control")
+       return self.render_template("irrigation_templates/irrigation_control")
       
    def get_index_page(self):
        return self.get_diagnostic_page( filename = "schedule_control" )
 
    def get_diagnostic_page(self, filename):   
-       return self.render_template("irrigation_diagnostics", filename = filename )
+       return self.render_template("irrigation_templates/irrigation_diagnostics", filename = filename )
 
    def irrigation_queue(self):
-       return self.render_template("irrigation_queue" )
+       return self.render_template("irrigation_templates/irrigation_queue" )
 
    def display_irrigation_queue(self):
-       return self.render_template("display_irrigation_queue" )
+       return self.render_template("irrigation_templates/display_irrigation_queue" )
 
-   def set_rain_day(self):
-       return self.render_template("set_rain_day" )
+   def manage_parameters(self):
+       return self.render_template("irrigation_templates/manage_parameters" )
        
 
-   def eto_management(self):
-        return self.render_template("eto_management" )
       
 
 
