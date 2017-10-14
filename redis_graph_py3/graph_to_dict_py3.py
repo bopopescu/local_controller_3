@@ -3,7 +3,8 @@ import json
 class Graph_To_Dictionary:
 
    def __init__( self ):
-       self.redis_handle = redis.StrictRedis( host = "localhost", port=6379, db = 14 ) 
+       self.redis_handle = redis.StrictRedis( host = "localhost", port=6379, db = 14 , decode_responses=True)
+ 
       
 
    def graph_to_dictionary( self ):

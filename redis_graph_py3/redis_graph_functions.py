@@ -189,7 +189,7 @@ class Query_Configuration(object):
        for i in list(starting_set):
            flag = True
            for j , value in property_values.items(): 
-               data = self.redis_handle.hget(i,j).decode("utf-8")
+               data = self.redis_handle.hget(i,j)
                if data == None:
                    flag = False
                    break
@@ -224,10 +224,10 @@ class Query_Configuration(object):
            for j in data.keys():
 
                try:
-                   temp[j.decode("utf-8")] = json.loads(data[j].decode("utf-8") )
+                   temp[j] = json.loads(data[j] )
                except:
                    #print("exception")
-                   temp[j.decode("utf-8")] = data[j].decode("utf-8")
+                   temp[j] = data[j]
            return_value.append(temp)
        return return_value
 
@@ -253,7 +253,8 @@ class Query_Configuration(object):
 
       
 if __name__ == "__main__":
-   redis_handle  = redis.StrictRedis( host = "127.0.0.1", port=6379, db = 11 )   
+   redis_handle  = redis.StrictRedis( host = "127.0.0.1", port=6379, db = 11 , decode_responses=True)
+   
 
    bc = Build_Configuration( redis_handle)  
    qc = Query_Configuration(redis_handle)

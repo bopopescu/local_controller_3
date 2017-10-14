@@ -154,7 +154,7 @@ class Moisture_Control(object):
            name = i["name"]
            redis_key = self.store_data_list[name]["queue_name"]
            data_json  = redis_handle.lindex( redis_key, 0)
-           data   = json.loads(data_json.decode("utf-8") )          
+           data   = json.loads(data_json )          
            temp = {"air_temperature": data["measurements"]["air_temperature"],"air_humidity": data["measurements"]["air_humidity"]}
            redis_key = self.store_air_list[name]["queue_name"]
            redis_length = self.store_air_list[name]["list_length"]
@@ -227,7 +227,8 @@ if __name__ == "__main__":
       raise ValueError("Imbalance in setup graph")
 
    
-   redis_handle = redis.StrictRedis( host = data_server_ip, port=data_server_port, db = 12 )
+   redis_handle = redis.StrictRedis( host = data_server_ip, port=data_server_port, db = 12 , decode_responses=True)
+
    status_stores = graph_management.match_terminal_relationship("CLOUD_STATUS_STORE")
 
    status_stores = list(status_stores)

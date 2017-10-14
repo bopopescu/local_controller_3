@@ -7,6 +7,10 @@
 **
 */
 
+function deepCopyObject(input)
+{
+  return JSON.parse(JSON.stringify(input))
+}
 
 function set_status_bar( text )
 {
@@ -46,7 +50,37 @@ function ajax_post_confirmation(url_path, data, confirmation_string,
                                        success_message, error_message )
 {
  
-   var result = confirm("Do you want to make mode change");  // change this
+   var result = confirm(confirmation_string);  // change this
+   if( result == true )
+   {
+       $("#page_status").text("Current Status: Operation in Progress")
+
+       var json_string = JSON.stringify(data);
+       $.ajax ({  type: "POST",
+                  url: url_path,
+                  dataType: 'json',
+	                 contentType: "application/json",
+                  async: true,
+                  data: json_string,
+                  success: function () 
+		                {
+                       set_status_bar(success_message)
+
+		                 },
+
+                   error: function () 
+		                {
+                       set_status_bar(error_message) 	                
+                  }
+           })
+   }
+}
+
+
+function ajax_post(url_path, data,  success_message, error_message )
+{
+ 
+   var result = true
    if( result == true )
    {
        $("#page_status").text("Current Status: Operation in Progress")

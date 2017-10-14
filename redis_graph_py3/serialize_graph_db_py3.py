@@ -3,7 +3,8 @@ import pickle
 class Serialize_Graph:
 
    def __init__( self, graph_db= 14 ):
-       self.redis_handle = redis.StrictRedis( host = "localhost", port=6379, db= graph_db ) 
+       self.redis_handle = redis.StrictRedis( host = "localhost", port=6379, db= graph_db , decode_responses=True)
+ 
       
 
    def serialize_graph( self, out_file = "graph_db.pickle" ):

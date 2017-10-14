@@ -109,7 +109,6 @@ temp = gm.match_relationship("ETO_SITES")
 eto_measurement    = temp[0]["measurement"]
 temp = gm.match_relationship("RAIN_SOURCES")
 rain_measurement    =  temp[0]["measurement"]
-
 interfaces = []
 remotes = {}
 remote_interfaces = gm.match_relationship("UDP_IO_SERVER")
@@ -858,6 +857,7 @@ def overal_current_statistics(schedule_id):
 def eto_raw_data():
        eto_data =  redis_data_handle.get(eto_measurement)
        rain_data = redis_data_handle.get(rain_measurement)
+       print(eto_data,rain_data)
        return render_template( "/eto_raw_data",eto_data = eto_data, rain_data = rain_data ) 
 
 

@@ -40,7 +40,7 @@ class SprinklerControl():
                if length > 0:
                   data = self.redis_handle.rpop("QUEUES:SPRINKLER:CTRL") 
                   data = base64.b64decode(data)
-                  object_data = json.loads(data.decode("utf-8") )
+                  object_data = json.loads(data.decode())
  
                  
                   if object_data["command"] in self.commands :
@@ -50,7 +50,7 @@ class SprinklerControl():
                       raise
            except:
                print( "exception in dispatch mode") # issue log message
-               #raise
+               raise
       
 
 
@@ -345,8 +345,9 @@ if __name__ == "__main__":
    data_server_ip   = data_store_nodes[0]["ip"]
    data_server_port = data_store_nodes[0]["port"]
    
-   redis_new_handle = redis.StrictRedis( host = data_server_ip, port=data_server_port, db = 12 )
-   redis_old_handle  = redis.StrictRedis( host = data_server_ip, port=data_server_port, db = 0 )
+   redis_new_handle = redis.StrictRedis( host = data_server_ip, port=data_server_port, db = 12, decode_responses=True)
+   redis_old_handle  = redis.StrictRedis( host = data_server_ip, port=data_server_port, db = 0, decode_responses=True)
+
 
    
 

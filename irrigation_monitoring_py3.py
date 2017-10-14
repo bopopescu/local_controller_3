@@ -151,8 +151,9 @@ if __name__ == "__main__":
    # find ip and port for redis data store
    data_server_ip   = data_store_nodes[0]["ip"]
    data_server_port = data_store_nodes[0]["port"]
-   redis_handle = redis.StrictRedis( host = data_server_ip, port=data_server_port, db = 12 )
-   redis_old_handle  = redis.StrictRedis( host = '192.168.1.84', port=6379, db = 0 )
+   redis_handle = redis.StrictRedis( host = data_server_ip, port=data_server_port, db = 12 , decode_responses=True)
+
+   redis_old_handle  = redis.StrictRedis( host = '192.168.1.84', port=6379, db = 0, decode_responses=True)
 
 
 

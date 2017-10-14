@@ -105,7 +105,7 @@ class Master_Valve(object):
 
    def master_valve_off(self, cf_handle, chainObj, parameters, event):
        print("checking master valve")
-       if self.redis_handle.hget("CONTROL_VARIABLES","MASTER_VALVE_SETUP").decode() == "ON":
+       if self.redis_handle.hget("CONTROL_VARIABLES","MASTER_VALVE_SETUP") == "ON":
           return_value = False
        else:
           return_value = True

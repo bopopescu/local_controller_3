@@ -32,7 +32,7 @@ class Eto_Management(object):
         self.rain_sources = rain_sources
         self.redis_handle = redis_handle
         self.redis_old = redis.StrictRedis(
-            host='192.168.1.84', port=6379, db=0)
+            host='192.168.1.84', port=6379, db=0 , decode_responses=True)
         try:
              eto_update_flag = int(
                   self.redis_handle.hget(
@@ -70,7 +70,7 @@ class Eto_Management(object):
             try:
                 data_store = i["measurement"]
                 #print "eto_data_store", data_store
-                length = self.redis_handle.llen(data_store)
+                length = self*_handle.llen(data_store)
                 
                 if length == 0:
                     self.redis_handle.lpush(data_store, "EMPTY")
@@ -291,10 +291,10 @@ class Eto_Management(object):
         data["namespace"] = self.cloud_namespace
         data["eto"] = self.get_max_data(
             self.redis_handle.get(
-                self.eto_integrated_measurement).decode("utf-8"))
+                self.eto_integrated_measurement))
         data["rain"] = self.get_max_data(
             self.redis_handle.get(
-                self.rain_measurement).decode("utf-8"))
+                self.rain_measurement))
         data["time_stamp"] = time.strftime(
             "%b %d %Y %H:%M:%S", time.localtime(
                 time.time() - 24 * 3600))  # time stamp is a day earlier
@@ -386,9 +386,10 @@ class ETO_Calculators(object):
         return result
 
     def cimis_eto(self, eto_data):
-        # print "eto_data",eto_data
+        #print( "eto_data",eto_data)
         cimis_eto = CIMIS_ETO(eto_data)
         cimis_results = cimis_eto.get_eto(time=time.time() - 24 * 3600)
+        print("cimis_results",cimis_results)
         result = cimis_results["eto"]
         return result
 
@@ -416,7 +417,7 @@ class ETO_Calculators(object):
 
         for i in range(0, 24):
             temp = messo_results[i]
-            data = json.loads(redis_data_json[i].decode())
+            data = json.loads(redis_data_json[i])
             temp["Humidity"] = data["air_humidity"]
             temp["TC"] = self.convert_to_C(data["air_temperature"])
         # print messo_results[0]
@@ -517,16 +518,17 @@ class CIMIS_ETO(object):
         self.station = self.cimis_data["station"]
 
     def get_eto(self, time=time.time() - 1 * ONE_DAY):  # time is in seconds for desired day
+        print("made it here")
         date = datetime.datetime.fromtimestamp(time).strftime('%Y-%m-%d')
 
         url = self.cimis_url + "?" + self.app_key + "&targets=" + \
             str(self.station) + "&startDate=" + date + "&endDate=" + date
         req = urllib.request.Request(url)
         response = urllib.request.urlopen(req)
-        temp = response.read().decode("utf-8") 
-        #print("temp",temp)
-        data = json.loads(temp)
-        #print("data",data)
+        temp = response.read()
+        print("temp",temp)
+        data = json.loads(temp.decode())
+        print("data",data)
         return {
             "eto": float(
                 data["Data"]["Providers"][0]["Records"][0]['DayAsceEto']["Value"]),
@@ -552,9 +554,9 @@ class CIMIS_SPATIAL(object):
 
         req = urllib.request.Request(url)
         response = urllib.request.urlopen(req)
-        temp = response.read().decode("utf-8") 
+        temp = response.read()
        
-        data = json.loads(temp)
+        data = json.loads(temp.decode())
        
         temp = float(data["Data"]["Providers"][0]
                      ["Records"][0]['DayAsceEto']["Value"])
@@ -584,8 +586,8 @@ class Messo_ETO(object):
 
         req = urllib.request.Request(url)
         response = urllib.request.urlopen(req)
-        temp = response.read().decode("utf-8") 
-        data = json.loads(temp)
+        temp = response.read()
+        data = json.loads(temp.decode())
 
         station = data["STATION"]
         # print data.keys()
@@ -631,7 +633,7 @@ class Messo_Precp(object):
 
         req = urllib.request.Request(url)
         response = urllib.request.urlopen(req)
-        temp = response.read().decode("utf-8") 
+        temp = response.read()
         data = json.loads(temp)
 
         station = data["STATION"]
@@ -729,7 +731,7 @@ def add_eto_chains(eto, cf):
     cf.insert.log("Receiving Hour tick")
     cf.insert.reset()
 
-    cf.define_chain("test_generator", False)
+    cf.define_chain("test_generator",True)
     #insert.send_event("DAY_TICK", 0)
     #cf.insert.log("Sending Day Tick")
     cf.insert.wait_event_count( event = "TIME_TICK" ,count = 1)
@@ -767,7 +769,7 @@ if __name__ == "__main__":
     # find ip and port for ip server
     #print "data_server_ip", data_server_ip, data_server_port
     redis_handle = redis.StrictRedis(
-        host=data_server_ip, port=data_server_port, db=12)
+        host=data_server_ip, port=data_server_port, db=12, decode_responses=True)
     eto = construct_eto_instance(gm, redis_handle)
     #
     # Adding chains

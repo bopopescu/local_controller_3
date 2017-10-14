@@ -147,7 +147,7 @@ class Irrigation_Queue_Management(object):
 
    def start_unfinished_job( self, cf_handle, chainObj, parameters, event):
        json_string = self.redis_handle.lindex( "QUEUES:SPRINKLER:IRRIGATION_CELL_QUEUE",0 )
-       json_object = json.loads(json_string.decode())
+       json_object = json.loads(json_string)
        json_object["restart"] =  True
        if "elasped_time" not in json_object:
            json_object["elasped_time"] = 0 # this should not happen
@@ -185,7 +185,7 @@ class Irrigation_Queue_Management(object):
           return
 
        binary_string = self.redis_handle.rpop(  "QUEUES:SPRINKLER:IRRIGATION_QUEUE" )
-       json_string = binary_string.decode()
+       json_string = binary_string
        json_object = json.loads(json_string)
        print("json_object",json_object)
        if json_object["type"] == "CHECK_OFF":

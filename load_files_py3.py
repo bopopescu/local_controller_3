@@ -38,12 +38,13 @@ class BASIC_FILES( object ):
         f = open(self.path + name, 'w')
         json_data = json.dumps(data)
         f.write(json_data)
-        self.redis_handle.hset(self.key, name, json_data.decode("utf-8") )
+        self.redis_handle.hset(self.key, name, json_data )
 
     def load_file(self, name):
+        print("name",name)
         json_data= self.redis_handle.hget(self.key, name)
-        print("****************",json_data)
-        data = json.loads(json_data.decode("utf-8") )
+        print("****************",type(json_data))
+        data = json.loads(json_data )
         return data
 
 
@@ -86,7 +87,8 @@ if __name__ == "__main__":
    data_server_port = data_store_nodes[0]["port"]
    print(data_server_ip,data_server_port)
 
-   redis_handle = redis.StrictRedis(data_server_ip, data_server_port, db=0)
+   redis_handle = redis.StrictRedis(data_server_ip, data_server_port, db=0, decode_responses=True)
+
 
    redis_handle.delete("APP_FILES")
    redis_handle.delete("SYS_FILES")
@@ -126,7 +128,7 @@ if __name__ == "__main__":
    # Construct ETO Data QUEUES
    ####
 
-   file_data = redis_handle.hget("FILES:APP", "eto_site_setup.json").decode("utf-8") 
+   file_data = redis_handle.hget("FILES:APP", "eto_site_setup.json")
 
    eto_site_data = json.loads(file_data) 
 

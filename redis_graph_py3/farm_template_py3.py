@@ -11,7 +11,8 @@ from    .redis_graph_functions  import Query_Configuration
 class Construct_Farm(Build_Configuration):
 
    def __init__( self ):
-         redis_handle  = redis.StrictRedis( host = "localhost", port=6379, db = 14 )       
+         redis_handle  = redis.StrictRedis( host = "localhost", port=6379, db = 14, decode_responses=True)
+      
          super().__init__(redis_handle )
     
 
@@ -253,7 +254,8 @@ class Construct_Farm(Build_Configuration):
 class Graph_Management(Query_Configuration):
 
    def __init__( self , controller_name, io_server_name, data_store_name ):
-      self.redis_handle  = redis.StrictRedis( host = "localhost", port=6379, db = 14 )   
+      self.redis_handle  = redis.StrictRedis( host = "localhost", port=6379, db = 14 , decode_responses=True)
+   
       super().__init__( self.redis_handle)
       
       self.controller_name = controller_name

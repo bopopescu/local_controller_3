@@ -63,11 +63,11 @@ class Load_Irrigation_Pages(object):
    #  Function serves a post operation
    #
    def schedule_data(self):
-     data           = self.redis_handle.hget("FILES:APP","sprinkler_ctrl.json").decode()
+     data           = self.redis_handle.hget("FILES:APP","sprinkler_ctrl.json")
      sprinkler_ctrl = json.loads(data)
      returnValue = []
      for j in sprinkler_ctrl:
-         data           = self.redis_handle.hget("FILES:APP",j["link"]).decode()
+         data           = self.redis_handle.hget("FILES:APP",j["link"])
          temp           = json.loads(data)
          j["step_number"], j["steps"], j["controller_pins"] = self.generate_steps(temp)
          returnValue.append(j)

@@ -39,7 +39,7 @@ class Remote_Interface_server():
        object_data = {}
        object_data["results"] = []
        for i in command_data:
-          object_data["results"].append( self.redis.hkeys(i["hash"]).decode("utf-8")  )
+          object_data["results"].append( self.redis.hkeys(i["hash"])  )
        return object_data
  
 
@@ -47,7 +47,7 @@ class Remote_Interface_server():
        object_data = {}
        object_data["results"] = []
        for i in command_data:
-           object_data["results"].append( self.redis.keys(i["key"]).decode("utf-8") )
+           object_data["results"].append( self.redis.keys(i["key"]) )
        return object_data
 
    def redis_get( self, command_data ):
@@ -55,7 +55,7 @@ class Remote_Interface_server():
         object_data = {}
         object_data["results"] = []
         for i in command_data:
-           object_data["results"].append({"key":i, "data": self.redis.get(i).decode("utf-8")  } )
+           object_data["results"].append({"key":i, "data": self.redis.get(i)  } )
         return object_data
 
    def redis_set( self, command_data ):
@@ -81,7 +81,7 @@ class Remote_Interface_server():
        for i in command_data:
           key    = i["key"]
           index  = int(i["index"])
-          object_data["results"].append({"key":key, "index":index, "data":self.redis.lindex( key, index ).decode("utf-8")  })
+          object_data["results"].append({"key":key, "index":index, "data":self.redis.lindex( key, index )  })
        return object_data
 
    def redis_lset( self, command_data ):
@@ -127,7 +127,7 @@ class Remote_Interface_server():
           temp1 = {"key": key,"number":number }
           temp = []
           for j in range(0,number):
-              temp_1 = self.redis.rpop(key).decode("utf-8") 
+              temp_1 = self.redis.rpop(key) 
               if temp_1 != None:
                  temp.append(temp_1)
           temp1["data"] = temp
@@ -176,7 +176,7 @@ class Remote_Interface_server():
         object_data = {}
         object_data["results"] = []
         for i in command_data:
-           object_data["results"].append({"hash":i["hash"], "key":i["key"], "data": self.redis.hget(i["hash"],i["key"]  ).decode("utf-8")  })
+           object_data["results"].append({"hash":i["hash"], "key":i["key"], "data": self.redis.hget(i["hash"],i["key"]  )  })
         return object_data
 
  
@@ -246,7 +246,7 @@ class Remote_Interface_server():
 
    def on_request(self, ch, method, props, body):
        try:
-           input_data   = json.loads( base64.b64decode(body))
+           input_data   = json.loads( base64.b64decode(body).decode())
            #print( "input_data",input_data)
            output_data  = self.process_commands( input_data )
            #print( "output_data",output_data)
@@ -283,19 +283,19 @@ if __name__ == "__main__":
    data_server_port = data_store_nodes[0]["port"]
    # find ip and port for ip server
    print( "data_server_ip",data_server_ip,data_server_port)
-   redis_handle = redis.StrictRedis( host = data_server_ip, port=data_server_port, db = 0 )
+   redis_handle = redis.StrictRedis( host = data_server_ip, port=data_server_port, db = 0 , decode_responses=True)
    
 
-   user_name = redis_handle.hget("redis_gateway", "user_name" ).decode("utf-8") 
+   user_name = redis_handle.hget("redis_gateway", "user_name" )
 
-   password  = redis_handle.hget("redis_gateway", "password"  ).decode("utf-8") 
+   password  = redis_handle.hget("redis_gateway", "password"  )
 
-   vhost     = redis_handle.hget("redis_gateway", "vhost"     ).decode("utf-8") 
+   vhost     = redis_handle.hget("redis_gateway", "vhost"     )
 
-   queue     = redis_handle.hget("redis_gateway", "queue"     ).decode("utf-8") 
+   queue     = redis_handle.hget("redis_gateway", "queue"     )
 
    port      = int(redis_handle.hget("redis_gateway", "port"  ))
-   server    = redis_handle.hget("redis_gateway", "server"    ).decode("utf-8") 
+   server    = redis_handle.hget("redis_gateway", "server"    )
 
    
    print( "server",server)

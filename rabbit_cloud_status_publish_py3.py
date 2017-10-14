@@ -38,11 +38,11 @@ class Status_Queue():
 
 
    def dequeue_message( self ):
-       return self.redis_handle.lpop(self.status_queue ).decode("utf-8") 
+       return self.redis_handle.lpop(self.status_queue )
 
 
    def get_message( self ):
-       return self.redis_handle.lindex(self.status_queue, -1).decode("utf-8")           
+       return self.redis_handle.lindex(self.status_queue, -1)     
 
 
 if __name__ == "__main__":
@@ -89,7 +89,8 @@ if __name__ == "__main__":
    # find ip and port for redis data store
    data_server_ip   = data_store_nodes[0]["ip"]
    data_server_port = data_store_nodes[0]["port"]
-   redis_handle = redis.StrictRedis( host = data_server_ip, port=data_server_port, db = 12 )
+   redis_handle = redis.StrictRedis( host = data_server_ip, port=data_server_port, db = 12 , decode_responses=True)
+
 
    status_stores = graph_management.match_terminal_relationship("CLOUD_STATUS_STORE")
    #print ("status_stores",status_stores)

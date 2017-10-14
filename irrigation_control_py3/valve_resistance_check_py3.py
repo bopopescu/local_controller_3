@@ -117,7 +117,7 @@ class Valve_Resistance_Check(object):
    def valve_setup(self, *args ):
        print("setup step")
        json_string = self.redis_handle.rpop(  "QUEUES:SPRINKLER:RESISTANCE_CHECK_QUEUE" )
-       json_object = json.loads(json_string.decode())
+       json_object = json.loads(json_string)
        print( "json object",json_object )
        self.io_control.disable_all_sprinklers()
        self.io_control.load_duration_counters( 1  ) #  2 minute

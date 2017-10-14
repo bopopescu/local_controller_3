@@ -50,5 +50,6 @@ class AlarmQueue(object):
 
 if __name__ == "__main__":
    import redis
-   redis                        = redis.StrictRedis( host = "192.168.1.84", port=6379, db = 0 )
+   redis                        = redis.StrictRedis( host = "192.168.1.84", port=6379, db = 0 , decode_responses=True)
+
    alarm_queue = AlarmQueue(redis)

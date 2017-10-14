@@ -68,11 +68,12 @@ def on_request(ch, method, props, body):
     global rt
    
     try:
-      
-       output_data  = rt.process_commands( json.loads(body.decode("utf-8") )) 
+       #print("madie it here",body)
+       output_data  = rt.process_commands( json.loads(body.decode()))
+       #print("ouput data",output_data) 
        
     except:
-     
+       print("exception")
        output_data = {} 
        output_data["reply"] = "BAD_COMMAND_3"
        output_data["results"] = None
@@ -103,18 +104,19 @@ if __name__ == "__main__":
    data_server_port = data_store_nodes[0]["port"]
    # find ip and port for ip server
    print( "data_server_ip",data_server_ip,data_server_port)
-   redis_handle = redis.StrictRedis( host = data_server_ip, port=data_server_port, db = 0 )
+   redis_handle = redis.StrictRedis( host = data_server_ip, port=data_server_port, db = 0 , decode_responses=True)
 
-   user_name = redis_handle.hget("web_gateway", "user_name" ).decode("utf-8") 
 
-   password  = redis_handle.hget("web_gateway", "password"  ).decode("utf-8") 
+   user_name = redis_handle.hget("web_gateway", "user_name" ) 
 
-   vhost     = redis_handle.hget("web_gateway", "vhost"     ).decode("utf-8") 
+   password  = redis_handle.hget("web_gateway", "password"  ) 
 
-   queue     = redis_handle.hget("web_gateway", "queue"     ).decode("utf-8") 
+   vhost     = redis_handle.hget("web_gateway", "vhost"     )
+
+   queue     = redis_handle.hget("web_gateway", "queue"     )
 
    port      = int(redis_handle.hget("web_gateway", "port"  ))
-   server    = redis_handle.hget("web_gateway", "server"    ).decode("utf-8") 
+   server    = redis_handle.hget("web_gateway", "server"    ) 
 
 
    web_client = Web_Client_Interface( )

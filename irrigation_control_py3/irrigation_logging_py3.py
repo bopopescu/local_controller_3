@@ -44,7 +44,7 @@ class Irrigation_Logging(object):
        self.log_flow_rate("main_sensor", flow_value )
       
        unified_string = self.redis_new_handle.lindex( self.unified_key,0 )
-       unified_object = json.loads(unified_string.decode())
+       unified_object = json.loads(unified_string)
        self.log_unified_object(unified_object)  
     
 
@@ -130,8 +130,10 @@ class Irrigation_Logging(object):
 if __name__ == "__main__":
    from .alarm_queue_py3 import AlarmQueue
    import redis
-   redis_new_handle  = redis.StrictRedis( host = "localhost", port=6379, db = 12 )   
-   redis_old_handle  = redis.StrictRedis( host = "localhost", port=6379, db = 0 ) 
+   redis_new_handle  = redis.StrictRedis( host = "localhost", port=6379, db = 12 , decode_responses=True)
+   
+   redis_old_handle  = redis.StrictRedis( host = "localhost", port=6379, db = 0 , decode_responses=True)
+ 
    alarm_queue = AlarmQueue(redis_old_handle)
    ir = Irrigation_Logging(redis_old_handle,redis_new_handle,
                         "MINUTE_ACQUISITION",alarm_queue)

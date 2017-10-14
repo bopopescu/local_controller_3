@@ -29,9 +29,9 @@ class Cloud_Event_Queue():
           log_data["data"]  = data
           log_data["time"]  = time.time()
           log_data['status'] = status
-          json_data = json.dumps(log_data).encode()
+          json_data = json.dumps(log_data)
           
-          json_data = base64.b64encode(json_data)
+          json_data = base64.b64encode(json_data.encode())
           self.redis_handle.lpush( "QUEUES:CLOUD_ALARM_QUEUE", json_data)
           self.redis_handle.ltrim(  "QUEUES:CLOUD_ALARM_QUEUE", 0,800)
           self.redis_handle.lpush( "QUEUES:SYSTEM:PAST_ACTIONS", json_data)
@@ -47,7 +47,7 @@ if __name__ == "__main__":
    # find ip and port for redis data store
    data_server_ip   = data_store_nodes[0]["ip"]
    data_server_port = data_store_nodes[0]["port"]
-   redis_handle = redis.StrictRedis( host = data_server_ip, port=data_server_port, db = 12 )
+   redis_handle = redis.StrictRedis( host = data_server_ip, port=data_server_port, db = 12, decode_responses=True)
    cloud_event_queue = Cloud_Event_Queue( redis_handle )
    event   =  sys.argv[1]
    process =  sys.argv[2]

@@ -146,7 +146,7 @@ class Irrigation_Control_Basic(object):
 
    def grab_json_data( self, *args ): #Transfer queue object to class
        json_string      = self.redis_handle.lindex( "QUEUES:SPRINKLER:IRRIGATION_CELL_QUEUE",0 )
-       self.json_object                             = json.loads(json_string.decode())
+       self.json_object                             = json.loads(json_string)
        self.json_object["max_flow_time"] = 0
        self.json_object = self.convert_to_integers( self.json_object,
                                   ["run_time","step","max_flow_time"])
@@ -354,7 +354,7 @@ class Irrigation_Control_Basic(object):
        if event["name"] == "INIT":
           return True
        cleaning_interval = self.redis_handle.hget("CONTROL_VARIABLES","CLEANING_INTERVAL")
-       cleaning_interval = float( cleaning_interval.decode())
+       cleaning_interval = float( cleaning_interval)
        flow_value   =  float( self.check_redis_value( "global_flow_sensor_corrected" ) )
        cleaning_sum =  float( self.check_redis_value( "cleaning_sum") )
        cleaning_sum = cleaning_sum + flow_value

@@ -39,6 +39,7 @@ class Load_Redis_Access(object):
                       ["redis_lrange"     , self.redis_lrange  ],
                       ["redis_ltrim"      , self.redis_ltrim    ],
                       # hash operations
+                      [ "redis_hset",               self.redis_hset    ],
                       [ "redis_hkeys",              self.redis_hkeys   ],
                       [ "redis_hget",               self.redis_hget    ],
                       [ "redis_hgetall",            self.redis_hgetall ],
@@ -171,7 +172,7 @@ class Load_Redis_Access(object):
        end      = param["end"]
        temp  = self.redis_handle.lrange(key,start,end) 
        for i in temp:
-          return_value.append(i.decode())
+          return_value.append(i)
        return json.dumps(return_value)
 
    def redis_ltrim( self ):
@@ -194,14 +195,16 @@ class Load_Redis_Access(object):
    def redis_hset(self ):
        return_value = []
        param = self.request.get_json()
+       
        for i,items in param.items():
-           self.redis_handle.set( i,items["key"],items["value"] )
+           self.redis_handle.hset( i,items["key"],items["value"] )
        return json.dumps('SUCCESS')
 
 
    def redis_hkeys(self ):
        return_value = {}
        param = self.request.get_json()
+       
        for i in params:     
            temp = self.redis_handle.hkeys( i )
            return_value[i] = { "keys":temp }
@@ -212,8 +215,8 @@ class Load_Redis_Access(object):
        param = self.request.get_json()
        for i in param["key_list"]:             
            temp = self.redis_handle.hget( param["hash_name"], i )
-           print("***********",param["hash_name"],i,temp)
-           return_value[i] = temp.decode()
+           #print("***********",param["hash_name"],i,temp)
+           return_value[i] = temp
        return json.dumps( return_value )
 
    def redis_hgetall(self ): #tested
@@ -221,7 +224,7 @@ class Load_Redis_Access(object):
        param = self.request.get_json()
        temp = self.redis_handle.hgetall(param)
        for i,item in temp.items():
-           return_value[i.decode()] = item.decode()
+           return_value[i] = item
        return json.dumps( return_value )
 
    def redis_hexist(self ):

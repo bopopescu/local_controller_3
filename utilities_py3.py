@@ -75,7 +75,7 @@ class System_Monitoring():
       try:
          data =  self.redis_handle.hget("SYSTEM_COMPLETED", schedule_name)
  
-         data = data.decode()
+         
          data = json.loads( data)
 
       except:
@@ -178,7 +178,7 @@ class Schedule_Monitoring():
    def check_schedule_flag( self, schedule_name ):
       try:      
          data =  self.redis_handle.hget("SCHEDULE_COMPLETED", schedule_name)
-         data = data.decode()
+        
  
          data = json.loads( data)
 
@@ -314,9 +314,10 @@ if __name__ == "__main__":
    # find ip and port for redis data store
    data_server_ip   = data_store_nodes[0]["ip"]
    data_server_port = data_store_nodes[0]["port"]
-   redis_new_handle = redis.StrictRedis( host = data_server_ip, port=data_server_port, db = 12 )
+   redis_new_handle = redis.StrictRedis( host = data_server_ip, port=data_server_port, db = 12 , decode_responses=True)
 
-   redis_handle = redis.StrictRedis( host = data_server_ip, port=data_server_port, db = 0 )
+
+   redis_handle = redis.StrictRedis( host = data_server_ip, port=data_server_port, db = 0 , decode_responses=True)
 
 
    action       = System_Monitoring( redis_handle )
