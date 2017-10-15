@@ -81,7 +81,7 @@
     </div>
     
        <div data-role="collapsible" data-theme="a"  data-iconpos="right" data-collapsed="True" data-content-theme="c">
-        <h3>Schedule Related Configurations</h3>
+        <h3>Configurations</h3>
         <ul data-role="listview">
             <li><a href="/add_schedule"               target="_self">Add  Schedule </a></li>
             <li><a href="/copy_schedule"               target="_self">Copy Schedule </a></li>
@@ -89,15 +89,11 @@
             <li><a href="/edit_schedules"             target="_self">Edit Schedule </a></li>
             <li><a href="/configure_flow_limits/0/0"      target="_self">Flow Limits</a></li>
             <li><a href="/configure_current_limits/0"   target="_self">Current Limits</a></li>
+            <li><a href ='/overal_resistance_limits/0' target="_self">Coil Resistance Limits</a></li>
+            <li><a href="/system_actions"   target="_self">Configure System Actions </a></li>
 
         </ul>
  
-    </div>
-    <div data-role="collapsible" data-theme="a"  data-iconpos="right" data-collapsed="True" data-content-theme="c">
-        <h3>Misc Config</h3>
-        <ul data-role="listview">
-            <li><a href="/system_actions"   target="_self">Configure System Actions </a></li>
-        </ul>
     </div>
 
    <div data-role="collapsible" data-theme="a"  data-iconpos="right" data-collapsed="True" data-content-theme="c">
@@ -138,7 +134,7 @@
             <li><a href="/site_map/0"    target="_self">Valve Group Site Map</a></li>
             <li><a href="/site_map/1"    target="_self">Controller Site Map</a></li>
             <li><a href="/site_map/2"    target="_self">Avocado Block Map</a></li>
-            <li><a href="/controller_pin_map"    target="_self">Controller Pin Map</a></li>
+            
         </ul>
    </div>
 

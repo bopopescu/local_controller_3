@@ -9,12 +9,13 @@ import json
 import redis
 import load_files_py3
 from redis_graph_py3 import farm_template_py3
-from flask_web_modular_py3.load_static_pages_py3 import   Load_Static_Files 
-from flask_web_modular_py3.load_app_sys_files_py3 import  Load_App_Sys_Files
-from flask_web_modular_py3.load_redis_access_py3  import  Load_Redis_Access
+from flask_web_modular_py3.load_static_pages_py3          import   Load_Static_Files 
+from flask_web_modular_py3.load_app_sys_files_py3         import  Load_App_Sys_Files
+from flask_web_modular_py3.load_redis_access_py3          import  Load_Redis_Access
 from flask_web_modular_py3.load_irrigation_control_py3    import  Load_Irrigation_Pages
 from flask_web_modular_py3.load_eto_management_py3        import  Load_ETO_Management
-
+from flask_web_modular_py3.load_site_data_py3             import  Load_Site_Data
+from flask_web_modular_py3.load_configuration_py3         import Load_Configuration_Data
 
 import flask
 from flask import Flask
@@ -29,8 +30,9 @@ class PI_Web_Server(object):
        app         = Flask(name) 
        auth = HTTPDigestAuth()
        auth.get_password( self.get_pw )
-
-
+       
+       self.app = app
+       self.users = users
        app.config["DEBUG"]  = True
        app.config["SECRET_KEY"] = "ABCEDER"
        app.template_folder       =   'flask_web_modular_py3/templates'
@@ -43,9 +45,9 @@ class PI_Web_Server(object):
                              redis_new_handle =redis_new_handle, request = request)
 
        Load_ETO_Management(app, auth, request, app_files, sys_files, gm, redis_new_handle,render_template )
+       Load_Site_Data(app,auth,render_template)
+       Load_Configuration_Data(app,auth,render_template,app_files,sys_files)
 
-       self.app = app
-       self.users = users
         
 
    def run_http( self):

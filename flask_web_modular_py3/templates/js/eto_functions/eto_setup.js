@@ -83,7 +83,7 @@ function refresh_stations(item,index)
    item["sprayer_rate"] = validate_field(index, "sprayer_rate",14.5)
    item["recharge_rate"] =( calculate_eto_data( item["sprayer_rate"],item["tree_radius"] ,item["sprayer_effiency"],
                         item["salt_flush_addition"],item["crop_utilization"]))
-   console.log(index,item["recharge_eto"]) 
+   
   
 }
 
@@ -116,7 +116,7 @@ function main_menu(event,ui)
    var choice
 
    choice = $("#action-choice").val()
-   alert(choice)
+
    if( choice == "recharge")
    {
        parameter_class.open(site_specific_defaults[0],reference_value,"Setup Recharge ETO")
@@ -166,7 +166,11 @@ function main_menu(event,ui)
            if( index >= 0 )
            {
                eto_data.splice(index, 1);
-               save_data();
+               parameter_url = window.location.href;
+               //alert(JSON.stringify(station_control_class.eto_data[index]))
+
+               ajax_post_get('/ajax/save_app_file/eto_site_setup.json', 
+                    eto_data,parameter_success_function,"Server Error")             
            }
            else
            {

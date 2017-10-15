@@ -47,7 +47,7 @@ class Parameter_Setup
 
 
           parameter_url = window.location.href;
-          ajax_post_get('/ajax/save_app_file/eto_site_setup_a.json', 
+          ajax_post_get('/ajax/save_app_file/eto_site_setup.json', 
                     eto_data,parameter_success_function,"Server Error")      
        }
 

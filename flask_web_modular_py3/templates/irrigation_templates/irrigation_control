@@ -23,7 +23,7 @@
 	
         
      <script type="text/javascript">
-     {% include  "js/irrigation_control.js" %}
+     {% include  "js/irrigation_functions/irrigation_control.js" %}
      </script>
  
 </head> 

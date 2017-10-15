@@ -34,7 +34,7 @@ class Load_ETO_Management(object):
 
 
    def eto_setup(self):
-       eto_data  = self.app_files.load_file( "eto_site_setup_a.json" )
+       eto_data  = self.app_files.load_file( "eto_site_setup.json" )
        pin_list  = self.sys_files.load_file("controller_cable_assignment.json")
        return self.render_template("eto_templates/eto_setup",
                                eto_data = eto_data, 

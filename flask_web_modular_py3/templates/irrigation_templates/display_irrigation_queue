@@ -22,7 +22,7 @@
   </script>
 
   <script type="text/javascript" >
-      {% include "js/display_work_queue.js" %}
+      {% include "js/irrigation_functions/display_work_queue.js" %}
   </script>
 
 </head> 

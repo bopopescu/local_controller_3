@@ -41,7 +41,7 @@
 	
         
      <script type="text/javascript">
-       {% include "js/manage_paramters.js" %}
+       {% include "js/irrigation_functions/manage_paramters.js" %}
      </script>
  
 </head> 

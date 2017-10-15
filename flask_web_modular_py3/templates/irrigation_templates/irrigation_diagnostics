@@ -29,20 +29,20 @@
 
   {% if filename == "schedule_control" %}
            <script type="text/javascript" >
-           {% include "js/diagnostic_schedule_control.js" %}
+           {% include "js/irrigation_functions/diagnostic_schedule_control.js" %}
            </script>
    {% endif %}
 
 	
    {% if filename == "valve_group" %}
            <script type="text/javascript" >
-           {% include "js/diagnostic_valve_group.js" %}
+           {% include "js/irrigation_functions/diagnostic_valve_group.js" %}
            </script>
    {% endif %}
 
    {% if filename == "controller_pin" %}
            <script type="text/javascript" >
-           {% include "js/diagnostic_pin_control.js" %}
+           {% include "js/irrigation_functions/diagnostic_pin_control.js" %}
            </script>
    {% endif %}
 

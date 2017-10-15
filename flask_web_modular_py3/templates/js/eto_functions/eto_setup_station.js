@@ -36,7 +36,7 @@ class Station_Setup
        {
            $("#station_add_controls").show()
            station_control_class.populate_controllers()
-           station_control_class.populate_pin(0)
+           station_control_class.populate_valves()
            if( eto_data.length == 0 )
            {    
                station_control_class.reference_data = { }
@@ -45,14 +45,27 @@ class Station_Setup
                station_control_class.reference_data["sprayer_effiency"] =     .8
                station_control_class.reference_data["salt_flush_addition"] =   .1 
                station_control_class.reference_data["tree_radius"] = 6
-               station_control_class.reference_data["sprayer_rate"] = 14.5
+               station_control_class.reference_data["sprayer_rate"] = 14.5;
+               station_control_class.reference_data["controller"] 
+                                       = $("#station_controller").val()
+               station_control_class.reference_data["pin"] = $("#station_valve").val()
+               station_control_class.backup_data 
+                     = deepCopyObject(station_control_class.reference_data)
+
+
            }
            else
            {
-               station_control_class.reference_data =
-                    station_control_class.eto_data[0]
+               station_control_class.reference_data 
+                     = deepCopyObject(station_control_class.eto_data[0])
+
+               station_control_class.reference_data["pin"] = $("#station_valve").val()
                station_control_class.backup_data 
                      = deepCopyObject(station_control_class.reference_data)
+
+               station_control_class.backup_data 
+                     = deepCopyObject(station_control_class.reference_data)
+
 
            }
        
@@ -80,14 +93,14 @@ class Station_Setup
               station_control_class.eto_data[index] = station_control_class.reference_data          
           }
           else
-          {  // station has been added
-                ; // TBD at this moment
+          {    eto_data.push(station_control_class.reference_data)
+               
           }
 
           parameter_url = window.location.href;
           //alert(JSON.stringify(station_control_class.eto_data[index]))
 
-          ajax_post_get('/ajax/save_app_file/eto_site_setup_a.json', 
+          ajax_post_get('/ajax/save_app_file/eto_site_setup.json', 
                     eto_data,parameter_success_function,"Server Error")      
        }
 
@@ -111,7 +124,9 @@ class Station_Setup
      $("#station_sprayer_rate").val( sprayer_rate)
      station_control_class.set_sprayer_capacity(sprayer_rate)
      $( "#station_sprayer_rate" ).slider( "refresh" );
-     station_control_class.calculate_recharge_rate()    
+     station_control_class.calculate_recharge_rate()   
+
+ 
 
    }
    
@@ -124,16 +139,19 @@ class Station_Setup
 
    controller_change()
    {
-      alert("controller change")
-      populate_pins()
+      
+      station_control_class.populate_valves()
       station_control_class.reference_data["controller"] = $("#station_controller").val()
 
    }
 
    valve_change()
    {
-      alert($("#station_valve").val())
-      station_control_class.reference_data["pin"] = $("#station_valve").val()
+      var index = $("#station_valve").val()
+
+      var value = station_control_class.controller_values[$("#station_controller").val()][index -1] 
+
+      station_control_class.reference_data["pin"] = value
    }
 
    tree_radius_change(value)
@@ -209,96 +227,101 @@ class Station_Setup
 
    populate_controllers(  )
    { 
-       var controller_list   = []
-       for( let i=0; i<pin_list.length; i++ )
-       {
-           name   = pin_list[i]["name"]
-           controller_list.push(name)
-       }
+       this.structure_data() 
+ 
        $("#station_controller").empty() 
-       for(let  i= 0; i< controller_list.length; i++)
+       for(let  i= 0; i< this.controller_list.length; i++)
        {
-          $("#station_controller").append($("<option></option>").val(controller_list[i]).html(controller_list[i]));
+          $("#station_controller").append($("<option></option>").val(this.controller_list[i]).html(this.controller_list[i]));
        }
        $("#station_controller").selectmenu("refresh");
    }
 
+   populate_valves()
+   {
+        var controller_index;
 
-function populate_pins()
-{
-    var controller_index;
-
-    controller_index = $("#valve_controllera")[0].selectedIndex;
-    var select_pins = controller_labels[controller_list[controller_index]]
+        controller_index = $("#station_controller")[0].selectedIndex;
+        var select_pins = this.controller_labels[this.controller_list[controller_index]]
     
-    $("#valve_valvea").empty()
-    for( i = 0; i < select_pins.length; i++)
-    {
-        
-        $("#valve_valvea").append($("<option></option>").val(i+1).html(select_pins[i]));
-    } 
+        $("#station_valve").empty()
+        for( let i = 0; i < select_pins.length; i++)
+        {      
+          $("#station_valve").append($("<option></option>").val(i+1).html(select_pins[i]));
+        } 
    
     
-    $("#valve_valvea").selectmenu("refresh")
-}
+       $("#station_valve").selectmenu("refresh")
+   }
 
-function match_current_valve( index, controller )
-{
-  if( controller != current_valve[valve_index][0] )
-  {
-      return false;
-  }
-  else
-  {
-     if( (index+1) == current_valve[valve_index][1] )
-     {
-       return true;
-      }
-  }
-  return false;
+   structure_data(  )
+   { 
+       var i;
+       var temp_value;
+       var name;
+       var length;
+    
+       var temp_value; 
+       var j;
+       var valve_location;
 
-
-}
-
-
-
-function match_step_valve( index, controller )
-{
-   var i;
-
-   for( i = 0; i < eto_data.length; i++ )
-   {
-       
-       if( ( eto_data[i]["controller"] == controller ) && ( eto_data[i]["pin"] == (index +1) ) )
+     
+       var controller_labels = {}
+       var controller_list   = []
+       var controller_values = {}
+       for( let i=0; i<pin_list.length; i++ )
        {
+           name   = pin_list[i]["name"]
+           length = pin_list[i]["pins"].length;
+         
+           controller_labels[name] = []
+           controller_list.push(name)
+           controller_values[name] = []
+       
+           for( let j = 0; j < length; j++)
+           {
+            
+               temp_value = pin_list[i]["pins"][j];
+
+              if( this.match_step_valve(j,name) == true )
+              {
+               
+                   ; //controller_labels[name].push("I/O:  "+j+ "    ----- Defined in Irrigation Step Donot Select  ");
+               }
+
+               else
+               {
+                   controller_labels[name].push("I/O:  "+(j+1)+ "    Description : "+temp_value);
+                   controller_values[name].push(j+1)
+              
+               }
+
+           }
+
+      }
+      this.controller_labels = controller_labels
+      this.controller_list   = controller_list
+      this.controller_values = controller_values
+
+    }
+
+    match_step_valve( index, controller )
+    {
+       // this is a very inefficent way of doing this
+       // but rarely executed function and eto_data is not large
+       for( let i = 0; i < this.eto_data.length; i++ )
+       {
+           if( ( this.eto_data[i]["controller"] == controller ) && 
+               ( this.eto_data[i]["pin"] == (index +1) ) )
+          {
           
-           return true; 
-       }
-   } 
-   return false;
-}
+             return true; 
+          }
+       } 
+       return false;
+   }
 
-}
-
-/*
-function valve_panel_controller_select()
-{
-
- 
-   local_data["controller"] = $("#valve_controllera").val()
-   load_pins();
-
-}
-
-function valve_panel_valve_select()
-{
-
-   var index = $("#valve_valvea").val()
-   pin = controller_values[$("#valve_controllera").val()][index -1] 
-   local_data["pin"] = pin
-
-}
-*/
+} 
 
 
 
