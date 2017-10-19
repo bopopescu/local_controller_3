@@ -25,20 +25,14 @@
 	
 	
          <script type="text/javascript">
-            template_type = "add"
+            template_type = "delete"
          </script>
 
 	
         
      <script type="text/javascript">
      {% include  "js/configuration/ajax_functions.js" %}
-     {% include  "js/configuration/add_schedule.js" %}
-
-     {% include  "js/configuration/edit_schedule.js" %}
-     {% include  "js/configuration/edit_schedule_start_time.js" %}
-     {% include  "js/configuration/edit_schedule_edit_steps.js" %}
-     {% include  "js/configuration/edit_schedule_edit_a_step.js" %}
-     {% include  "js/configuration/edit_a_valve.js" %}
+     {% include  "js/configuration/delete_schedule.js" %}
 
     </script>
  
@@ -48,22 +42,23 @@
    <div data-role="page"> 
 
    {% include 'menu' %}
-   <div id="define-schedule">
-    <h3>Current Irrigation Schedules</h3>
-    <ol>
-       {% for item in schedule_list %}
-           <li>{{ item }}</li>
+    <fieldset data-role="controlgroup">
+        <legend>Select Irrigation Schedules to Delete</legend>
+        {% for item in schedule_list %}        
+          <input type="radio" name="delete" id="{{item}}" >
+          <label for="{{item}}">{{item}}</label>
        {% endfor %}
-    </ol>
-   
-   <h3>Enter New Schedule Name:</h3>
-   <input type="text" id="new_schedule" value=""  />
-   <input type="button" id = "action_button" value="Create New Irrigation Schedule" /> 
-  </div>   	
-
-{% include 'configuration/edit_panel' %}
-
-
+    </fieldset>
+    <input type="button" id = "action_button" value="Delete Selected Irrigation Schedule" /> 
 </div><!-- /page -->
 </html>
 </body>
+
+
+
+
+
+
+
+
+

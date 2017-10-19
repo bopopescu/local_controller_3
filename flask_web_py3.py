@@ -46,7 +46,7 @@ class PI_Web_Server(object):
 
        Load_ETO_Management(app, auth, request, app_files, sys_files, gm, redis_new_handle,render_template )
        Load_Site_Data(app,auth,render_template)
-       Load_Configuration_Data(app,auth,render_template,app_files,sys_files)
+       Load_Configuration_Data(app,auth,render_template,request , app_files,sys_files)
 
         
 

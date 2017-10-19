@@ -14,28 +14,46 @@ function check_duplicate( new_schedule )
      return true;
 } 
 
+function check_radio_selection()
+{  
+   var update_flag;
+   var item;
+   var schedule;
 
-function add_function(event, ui) 
-{
-   new_schedule = $("#new_schedule" ).val()
-   if( check_duplicate( new_schedule ) )
+   return_value = [false,null]
+   for( i = 0; i < schedule_list.length; i++ )
    {
-          load_new_schedule_data( new_schedule )
-          load_controls( working_data )
-          $("#define-schedule").hide()
-               
+       item = "#"+schedule_list[i]
+       if( $(item).is(":checked") == true )
+	      {
+           return_value = [ true, schedule_list[i] ]
+       }
+   }
+   return return_value	              
 
-          edit_schedule_enable(new_schedule)
-          
-          
-          
+}
+
+
+function edit_function(event, ui) 
+{
+   var temp;
+   temp = check_radio_selection()
+   if( temp[0] == true )
+   {      
+       new_schedule = temp[1]
+       working_data  = JSON.parse(JSON.stringify( schedule_data[temp[1]]))
+       load_controls( working_data )
+       $("#define-schedule").hide()
+       edit_schedule_enable(temp[1])
+        
     }
     else
     {
-       set_status_bar("duplicate schedule "+ $("#new_schedule" ).val())
+       set_status_bar("no schedule selected")
     }
-   
 }
+
+
 
 function load_new_schedule_data( schedule)
 {
@@ -56,7 +74,7 @@ $(document).ready(
  {
     
       
-      $( "#action_button" ).bind( "click", add_function );
+      $( "#action_button" ).bind( "click", edit_function );
       initialize_edit_functions();
 
 

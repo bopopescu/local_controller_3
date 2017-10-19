@@ -2,13 +2,69 @@
 
 var working_index;
 
+function show_start_panel()
+{
+    $("#edit_panel").show();
+    $("#edit_a_step").hide()
+    $("#edit_steps").show()
+    
+}
 
-function initialize_edit_a_step_panel()
+function hide_edit_a_step_panel()
+{
+   $("#edit_a_step").hide()
+}
+
+function show_edit_a_step_panel()
+{
+
+  $("#edit_a_step").show()
+
+
+}    
+
+
+function back_button()
 {
   
-   $( "#select-choice-2a" ).bind( "change", choice_2_function );
-   $( "#step_run_timea").bind("change",run_time_function);
+  show_start_panel();
+
 }
+
+
+function initialize_runtime()
+{
+         $("#step_run_timea").empty()
+         for( var i = 0; i <= 180; i++ )
+         {
+             $("#step_run_timea").append($("<option></option>").val(i).html(i+'  minutes '));
+	
+         }
+
+         $("#step_run_timea").selectmenu();
+         $("#step_run_timea").selectmenu("refresh");
+}
+
+
+function initialize_edit_a_step()
+{
+   $( "#edit_a_step_back").bind("click",back_button )  
+   $( "#step_choice" ).bind( "change", step_choice );
+   $( "#step_run_timea").bind("change",run_time_function);
+   initialize_runtime()
+}
+
+
+function show_edit_a_step( data, index  )
+{
+   working_index = index
+   working_data  = data
+   show_edit_a_step_panel()
+   hide_edit_panel()
+
+}
+
+
 
 function run_time_function( event ,ui)
 {
@@ -19,12 +75,12 @@ function run_time_function( event ,ui)
 
 }
 
-function choice_2_function(event, ui)
+function step_choice(event, ui)
 {
  var status
  var valve_index
 
- if( $("#select-choice-2a").val() == "1" )
+ if( $("#step_choice").val() == "1" )
   {
  
      status = find_selected_valve()
@@ -39,23 +95,21 @@ function choice_2_function(event, ui)
      }
      else
      {
-        alert("no valve selected")
+        set_status_bar("no valve selected")
      }
      
   }
-  if( $("#select-choice-2a").val() == "2" )
+  if( $("#step_choice").val() == "2" )
   {
-     $("#edit_a_step").hide()
-     $("#edit_steps").hide()
-     $("#start_time").hide()
      working_data["controller_pins"][working_index].push([]);
      working_valves    = working_data["controller_pins"][working_index]
      index = working_valves.length -1 
      load_valve( working_index, index, true )
      
+     
   }
  
-  if( $("#select-choice-2a").val() == "3" )
+  if( $("#step_choice").val() == "3" )
   {
      status = find_selected_valve()
      if( status[0] == true )
@@ -71,12 +125,12 @@ function choice_2_function(event, ui)
      }
      else
      {
-        alert("no valve selected")
+        set_status_bar("no valve selected")
      }
 
      
   }
-  if( $("#select-choice-2a").val() == "4" )
+  if( $("#step_choice").val() == "4" )
   {
        
        show_edit_panel()
@@ -84,13 +138,13 @@ function choice_2_function(event, ui)
        $("#edit_a_step").hide()
      
   }
-  if( $("#select-choice-2a").val() == "5" )
+  if( $("#step_choice").val() == "5" )
   {
        show_start_panel();
      
   }
-  $("#select-choice-2a").val(0);
-  $("#select-choice-2a").selectmenu('refresh');
+  $("#step_choice").val(0);
+  $("#step_choice").selectmenu('refresh');
 }
 
 
@@ -99,7 +153,7 @@ function choice_2_function(event, ui)
 
 function edit_a_step_panel()
 {
-    alert("edit a step panel")
+    ;
 
 }
 
@@ -122,12 +176,9 @@ function show_editing_panel( index )
          $("#select-choice-2a").selectmenu('refresh');
 
          $("#define-schedule").hide()
-         $("#edit_panel").show();
+         $("#edit_panel").hide();
          $("#edit_a_step").show()
          $("#edit_steps").hide()
-         $("#start_time").hide()
-         $("#edit_a_valve").hide()
-         $("#master_save").hide() 
          generate_valve(index, working_data)
          $("#step_run_timea").empty()
          for( var i = 0; i <= 180; i++ )

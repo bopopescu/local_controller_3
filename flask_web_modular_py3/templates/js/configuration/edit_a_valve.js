@@ -7,6 +7,30 @@ var controller_labels = {}
 var controller_list   = []
 var controller_values = {}
 
+
+function hide_edit_a_valve_panel()
+{
+   $("#edit_a_valve").hide()
+}
+
+function show_edit_a_valve_panel()
+{
+
+  $("#edit_a_valve").show()
+
+
+}    
+
+
+function initialize_edit_a_valve()
+{
+   $( "#edit_valve_cancel" ).bind( "click", valve_panel_cancel );
+   $( "#edit_valve_save" ).bind( "click", valve_panel_save );
+   $( "#valve_controllera" ).bind( "change", valve_panel_controller_select );
+   $( "#valve_valvea").bind("change",valve_panel_valve_select);
+}
+
+
 function valve_panel_controller_select()
 {
 
@@ -27,9 +51,6 @@ function valve_panel_save()
    temp = [$("#valve_controllera").val(), $("#valve_valvea").val()]
  
    var index = $("#valve_valvea")[0].selectedIndex;
-   //alert(index)
-   //alert(JSON.stringify(controller_values))
-
    temp = [$("#valve_controllera").val(), controller_values[$("#valve_controllera").val()][index] ]
    working_data["controller_pins"][working_index][ valve_index] = temp
    $("#edit_a_valve").hide()
@@ -147,7 +168,7 @@ function load_valve( step_indexa, valve_indexa , add_flag )
            if( ( add_flag == false ) && match_current_valve(j,name) )
            {
              
-              alert("match_index "+ j)
+              
               valve_location = count;
               controller_labels[name].push("I/O:  "+(j+1) +"    Description : "+temp_value);
               controller_values[name].push(j+1)
