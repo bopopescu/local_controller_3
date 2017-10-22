@@ -1,13 +1,14 @@
 
 
 var working_index;
-
+var working_data;
 function show_start_panel()
 {
     $("#edit_panel").show();
     $("#edit_a_step").hide()
     $("#edit_steps").show()
-    
+    steps_load_controls(working_data)
+
 }
 
 function hide_edit_a_step_panel()

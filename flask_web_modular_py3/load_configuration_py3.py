@@ -1,15 +1,18 @@
 import os
 import json
+import base64
 
 class Load_Configuration_Data(object):
 
-   def __init__( self, app, auth,render_template,request,app_files,sys_files ):
+   def __init__( self, app, auth,render_template,request,
+                 app_files,sys_files,redis_old_handle, redis_new_handle ):
        self.app      = app
        self.auth     = auth
        self.render_template = render_template
        self.request = request
        self.app_files = app_files
        self.sys_files = sys_files
+       self.redis_old_handle = redis_old_handle
        
 
        a1 = auth.login_required( self.system_actions )
@@ -31,17 +34,32 @@ class Load_Configuration_Data(object):
        app.add_url_rule('/configure_flow_limits/<int:flow_id>/<int:schedule_id>',
                         "configure_flow_limits",a1,methods=["GET"])
 
-       a1 = auth.login_required( self.overal_current_limits )
+       a1 = auth.login_required( self.overall_current_limits )
        app.add_url_rule('/configure_current_limits/<int:schedule_id>',
                            "configure_current_limits",a1,methods=["GET"])
 
-       a1 = auth.login_required( self.overal_resistance_limits )
-       app.add_url_rule('/overal_resistance_limits/<int:controller_id>',
-                          "overal_resistance_limits",a1,methods=["GET"])
+       a1 = auth.login_required( self.overall_resistance_limits )
+       app.add_url_rule('/configure_resistance_limits/<int:controller_id>',
+                          "configure_resistance_limits",a1,methods=["GET"])
 
        a1 = auth.login_required( self.update_schedule )
        app.add_url_rule("/ajax/update_schedule",
                           "ajax_update_schedule",a1,methods=["POST"])
+
+       a1 = auth.login_required( self.update_resistance_limit )
+       app.add_url_rule('/ajax/update_resistance_limit',
+                          "update_resistance_limit",a1,methods=["POST"])
+
+       a1 = auth.login_required( self.update_current_limit )
+       app.add_url_rule('/ajax/update_current_limit',
+                          "update_current_limit",a1,methods=["POST"])
+
+       a1 = auth.login_required( self.update_flow_limit )
+       app.add_url_rule('/ajax/update_flow_limit',
+                          "update_flow_limit",a1,methods=["POST"])
+
+
+
 
    def system_actions(self):  
        system_actions = self.app_files.load_file( "system_actions.json" )
@@ -95,24 +113,26 @@ class Load_Configuration_Data(object):
  
   
    def overall_flow_limits(self, flow_id, schedule_id ):
-       schedule_list = statistics_module.schedule_data.keys()
-       sensor_name  = statistics_module.sensor_names[flow_id]
+       schedule_data = self.get_schedule_data()  
+       schedule_list = list(schedule_data.keys())
+       sensor_name  = self.get_flow_rate_sensor_names()[flow_id]
        max_flow_rate = 33
-       canvas_list = template_support.generate_canvas_list( schedule_list[schedule_id], flow_id   ) 
-       return self.render_template("overall_flow_limits", 
+       canvas_list = self.generate_canvas_list( schedule_list[schedule_id], flow_id ,schedule_data  ) 
+       return self.render_template("configuration/overall_flow_limits", 
                                schedule_id=schedule_id,
                                flow_id=flow_id,  
                                header_name="Flow Overview  Max Flow Rate "+str(max_flow_rate), 
-                               flow_sensors = statistics_module.sensor_names,
+                               flow_sensors = self.get_flow_rate_sensor_names(),
                                schedule_list = schedule_list, 
                                max_flow_rate = max_flow_rate, 
                                canvas_list= canvas_list )
 
-   def overal_current_limits(self, schedule_id):
+   def overall_current_limits(self, schedule_id):
        max_current = 30
-       schedule_list = statistics_module.schedule_data.keys()
-       canvas_list = template_support.generate_current_canvas_list( schedule_list[schedule_id]  ) 
-       return self.render_template("overall_current_limits", 
+       schedule_data = self.get_schedule_data()  
+       schedule_list = list(schedule_data.keys())
+       canvas_list = self.generate_current_canvas_list( schedule_list[schedule_id] ,schedule_data ) 
+       return self.render_template("configuration/overall_current_limits", 
                                schedule_id=schedule_id,
                                header_name="Valve Current Overview  Max Current "+str(max_current),
                                schedule_list = schedule_list, 
@@ -120,12 +140,12 @@ class Load_Configuration_Data(object):
                                canvas_list= canvas_list )
 
   
-   def overal_resistance_limits(self, controller_id):
+   def overall_resistance_limits(self, controller_id):
        max_current      = 30
-       controller_list,valve_list  = template_support.get_controller_list(controller_id)
+       controller_list,valve_list  = self.get_controller_list(controller_id)
        
-       canvas_list      = template_support.resistance_canvas_list(  controller_id ) 
-       return self.render_template("overal_resistance_limits", 
+       canvas_list      = self.resistance_canvas_list(  controller_id ) 
+       return self.render_template("configuration/overall_resistance_limits", 
                                controller_id     = controller_id,
                                header_name       ="Valve Resistance Max Value:  "+str(max_current), 
                                controller_list   = controller_list,
@@ -153,7 +173,23 @@ class Load_Configuration_Data(object):
            
        return json.dumps("SUCCESS")
 
+   def update_resistance_limit(self):
+       return_value     = {}
+       param              = self.request.get_json() 
+       controller         = param["controller"]
+       data               = param["limit_data"]
+       self.process_resistance_limit_values( controller, data)
+       return json.dumps("SUCCESS")
 
+   def update_flow_limit(self):
+       return_value     = {}
+       param              = self.request.get_json() 
+       schedule           = param["schedule"]
+       sensor             = param["sensor"] 
+       data               = param["limit_data"]
+
+       self.process_flow_limit_values( sensor, schedule, data)
+       return json.dumps("SUCCESS")
 
    #
    #  Internal functions
@@ -212,7 +248,7 @@ class Load_Configuration_Data(object):
       
 
    def save_link_file( self, schedule, schedule_data ):
-       print("@@@@@@@@@@@@@@@@@@@@@@@@",schedule,schedule_data)
+       
        link_data = {}
        link_data["bits"] = {'1':'C201', '3':'DS2', '2':'C2'}
        link_data["schedule"] = []
@@ -244,40 +280,305 @@ class Load_Configuration_Data(object):
 
 
 
+   def get_controller_list( self,controller_id ):
+       base64_object     = self.redis_old_handle.get(  "SPRINKLER_RESISTANCE_DICTIONARY")
+       json_string       = base64.b64decode(base64_object)
+       resistance_dictionary = json.loads(json_string.decode())
+       
+       controllers = list(resistance_dictionary.keys())
+       controllers.sort()
+       controller_name = controllers[controller_id]
+       valve_data = resistance_dictionary[ controller_name ]
+       valve_list  = valve_data.keys()
+       valve_list  = list(map(int, valve_list))   
+       valve_list.sort()
+       valve_list  = list(map(str,valve_list))
+       return  controllers, valve_list    
 
 
+   def resistance_canvas_list( self, controller_id,  *args,**kwargs):
+       controller_list, valve_list = self.get_controller_list(controller_id)
+       controller_name = controller_list[controller_id]
+       limit = []
+       for j in range(0,len(valve_list)):
+          temp = []
+          redis_key = "log_data:resistance_log_limit:"+controller_name+":"+valve_list[j]
+          limit_value = self.redis_old_handle.get(redis_key)
+          if limit_value == None:
+              redis_list = "log_data:resistance_log:"+controller_name+":"+valve_list[j]
+              limit_value = self.redis_old_handle.lindex(redis_list,0)
+              self.redis_old_handle.set(redis_key,limit_value)
+         
+          limit.append(limit_value)
+ 
+       resistance = []
+       for j in valve_list:
+          temp = []
+          redis_list = "log_data:resistance_log:"+controller_name+":"+j
+          length = self.redis_old_handle.llen(redis_list)
+          for i in range(0,length):
+             value = self.redis_old_handle.lindex(redis_list,i)
+     
+             temp.append(value)
+          resistance.append(temp)
+    
+       
+       return_value = []
+      
+       for i in range(0,len(valve_list)):
+           
+           temp                                = {}
+           temp["canvasName"]                  = "canvas1"   +  valve_list[i]
+           temp["titleText"]                   = "Valve "    +  valve_list[i]
+           temp["qualScale1Color"]             = "Black"
+           temp["featuredColor"]               = "Red"
+           try:
+                temp["qualScale1"]             =  float(int(float(float(limit[i])*100)))/100.
+           except:
+                temp["qualScale1"]             = 0
+
+           try:
+               temp["featuredMeasure"]         = resistance[i]
+           except:
+               temp["featuredMeasure"]         = 0
+           try:
+               temp["limit"]                   = 0 # limit_values[i]['limit_std']
+           except:
+               temp["limit"]                   = 0
+           return_value.append(temp)
+       
+      
+       return return_value
 
 
-   '''
+   def process_resistance_limit_values( self, controller, data ):
+       for i in data :
+          redis_key = "log_data:resistance_log_limit:"+controller+":"+i["valve"]
+          self.redis_old_handle.set(redis_key,i["value"] )
 
-@app.route('/ajax/update_flow_limit',methods=["POST"])
-@authDB.requires_auth
-def update_flow_limit():
-   return_value     = {}
-   param              = request.get_json() 
-   schedule           = param["schedule"]
-   sensor             = param["sensor"] 
-   data               = param["limit_data"]
-   statistics_module.process_flow_limit_values( sensor, schedule, data)
-   return json.dumps("SUCCESS")
+   def  generate_current_canvas_list( self, schedule_name,schedule_data ,*args, **kwargs ):
+       return_value = []
+       
+       self.schedule_name = schedule_name
+       data = schedule_data[ schedule_name ]
 
-@app.route('/ajax/update_current_limit',methods=["POST"])
-@authDB.requires_auth
-def update_current_limit():
-   return_value     = {}
-   param              = request.get_json() 
-   schedule           = param["schedule"]
-   data               = param["limit_data"]
-   statistics_module.process_current_limit_values( schedule, data)
-   return json.dumps("SUCCESS")
+       current_data      = self.get_current_data( data["step_number"],schedule_name )
+       limit_values      = self.get_current_limit_values( data["step_number"],schedule_name )
+       for i in range(0,data["step_number"]):
+           
+           temp                                = {}
+           temp["canvasName"]                  = "canvas1"   +str(i+1)
+           temp["titleText"]                   = "Step "     +str(i+1)
+           temp["qualScale1Color"]             = "Black"
+           temp["featuredColor"]               = "Red"
+           temp["featuredMeasure"]             = current_data[i] 
+           try:
+              temp["qualScale1"]                  = limit_values[i]['limit_avg']  
+              temp["limit"]                       = limit_values[i]['limit_std']
+           except:
+              temp["qualScale1"]                  = 0  
+              temp["limit"]                       = 0
+           temp["step"]                        = i
+           return_value.append(temp)
+           
+       return return_value
+          
+   def get_current_data( self, step_number, schedule_name ):
+       returnValue = []
+       for i in range(0,step_number):
+           key = "log_data:coil:"+schedule_name+":"+str(i+1)
+           value_array = []
+           for j in range(0,10):
+               composite_string = self.redis_old_handle.lindex(key,j)
+              
+               try:
+                   composite_object = json.loads( composite_string )
+                   value = composite_object["fields"]["coil_current"]["average"] 
+               
+               except:
+                   value = 0
+               value_array.append(value)
+           returnValue.append(value_array)   
+       return returnValue
 
-@app.route('/ajax/update_resistance_limit',methods=["POST"])
-@authDB.requires_auth
-def update_resistance_limit():
-   return_value     = {}
-   param              = request.get_json() 
-   controller         = param["controller"]
-   data               = param["limit_data"]
-   template_support.process_resistance_limit_values( controller, data)
-   return json.dumps("SUCCESS")
-   '''
+   def get_current_limit_values( self,  step_number, schedule_name ):
+       key = "log_data:coil_limits:"+schedule_name
+       data = self.redis_old_handle.get( key )
+       if data == None:
+           returnValue = self.generate_default_limits( step_number )
+       else:
+           returnValue = json.loads(data)
+       return returnValue
+
+   def generate_default_limits( self, step_number ):
+       returnValue = []
+       for i in range(0,step_number):
+           temp = {}
+           temp["limit_avg"] = 0
+           temp["limit_std"] = 0
+           returnValue.append(temp)
+    
+       return returnValue
+
+   def update_current_limit(self):
+       return_value     = {}
+       param            = self.request.get_json() 
+       schedule           = param["schedule"]
+       data               = param["limit_data"]
+       key = "log_data:coil_limits:"+schedule
+       corrected_data = self.assemble_corrected_data( data, 1. )
+       self.redis_old_handle.set( key , json.dumps(corrected_data) )
+       return json.dumps("SUCCESS")
+
+   def assemble_corrected_data( self, data, conversion_rate):
+       corrected_data = []
+       for i in data:
+
+           corrected_data.append( {"limit_avg":float(i)*conversion_rate, "limit_std" : 0 } )
+       return corrected_data 
+
+   def process_flow_limit_values( self, sensor_name, schedule, data):
+        sensor_id = self.find_sensor_id( sensor_name )
+        inverse_conversion_rate = 1./self.get_conversion_rates()[sensor_id]
+        corrected_data = self.assemble_corrected_data( data, inverse_conversion_rate )
+        self.save_flow_limit_values( sensor_name, schedule, corrected_data )
+
+   def assemble_corrected_data( self, data, conversion_rate):
+       corrected_data = []
+       for i in data:
+
+           corrected_data.append( {"limit_avg":float(i)*conversion_rate, "limit_std" : 0 } )
+       return corrected_data 
+ 
+   def save_flow_limit_values( self, sensor_name, schedule_name, data ):
+       json_data = json.dumps(data)
+       key = "log_data:flow_limits:"+schedule_name+":"+sensor_name
+       self.redis_old_handle.set( key , json_data )
+
+   def find_sensor_id( self, sensor_name ):
+     
+       try:
+           sensor_id = self.get_flow_rate_sensor_names.index( sensor_name )
+       except:
+           sensor_id = 0
+       return sensor_id  
+   
+   def get_flow_rate_sensor_names( self  ):
+       return_data = []
+
+       data           = self.redis_old_handle.hget("FILES:SYS","global_sensors.json")
+
+       temp           = json.loads(data)
+
+       for i in temp:
+           
+           return_data.append(i[0])
+
+       return return_data
+
+   def generate_canvas_list(self, schedule_name, flow_id , schedule_data, *args,**kwargs):
+       return_value = []
+       
+       
+       data = schedule_data[ schedule_name ]
+       flow_sensors = self.get_flow_rate_sensor_names() 
+       flow_sensor_name = flow_sensors[flow_id]
+
+       conversion_rate   = self.get_conversion_rates()[flow_id]
+
+       flow_data      = self.get_average_flow_data( data["step_number"], flow_sensor_name, schedule_name )
+       limit_values = self.get_flow_limit_values( data["step_number"], flow_sensor_name, schedule_name )
+       
+       for i in limit_values:
+           try:
+               i['limit_avg'] = float(i['limit_avg'])*conversion_rate
+               i['limit_std'] = float(i['limit_std'])*conversion_rate
+           except:
+               i['limit_avg'] = 0
+               i['limit_std'] = 0
+          
+       corrected_flow = []
+       for i in flow_data:
+           temp1 = []
+           
+           for j in i:
+               temp1.append( j *conversion_rate)
+           corrected_flow.append(temp1)
+       
+       
+       for i in range(0,data["step_number"]):
+           
+           temp                                = {}
+           temp["canvasName"]                  = "canvas1"   +str(i+1)
+           temp["titleText"]                   = "Step "     +str(i+1)
+           temp["qualScale1Color"]             = "Black"
+           temp["featuredColor"]               = "Red"
+           try:
+                temp["qualScale1"]             = limit_values[i]['limit_avg']
+           except:
+                temp["qualScale1"]             = 0
+
+           try:
+               temp["featuredMeasure"]         = corrected_flow[i]
+           except:
+               temp["featuredMeasure"]         = 0
+           try:
+               temp["limit"]                       = limit_values[i]['limit_std']
+           except:
+               temp["limit"]                   = 0
+           return_value.append(temp)
+           
+       return return_value
+
+   def get_conversion_rates( self ):
+       return_data = []
+
+       data           = self.redis_old_handle.hget("FILES:SYS","global_sensors.json")
+       temp           = json.loads(data)
+   
+       for i in temp:
+           
+           return_data.append(i[3])
+
+       return return_data
+
+   def get_average_flow_data( self,  step_number, sensor_name, schedule_name ):  
+       returnValue = []
+       for i in range(0,step_number):
+           key = "log_data:flow:"+schedule_name+":"+str(i+1)
+           value_array = []
+           for j in range(0,10):
+               composite_string = self.redis_old_handle.lindex(key,j)
+               try:
+                   composite_object = json.loads( composite_string )
+                   value = composite_object["fields"][sensor_name]["average"] 
+               
+               except:
+                   value = 0
+               value_array.append(value)
+           returnValue.append(value_array)   
+       return returnValue
+
+   def get_flow_limit_values( self, step_number, sensor_name, schedule_name ):
+       key = "log_data:flow_limits:"+schedule_name+":"+sensor_name
+       data = self.redis_old_handle.get( key )
+       if data == None :
+            returnValue = self.generate_default_limits( step_number )
+       else:
+          temp = json.loads(data)
+          if (data == None) or (len(temp) != step_number):
+              returnValue = self.generate_default_limits( step_number )
+          else:
+              returnValue = temp
+       return returnValue 
+
+   def generate_default_limits( self, step_number ):
+       returnValue = []
+       for i in range(0,step_number):
+           temp = {}
+           temp["limit_avg"] = 0
+           temp["limit_std"] = 0
+           returnValue.append(temp)
+    
+       return returnValue
+

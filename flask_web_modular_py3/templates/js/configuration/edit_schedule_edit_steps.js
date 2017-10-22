@@ -3,7 +3,7 @@ function initialize_steps_control()
 {
   
   $( "#steps_choice" ).bind( "change", choice_1_function );
-}
+}show_edit_a_step
 
 
 function show_steps_panel()
@@ -74,6 +74,7 @@ function choice_1_function(event, ui)
         working_data["controller_pins"].splice(status[1],0,[])
         working_data["steps"].splice(status[1],0,0)
         generate_steps(working_data)
+        //alert(JSON.stringify(working_data))
         show_editing_panel( status[1] )
      }
      else
@@ -120,14 +121,9 @@ function choice_1_function(event, ui)
 
      
   }
- 
-  if( $("#select-choice-1a").val() == "6" )
-  {
-       show_start_panel();
-     
-  }
-  $("#select-choice-1a").val(0);
-  $("#select-choice-1a").selectmenu('refresh');
+
+  $("#steps_choice").val(0);
+  $("#steps_choice").selectmenu('refresh');
 }
 
 function check_step_selection()
@@ -140,7 +136,9 @@ function check_step_selection()
    
    for( i = 0; i <  working_data["steps"].length; i++ )
    {
+  
        item = "#step-"+i+"a"
+       //alert($(item).is(":checked"))
        if( $(item).is(":checked") == true )
        {
            return_value = [ true, i ]

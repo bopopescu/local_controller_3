@@ -43,6 +43,7 @@
            <li><a href="/control/display_irrigation_queue" target="_self">Pending Irrigation Actions</a></li>
             <li><a href ='/sel_chart/flow' target="_self">Recent Flow History</a></li>
             <li><a href="/strip_chart/coil" target="_self">Recent Coil History</a></li>
+            <li><a href="/strip_chart/coil" target="_self">Recent Streaming Data</a></li>
             
             
         </ul>
@@ -68,12 +69,13 @@
     </div>
 
    <div data-role="collapsible" data-theme="a"  data-iconpos="right" data-collapsed="True" data-content-theme="c">
-        <h3>Schedule Statistics</h3>
+        <h3>Irrigation Statistics</h3>
         <ul data-role="listview">
         <li><a href="/overall_flow_statistics/0/0" target="_self">Composite Flow Statistics</a></li>
         <li><a href="/overall_current_statistics/0" target="_self">Composite Current Statistics</a></li>
         <li><a href="/detail_statistics/0/0/0/0/0" target="_self">Detail Statistics</a></li>
-       
+        <li><a href ='/overall_resistance/0' target="_self">Coil Resistance</a></li>
+               
 
 
 
@@ -81,7 +83,7 @@
     </div>
     
        <div data-role="collapsible" data-theme="a"  data-iconpos="right" data-collapsed="True" data-content-theme="c">
-        <h3>Configurations</h3>
+        <h3>Irrigation Configurations</h3>
         <ul data-role="listview">
             <li><a href="/add_schedule"               target="_self">Add  Schedule </a></li>
             <li><a href="/copy_schedule"               target="_self">Copy Schedule </a></li>
@@ -89,7 +91,7 @@
             <li><a href="/edit_schedules"             target="_self">Edit Schedule </a></li>
             <li><a href="/configure_flow_limits/0/0"      target="_self">Flow Limits</a></li>
             <li><a href="/configure_current_limits/0"   target="_self">Current Limits</a></li>
-            <li><a href ='/overal_resistance_limits/0' target="_self">Coil Resistance Limits</a></li>
+            <li><a href ='/configure_resistance_limits/0' target="_self">Coil Resistance Limits</a></li>
             <li><a href="/system_actions"   target="_self">Configure System Actions </a></li>
 
         </ul>
@@ -97,10 +99,8 @@
     </div>
 
    <div data-role="collapsible" data-theme="a"  data-iconpos="right" data-collapsed="True" data-content-theme="c">
-        <h3>Operational Diagnostics</h3>
+        <h3>Moisture Data Diagnostics</h3>
         <ul data-role="listview">
-            <li><a href ='/overall_resistance/0' target="_self">Coil Resistance</a></li>
-            <li><a href ='/overal_resistance_limits/0' target="_self">Coil Resistance Limits</a></li>
  
             <li><a href ='/soil_moisture_data' target="_self">Soil Moisture Data</a></li>
 
