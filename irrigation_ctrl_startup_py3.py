@@ -16,6 +16,7 @@ class SprinklerControl():
        self.commands["QUEUE_SCHEDULE"]            = self.queue_schedule
        self.commands["QUEUE_SCHEDULE_STEP"]       = self.queue_schedule_step     
        self.commands["QUEUE_SCHEDULE_STEP_TIME"]  = self.queue_schedule_step_time
+       self.commands["QUEUE_SCHEDULE_STEP_TIME_A"]  = self.queue_schedule_step_time_a
        self.commands["RESTART_PROGRAM"]           = self.restart_program  #ok          
        self.commands["NATIVE_SCHEDULE"]           = self.queue_schedule_step_time  ###command soon to be deleted    
        self.commands["DIRECT_VALVE_CONTROL"]      = self.direct_valve_control       
@@ -125,7 +126,18 @@ class SprinklerControl():
        self.load_step_data( self.schedule_name, self.schedule_step ,None,True ) 
        #self.redis_handle.hset("CONTROL_VARIABLES","SUSPEND","OFF")
        self.redis_handle.hset("CONTROL_VARIABLES","SKIP_STATION","OFF")  
-    
+
+   def queue_schedule_step_time_a( self, object_data,chainFlowHandle, chainObj, parameters,event ):   
+       self.schedule_name =  object_data["schedule_name"]
+       self.schedule_step =  object_data["step"]
+       self.schedule_step =   int(self.schedule_step)
+       self.schedule_step_time        =  object_data["run_time"]
+
+       self.alarm_queue.store_past_action_queue("QUEUE_SCHEDULE_STEP","GREEN",{ "schedule":self.schedule_name,"step":self.schedule_step } )
+       #print "queue_schedule",self.schedule_name,self.schedule_step
+       self.load_step_data( self.schedule_name, self.schedule_step ,self.schedule_step_time,True ) 
+       #self.redis_handle.hset("CONTROL_VARIABLES","SUSPEND","OFF")
+       self.redis_handle.hset("CONTROL_VARIABLES","SKIP_STATION","OFF")  
 
  
    def queue_schedule_step_time( self, object_data,chainFlowHandle, chainObj, parameters,event ):

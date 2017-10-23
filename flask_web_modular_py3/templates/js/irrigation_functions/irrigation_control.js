@@ -102,55 +102,62 @@ function op_mode_change(event, ui)
           $("#run_div").hide()
 	         break;
 
-       case 4:  // OPEN_MASTER_VALVE
+      case 4: // QUEUE_SCHEDULE_STEP_TIME_A   
+	         $("#schedule_div").show()
+          $("#manual_div").show()
+          $("#run_div").show()
+	         break;
+
+
+       case 5:  // OPEN_MASTER_VALVE
 	         $("#schedule_div").hide()
           $("#manual_div").hide()
           $("#run_div").hide()
 	         break;
 
-       case 5: // CLOSE_MASTER_VALVE
+       case 6: // CLOSE_MASTER_VALVE
 	         $("#schedule_div").hide()
           $("#manual_div").hide()
           $("#run_div").hide()
 	         break;
 
-       case 6: // CLEAN_FILTER
+       case 7: // CLEAN_FILTER
 	         $("#schedule_div").hide()
           $("#manual_div").hide()
           $("#run_div").hide()
 	         break;
 
-       case 7: // RESISTANCE_CHECK
+       case 8: // RESISTANCE_CHECK
 	         $("#schedule_div").hide()
           $("#manual_div").hide()
           $("#run_div").hide()
 	         break;
 
-       case 8: // CHECK OFF
+       case 9: // CHECK OFF
 	         $("#schedule_div").hide()
           $("#manual_div").hide()
           $("#run_div").hide()
 	         break;
 
-       case 9: // SUSPEND
+       case 10: // SUSPEND
 	         $("#schedule_div").hide()
           $("#manual_div").hide()
           $("#run_div").hide()
 	         break;
 
-       case 10: // RESUME
+       case 11: // RESUME
 	         $("#schedule_div").hide()
           $("#manual_div").hide()
           $("#run_div").hide()
 	         break;
 
-       case 11: // RESTART_PROGRAM
+       case 12: // RESTART_PROGRAM
 	         $("#schedule_div").hide()
           $("#manual_div").hide()
           $("#run_div").hide()
 	         break;
 
-       case 12: // RESET_SYSTEM
+       case 13: // RESET_SYSTEM
 	         $("#schedule_div").hide()
           $("#manual_div").hide()
           $("#run_div").hide()
@@ -199,6 +206,17 @@ $(document).ready(
    $("#schedule_div").hide()
    $("#manual_div").hide()
    $("#run_div").hide()
+
+   $("#run_time").empty()
+   for( var i = 1; i <= 120; i++ )
+   {
+       $("#run_time").append('<option value='+i+'>'+i+'  minutes </option>');	
+	
+   }
+
+   $("#run_time")[0].selectedIndex = 9;
+	  $("#run_time").selectmenu();
+	  $("#run_time").selectmenu("refresh");
 	
   
    $( "#op_mode" ).bind( "change",op_mode_change) 
