@@ -1,7 +1,7 @@
 
 function generate_description( index , schedule_name)
 {
-   var temp_string;  
+   var temp_string; 
    temp_string = "step "+index+" controller/pins  --->";
    index = index -1;
    if( index >= schedules_pins[schedule_name].length)
@@ -12,8 +12,8 @@ function generate_description( index , schedule_name)
    for( i = 0; i < schedules_pins[schedule_name][index].length;  i++)
    {
 	     temp_string = temp_string + "   "+ schedules_pins[schedule_name][index][i];
-   }
-   return temp_string;
+         }
+      return temp_string;
 }
 
 
@@ -52,10 +52,12 @@ function set_step(index)
     var schedule_name;
 	   var temp_string;
 	   schedule_name = schedules[index];
+    
     $("#manual_step").empty()
     for( var i = 1; i <= schedules_step[schedule_name].length; i++ )
 	   {
 	       temp_string = generate_description( i , schedule_name)
+
         $("#manual_step").append('<option value='+i+'>'+temp_string+'</option>');	
 	   }
 
@@ -113,7 +115,7 @@ function bind_op_mode_change()
        
        var temp_index     
 	      temp_index = $("#op_mode")[0].selectedIndex;
-       console.log("temp_index",temp_index)
+       
 	      switch( temp_index)
 	      {
 	         case  0:  // CLEAR

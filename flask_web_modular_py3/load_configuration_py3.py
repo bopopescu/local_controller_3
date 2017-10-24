@@ -215,7 +215,7 @@ class Load_Configuration_Data(object):
                temp = []
                for l in  i:
                    temp.append(  [ l[0], l[1][0] ] )
-                   controller_pins.append(temp)
+               controller_pins.append(temp)
   
   
        return len(returnValue), returnValue, controller_pins
