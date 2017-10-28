@@ -16,7 +16,7 @@ from flask_web_modular_py3.load_irrigation_control_py3    import  Load_Irrigatio
 from flask_web_modular_py3.load_eto_management_py3        import  Load_ETO_Management
 from flask_web_modular_py3.load_site_data_py3             import  Load_Site_Data
 from flask_web_modular_py3.load_configuration_py3         import Load_Configuration_Data
-
+from flask_web_modular_py3.load_streaming_data            import Load_Streaming_Data
 import flask
 from flask import Flask
 from flask import render_template,jsonify
@@ -48,6 +48,9 @@ class PI_Web_Server(object):
        Load_Site_Data(app,auth,render_template)
        Load_Configuration_Data(app,auth,render_template,request , app_files,sys_files,
                                redis_handle,redis_new_handle )
+       Load_Streaming_Data(app,auth,render_template,request , app_files,sys_files,
+                               redis_handle,redis_new_handle,gm )
+
 
         
 

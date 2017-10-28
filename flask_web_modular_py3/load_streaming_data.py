@@ -2,7 +2,7 @@ import os
 import json
 import base64
 
-class Load_Irrigation_Streaming_Data(object):
+class Load_Streaming_Data(object):
 
    def __init__( self, app, auth,render_template,request,
                  app_files,sys_files,redis_old_handle, redis_new_handle,gm ):
@@ -13,45 +13,43 @@ class Load_Irrigation_Streaming_Data(object):
        self.app_files = app_files
        self.sys_files = sys_files
        self.redis_old_handle = redis_old_handle
+       self.redis_new_handle = redis_new_handle
        self.gm               = gm
-
-       // find redis queue positions for irrigation 
-       
-  
-
-       a1 = auth.login_required( self._fifteen_second )
-       app.add_url_rule('/irrigation_streaming_data/fifteen_second_irrigation',
-                             "fifteen_second_irrigation",a1,methods=["GET"])
+       temp                  = self.gm.match_terminal_relationship( "MINUTE_ACQUISITION")[0]
+       self.minute_store     =  temp["measurement"]
       
        a1 = auth.login_required( self._one_minute )
        app.add_url_rule('/irrigation_streaming_data/display_minute_irrigation',
                              "display_minute_irrigation",a1,methods=["GET"])
-      
-
-       a1 = auth.login_required( self._one_hour )
-       app.add_url_rule('/irrigation_streaming_data/display_hour_irrigation',
-                            "display_hour_irrigation",a1,methods=["GET"])
-
-       a1 = auth.login_required( self._one_day )
-       app.add_url_rule("/irrigation_streaming_data/display_daily_irrigation",
-                          "display_daily_irrigation",a1,methods=["GET"])
-
-   def _fifteen_second(self): 
-       pass 
 
    def _one_minute(self): 
-       pass 
+       sel_prop = {}
+       sel_prop["flow"] = {}
+       irrigation_data = []
+       temp_data = self.redis_new_handle.lrange(self.minute_store, 0,-1) 
+       for i in temp_data:
+          irrigation_data.append(json.loads(i))
+       return self.render_template("streaming_data/streaming_data",title="Irrigation Streaming Data",
+                               header_name = "Irrigation Streaming Data", data = irrigation_data) 
 
-   def _one_hour(self): 
-       pass 
 
-   def _one_day(self): 
-       pass 
+
 
 if __name__ == "__main__":
    pass
 
-   '''
+
+'''
+sel_prop = {}
+sel_prop["flow"] = {}
+sel_prop["flow"]["header"]        = "Flow Rate History GPM"
+sel_prop["flow"]["queue"]          = "/ajax/sel_strip_chart/QUEUES:SPRINKLER:FLOW:"
+sel_prop["flow"]["limit_low"]     = 0
+sel_prop["flow"]["limit_high"]    = 40
+sel_prop["flow"]["sel_function"]  = '/ajax/flow_sensor_names'
+sel_prop["flow"]["sel_label"]     = "Flow Sensors"
+sel_prop["flow"]["x_axis"]        = "Time"
+sel_prop["flow"]["y_axis"]        = "GPM"
 @app.route('/sel_chart/<filename>',methods=["GET"])
 @authDB.requires_auth
 def sel_chart(filename):
@@ -70,4 +68,5 @@ def sel_chart(filename):
                                sel_function = sel_function,sel_label = sel_label, x_axis=x_axis,y_axis=y_axis )
 
 
-   '''
+   
+'''
