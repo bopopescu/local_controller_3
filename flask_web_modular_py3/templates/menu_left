@@ -43,20 +43,8 @@
            <li><a href="/control/display_irrigation_queue" target="_self">Pending Irrigation Actions</a></li>
             <li><a href ='/sel_chart/flow' target="_self">Recent Flow History</a></li>
             <li><a href="/strip_chart/coil" target="_self">Recent Coil History</a></li>
-            <li><a href="/strip_chart/coil" target="_self">Recent Streaming Data</a></li>
-            
-            
-        </ul>
-    </div>
-   <div data-role="collapsible" data-theme="a"  data-iconpos="right" data-collapsed="True" data-content-theme="c">
-        <h3>Irrigation Streaming Data</h3>
-        <ul data-role="listview">
-           <li><a href ='/irrigation_streaming_data/fifteen_second_irrigation' target="_self">15 second data</a></li>
-           <li><a href ='/irrigation_streaming_data/display_minute_irrigation' target="_self">1 minute data</a></li>
-           <li><a href ='/irrigation_streaming_data/display_hour_irrigation' target="_self">1 hour data</a></li>
-           <li><a href="/irrigation_streaming_data/display_daily_irrigation" target="_self">daily data</a></li>
-  
-            
+            <li><a href ='/irrigation_streaming_data/display_minute_irrigation' target="_self">Irrigation 1 minute data</a></li>
+ 
             
         </ul>
     </div>
