@@ -8,10 +8,32 @@ var v_max = -Number.MAX_SAFE_INTEGER;
 
 var hh = {}
 
-function change_index()
+function change_field_index()
 {
-    alert("change index ")
+    alert("change_field_index ")
 }
+function change_time_index()
+{
+    alert("change_time_index")
+}
+function change_vertical_index()
+{
+    alert("change_vertical_index ")
+}
+
+function save_field_index()
+{
+    alert("save_field_index ")
+}
+function save_time_index()
+{
+    alert("save_time_index")
+}
+function save_vertical_index()
+{
+    alert("save_vertical_index ")
+}
+
 
 function prepare_data( )
 {
@@ -141,12 +163,17 @@ $(document).ready(
  
    display_data(0)
    
-  //$("#edit_panel_cancel").bind("click",cancel_function )
-  //$("#edit_panel_save").bind("click", save_function )
-  $("#footer-button_1").on("popupafteropen", change_index);
+  
+  $("#edit_panel_save").bind("click", save_field_index );
+  $("#change_index").on("popupafteropen", change_field_index );
+                          
+  
+  $("#edit_panel_save").bind("click", save_time_index )
+  $("#change_index").on("popupafteropen", change_time_index );
+                          
+  
+  $("#edit_panel_save").bind("click", save_vertical_index )
+  $("  #change_time_index").on("popupafteropen", change_field_index );
+
 
   })
-  
-
-
-

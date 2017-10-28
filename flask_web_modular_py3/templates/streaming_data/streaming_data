@@ -34,41 +34,51 @@
    <!-- /header -->
     
 
-<div data-role="popup" id="change_setting" data-theme="a"
+<div data-role="popup" id="change_index" data-theme="a"
          data-display="overlay" data-position="right"> 
-    <h4>Select Flow Sensor</h4>
-    <select id="flowRate">
-      {% set j = 0 %}
-      {% for i in flow_sensors: %}
-         
-          <option value={{j}} >  {{i}} </option>
-          {% set j=j+1 %}
-      {% endfor %}
+    <h4>Select Field Index</h4>
+    <select id="field_index">
     </select>
-   <h4> Select Schedule </h4>
-   <select id="titleList" name="values">
-      {% set j = 0 %}
-      {% for i in schedule_list: %}
-         
-          <option value={{j}} > {{i}} </option>
-          {% set j=j+1 %}
-      {% endfor %}
+    <select >
     </select>
-   
+
    <a href="#" data-rel="back" data-role="button" data-theme="a" data-icon="delete"  >Close</a>
-  <a href="#" id="make_changes" data-role="button" data-theme="a"  data-icon="forward">Make Changes</a>
+   <a href="#" id="make_index_changes" data-role="button" data-theme="a"  data-icon="forward">Make Changes</a>
+    
+</div>    
+    
+ <div data-role="popup" id="change_time_index" data-theme="a"
+         data-display="overlay" data-position="right"> 
+    <h4>Select Field Index</h4>
+    <select id="field_index">
+    </select>
+    <select >
+    </select>
+
+   <a href="#" data-rel="back" data-role="button" data-theme="a" data-icon="delete"  >Close</a>
+  <a href="#" id="make_time_changes" data-role="button" data-theme="a"  data-icon="forward">Make Changes</a>
+   
+   
+</div> 
+<div data-role="popup" id="change_vertical_index" data-theme="a"
+         data-display="overlay" data-position="right"> 
+    <h4>Select Field Index</h4>
+    <select >
+    </select>
+    <select >
+    </select>
+
+   <a href="#" data-rel="back" data-role="button" data-theme="a" data-icon="delete"  >Close</a>
+  <a href="#" id="make_vertical_changes" data-role="button" data-theme="a"  data-icon="forward">Make Changes</a>
    
   
  
     
-</div>    
-    
-     
+</div> 
 
 
     <h3 id="title_banner"></h3>   
     <div id="div_g" "></div>
-     
    <div data-role="footer"  data-theme="b"> 
     <a id="footer-button_1" data-icon="bars"  
        style="margin-top:10px;"data-rel="popup" 
@@ -78,15 +88,17 @@
         style="margin-top:10px;" 
         data-rel="popup" 
         data-position-to="window" 
-        href="#navpanel">Vertical Display</a>
+        href="change_vertical_index">Vertical Display</a>
    <a id="footer-button_3" data-icon="bars" 
        style="margin-top:10px;"
-       data-rel="popup" 
+       data-rel="popup"
        data-position-to="window" 
-       href="#status_panel">Time Range</a>
+       href="#change_time_index">Time Range</a>
 
  </div>
 
 </div><!-- /page -->
+
+
 </html>
 
