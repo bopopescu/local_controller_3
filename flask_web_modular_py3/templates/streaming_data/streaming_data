@@ -4,6 +4,22 @@
 	 <meta name="viewport" content="width=device-width, minimum-scale=1, maximum-scale=1">
   <!link rel="icon" type="image/png" href="/static/favicon.ico"!>
   <link rel="shortcut icon" href="/static/favicon.ico">
+  
+  <style>
+        /*this block should go in the styles.css file*/
+        .ui-panel-inner {
+            padding:7px; /*make the buttons flush edge to edge*/
+        }
+        .ui-controlgroup {
+            margin:7px; /*make the buttons flush to the top*/
+        }
+        #header {
+            height:60px;
+        }
+        #bars-button {
+            margin:5px;
+        }
+    </style>
 	 <title>{{title_name}}</title>
         
   {% include 'common_setup' %}
@@ -36,40 +52,38 @@
 
 <div data-role="popup" id="change_index" data-theme="a"
          data-display="overlay" data-position="right"> 
-    <h4>Select Field Index</h4>
+    <h4>Select Data Field</h4>
     <select id="field_index">
     </select>
-    <select >
-    </select>
-
-   <a href="#" data-rel="back" data-role="button" data-theme="a" data-icon="delete"  >Close</a>
-   <a href="#" id="make_index_changes" data-role="button" data-theme="a"  data-icon="forward">Make Changes</a>
+   <a  id="cancel_index_changes"   data-role="button" data-theme="a" data-icon="delete"  >Close</a>
+   <a  id="make_index_changes" data-role="button" data-theme="a"  data-icon="forward">Make Changes</a>
     
 </div>    
     
  <div data-role="popup" id="change_time_index" data-theme="a"
          data-display="overlay" data-position="right"> 
-    <h4>Select Field Index</h4>
-    <select id="field_index">
-    </select>
-    <select >
-    </select>
+    <h4>Select Time Range</h4>
+    <label for="time_slider-1">Starting Time Value (Percent of Full Scale)</label>
+    <input type="range" name="time_slider-1" id="time_slider_1" value="60" min="0" max="100">
+    <label for="time_slider-2">Time Range (Percent of Full Scale)</label>
+    <input type="range" name="time_slider-2" id="time_slider_2" value="60" min="0" max="100">
 
-   <a href="#" data-rel="back" data-role="button" data-theme="a" data-icon="delete"  >Close</a>
-  <a href="#" id="make_time_changes" data-role="button" data-theme="a"  data-icon="forward">Make Changes</a>
+   <a id="cancel_time_changes"  data-role="button" data-theme="a" data-icon="delete"  >Close</a>
+  <a  id="make_time_changes" data-role="button" data-theme="a"  data-icon="forward">Make Changes</a>
    
    
 </div> 
 <div data-role="popup" id="change_vertical_index" data-theme="a"
          data-display="overlay" data-position="right"> 
-    <h4>Select Field Index</h4>
-    <select >
-    </select>
-    <select >
-    </select>
+    <h4>Select Vertical Graph Range</h4>
+    <label for="v_slider-1">Minimium Display Value</label>
+    <input type="range" name="v_slider-1" id="v_slider_1" value="60" min="0" max="100">
+    <label for="v-2">Maximium Display Value</label>
+    <input type="range" name="v-2" id="v_slider_2" value="60" min="0" max="100">
 
-   <a href="#" data-rel="back" data-role="button" data-theme="a" data-icon="delete"  >Close</a>
-  <a href="#" id="make_vertical_changes" data-role="button" data-theme="a"  data-icon="forward">Make Changes</a>
+
+   <a id="cancel_vertical_changes"  data-role="button" data-theme="a" data-icon="delete"  >Close</a>
+  <a  id="make_vertical_changes" data-role="button" data-theme="a"  data-icon="forward">Make Changes</a>
    
   
  
@@ -88,7 +102,7 @@
         style="margin-top:10px;" 
         data-rel="popup" 
         data-position-to="window" 
-        href="change_vertical_index">Vertical Display</a>
+        href="#change_vertical_index">Vertical Display</a>
    <a id="footer-button_3" data-icon="bars" 
        style="margin-top:10px;"
        data-rel="popup"
