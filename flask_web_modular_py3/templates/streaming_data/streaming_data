@@ -108,6 +108,7 @@
        data-rel="popup"
        data-position-to="window" 
        href="#change_time_index">Time Range</a>
+    <h4  id="field_description" >This is a field description</h4>
 
  </div>
 

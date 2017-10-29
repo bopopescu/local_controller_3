@@ -178,6 +178,7 @@ function display_data( index )
 
   draw_array = []
   let field_key_ref = field_keys[index]
+  $("#field_description").html("Current Selected Stream is:  "+field_key_ref )
   temp_x = Math.round(time_data.length *x_start_index)
   temp_x_range = Math.round(x_start_range *time_data.length)
 
