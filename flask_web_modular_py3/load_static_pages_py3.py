@@ -38,7 +38,6 @@ class Load_Static_Files(object):
 
   
    def get_fav(self):
-       print("made it hese")
        return self.app.send_static_file("favicon.ico")
 
    def get_js(self, filename):

@@ -5,11 +5,18 @@ var x_start_range = 0
 var x_start_index = 0
 var v_min = Number.MAX_SAFE_INTEGER;
 var v_max = -Number.MAX_SAFE_INTEGER;
-var ref_field_index
+
 var v_min
 var v_max_ref 
 var hh = {}
 
+function make_refresh()
+{
+   let temp = '/irrigation_streaming_data/display_minute_irrigation/'+ref_field_index
+
+   window.location.href = temp
+}    
+    
 function change_field_index()
 {
     
@@ -128,7 +135,7 @@ function prepare_data( )
   x_start_range = .25
   v_min = Number.MAX_SAFE_INTEGER;
   v_max = -Number.MAX_SAFE_INTEGER;
-  ref_field_index = 0
+  
   
 }
 
@@ -234,7 +241,7 @@ $(document).ready(
      
      
  
-   display_data(0)
+   display_data(ref_field_index)
    
   $("#cancel_index_changes").bind("click",cancel_field_index);
   $("#make_index_changes").bind("click", save_field_index );
@@ -247,7 +254,7 @@ $(document).ready(
                     
   $("#cancel_vertical_changes").bind("click",cancel_vertical_index);
   $("#make_vertical_changes").bind("click", save_vertical_index )
-  $("  #change_vertical_index").on("popupafteropen", change_vertical_index );
+  $("#change_vertical_index").on("popupafteropen", change_vertical_index );
 
-
+  $("#footer-button_4").bind("click",make_refresh)
   })

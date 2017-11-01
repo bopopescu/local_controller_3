@@ -19,10 +19,10 @@ class Load_Streaming_Data(object):
        self.minute_store     =  temp["measurement"]
       
        a1 = auth.login_required( self._one_minute )
-       app.add_url_rule('/irrigation_streaming_data/display_minute_irrigation',
+       app.add_url_rule('/irrigation_streaming_data/display_minute_irrigation/<int:stream_index>',
                              "display_minute_irrigation",a1,methods=["GET"])
 
-   def _one_minute(self): 
+   def _one_minute(self,stream_index): 
        sel_prop = {}
        sel_prop["flow"] = {}
        irrigation_data = []
@@ -30,7 +30,7 @@ class Load_Streaming_Data(object):
        for i in temp_data:
           irrigation_data.append(json.loads(i))
        return self.render_template("streaming_data/streaming_data",title="Irrigation Streaming Data",
-                               header_name = "Irrigation Streaming Data", data = irrigation_data) 
+                               header_name = "Irrigation Streaming Data", data = irrigation_data, start_index = stream_index) 
 
 
 

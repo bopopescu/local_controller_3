@@ -44,7 +44,7 @@
            <li><a href ='/control/display_past_alerts' target="_self">Past Alerts</a></li>
            <li><a href ='/control/display_past_actions' target="_self">Past Actions</a></li>
            <li><a href="/control/display_irrigation_queue" target="_self">Pending Irrigation Actions</a></li>
-           <li><a href ='/irrigation_streaming_data/display_minute_irrigation' target="_self">Irrigation 1 minute data</a></li>
+           <li><a href ='/irrigation_streaming_data/display_minute_irrigation/0' target="_self">Irrigation 1 minute data</a></li>
  
             
         </ul>
@@ -54,7 +54,7 @@
         <ul data-role="listview">
          <li><a href="/control/control" target="_self">Control Operation</a></li>
          <li><a href="/control/parameters" target="_self">Manage Parameters</a></li>
-         <li><a href="/control/irrigation_queue/0" target="_self">Manage Irrigation Queue</a></li>
+         <li><a href="/control/irrigation_queue" target="_self">Manage Irrigation Queue</a></li>
 
         </ul>
     </div>
@@ -70,15 +70,10 @@
 
    <div data-role="collapsible" data-theme="a"  data-iconpos="right" data-collapsed="True" data-content-theme="c">
         <h3>Irrigation Statistics</h3>
-        <ul data-role="listview">
-        <li><a href="/overall_flow_statistics/0/0" target="_self">Composite Flow Statistics</a></li>
-        <li><a href="/overall_current_statistics/0" target="_self">Composite Current Statistics</a></li>
-        <li><a href="/detail_statistics/0/0/0/0/0" target="_self">Detail Statistics</a></li>
-        <li><a href ='/overall_resistance/0' target="_self">Coil Resistance</a></li>
-               
-
-
-
+        <ul data-role="listview">        
+        <li><a href="/composite_statistics/0/0" target="_self">Composite Statistics</a></li>        
+        <li><a href="/detail_statistics/0/0" target="_self">Detail Statistics</a></li>
+        <li><a href="/irrigation_time_profile/0/0/0/0/0" target="_self">Irrigation Time Profile</a></li>
         </ul>
     </div>
     
