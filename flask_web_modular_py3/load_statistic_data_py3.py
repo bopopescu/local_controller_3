@@ -18,10 +18,14 @@ class Load_Statistic_Data(object):
        self.gm               = gm
       
        a1 = auth.login_required( self.detail_statistics_setup_page )
-       app.add_url_rule('/detail_statistics/<int:schedule>/<int:step>',
+       app.add_url_rule('/detail_statistics/<int:schedule>/<int:step>/<int:field_id>/<int:attribute_id>',
                              "detail_statistics",a1,methods=["GET"])
+                             
+       a1 = auth.login_required( self.time_series_statistics_setup_page )
+       app.add_url_rule('/time_series_statistic/<int:schedule_index>/<int:step>/<int:field_index>/<int:time_step_index>/<int:display_number>',
+                             "time_series_statistics",a1,methods=["GET"])
 
-   def detail_statistics_setup_page(self, schedule,step  ):
+   def detail_statistics_setup_page(self, schedule,step ,field_id, attribute_id ):
     
         schedule_data = self.get_schedule_data()
         schedule_list = sorted(list(schedule_data.keys()))
@@ -33,14 +37,16 @@ class Load_Statistic_Data(object):
             step = step_number-1
             
         log_name = "log_data:unified:"+schedule_name+":"+str(step+1)
+        limit_name = "limit_data:unified:"+schedule_name+":"+str(step+1)
         data = self.redis_old_handle.lindex(log_name,0)
         data = json.loads(data)
         field_list = sorted(set(data["fields"].keys()))
         flatten_data = self.flatten(data["fields"][field_list[0]])
         sub_field_list   =  sorted(set(flatten_data.keys()))
-        irrigation_data = {}
+        irrigation_data = self.get_irrigation_data( log_name )
+        limit_data      = self.get_limit_data(limit_name,log_name)
         return self.render_template("statistics/detail_statistics", 
-                                      title = "Detail Irrigation Profile",
+                                      title = "Time Series Irrigation Profile",
                                       schedule_id = schedule,
                                       field_list=field_list, 
                                       sub_field_list = sub_field_list, 
@@ -49,7 +55,46 @@ class Load_Statistic_Data(object):
                                       schedule_step = step , 
                                       step_number = step_number,
                                       schedule_list = schedule_list ,
-                                      irrigation_data = irrigation_data)
+                                      irrigation_data = irrigation_data,
+                                      limit_data      = limit_data,
+                                      field_id        =  field_id,
+                                      attribute_id    =  attribute_id )
+                                      
+                                      
+                                      
+   def time_series_statistics_setup_page(self, schedule_index ,step , field_index, time_step_index, display_number):
+    
+        schedule_data = self.get_schedule_data()
+        schedule_list = sorted(list(schedule_data.keys()))
+        
+        schedule_name = schedule_list[schedule_index]
+        step_number = schedule_data[schedule_name]["step_number"]
+        
+        if step >= step_number:
+            step = step_number-1
+            
+        log_name = "log_data:unified:"+schedule_name+":"+str(step+1)
+        limit_name = "limit_data:unified:"+schedule_name+":"+str(step+1)
+        data = self.redis_old_handle.lindex(log_name,0)
+        data = json.loads(data)
+        field_list = sorted(set(data["fields"].keys()))
+        irrigation_data = self.get_irrigation_time_data( log_name )
+        limit_data      = self.get_limit_time_data(limit_name,log_name)
+        return self.render_template("statistics/time_series_statitics",
+                                      title = "Time Irrigation Profile",
+                                      schedule_id = schedule_index,
+                                      field_list=field_list, 
+                                      schedule_data = schedule_data,
+                                      schedule_name = schedule_name, 
+                                      schedule_step = step , 
+                                      step_number = step_number,
+                                      schedule_list = schedule_list ,
+                                      irrigation_data = irrigation_data,
+                                      limit_data      = limit_data,
+                                      field_index       =  field_index,
+                                      time_step_index      =  time_step_index,
+                                      display_number    = display_number )                                      
+                                      
 #  correct step
 #  add step number
        
@@ -86,6 +131,60 @@ class Load_Statistic_Data(object):
        return len(returnValue), returnValue, controller_pins
 
 
+   def get_irrigation_data( self, log_name ):
+       return_value = []
+       temp_list = self.redis_old_handle.lrange(log_name, 0,-1) 
+       for i in temp_list:
+          temp_dict = json.loads(i)
+          return_value.append(self.compose_array_element( temp_dict ))
+       return return_value
+
+   def get_irrigation_time_data( self, log_name ):
+       return_value = []
+       temp_list = self.redis_old_handle.lrange(log_name, 0,-1) 
+       for i in temp_list:
+          temp_dict = json.loads(i)
+          return_value.append(self.compose_array_element( temp_dict ))
+       return return_value
+
+
+
+   def get_limit_data( self, limit_name, log_name):
+       temp_limit_json = self.redis_old_handle.get(limit_name)
+       if temp_limit_json == None: # add limit  as last element
+            print("derived limit")
+            temp_limit_json = self.redis_old_handle.lindex( log_name, 0 )
+            self.redis_old_handle.set(limit_name,temp_limit_json)
+       else:
+           print("normal limits")
+       temp_limit = json.loads(temp_limit_json )
+       return self.compose_time_array_element(temp_limit)
+       
+   def get_limit_time_data( self, limit_name, log_name):
+       temp_limit_json = self.redis_old_handle.get(limit_name)
+       if temp_limit_json == None: # add limit  as last element
+        
+            temp_limit_json = self.redis_old_handle.lindex( log_name, 0 )
+            self.redis_old_handle.set(limit_name,temp_limit_json)
+       
+       temp_limit = json.loads(temp_limit_json )
+       return self.compose_time_array_element(temp_limit)
+      
+   def compose_array_element( self, array_element ):
+        return_value = {}
+        return_value["time"] = array_element["time"]
+        return_value["fields"] = {}
+        for key,item in array_element["fields"].items():
+            if key != "data":
+               return_value["fields"][key] = self.flatten(item)
+        return return_value
+        
+   def compose_time_array_element( self, array_element ):
+        return_value = {}
+        return_value["time"] = array_element["time"]
+        for k,v in array_element["fields"].items():
+            return_value[k] = v["data"]
+        return return_value
 
    def flatten(  self, d, parent_key='', sep='_'):
        items = []
@@ -101,100 +200,3 @@ class Load_Statistic_Data(object):
 
 if __name__ == "__main__":
    pass
-'''
-
-       <li><a href="/composite_statistics/0/0" target="_self">Composite Statistics</a></li>        
-        <li><a href="/detail_statistics/0/0/0/0/0" target="_self">Detail Statistics</a></li>
-        <li><a href="/irrigation_time_profile/0/0/0/0/0" target="_self">Irrigation Time Profile</a></li>
-@app.route('/detail_statistics_ajax/<int:chart_type>/<int:flow_sensor_id>/<int:schedule_id>/<int:step_id>/<int:time_id>',methods=["GET"])
-@authDB.requires_auth
-def detail_statistics_ajax(chart_type, flow_sensor_id,schedule_id,step_id,time_id):
-   if chart_type == 0:
-       schedule_name = statistics_module.schedule_data.keys()[schedule_id]
-       sensor_name   = statistics_module.flow_rate_sensor_names[ flow_sensor_id ]
-      
-       return_value  = statistics_module.get_average_flow_data_queue( step_id, sensor_name, schedule_name )
-
-   if chart_type == 1:
-       schedule_name = statistics_module.schedule_data.keys()[schedule_id]
-       sensor_name   = statistics_module.flow_rate_sensor_names[ flow_sensor_id ]
-       return_value  = statistics_module.get_time_index_flow( time_id, step_id, sensor_name, schedule_name )
-   if chart_type == 2:
-       schedule_name = statistics_module.schedule_data.keys()[schedule_id]
-       sensor_name   = statistics_module.flow_rate_sensor_names[ flow_sensor_id ]
-       return_value  = statistics_module.get_total_flow_data( step_id, sensor_name, schedule_name )
-
-   if chart_type == 3:
-       schedule_name = statistics_module.schedule_data.keys()[schedule_id]
-       return_value  = statistics_module.get_average_current_data_queue( step_id,  schedule_name )
-
-
-   if chart_type == 4:
-       schedule_name = statistics_module.schedule_data.keys()[schedule_id]
-       return_value  = statistics_module.get_time_index_current( time_id, step_id,schedule_name )
-   
-   return_value = json.dumps(return_value)
-   return return_value
-
-
-@app.route('/detail_statistics/<int:chart_type>/<int:flow_sensor_id>/<int:schedule_id>/<int:step_id>/<int:time_id>',methods=["GET"])
-@authDB.requires_auth
-def detail_1(chart_type, flow_sensor_id,schedule_id,step_id,time_id):
-
-       if chart_type < 0:
-           chart_type = 0
-       if chart_type > len(display_control)-1:
-           chart_type = len(display_control)-1
-          
-       chart_data        = display_control[ chart_type ]
-       schedule_list     = statistics_module.schedule_data.keys()
-       
-       if schedule_id > len(schedule_list)-1:
-           schedule_id = len(schedule_list)-1
-       
-       logscale = False
-       step_number       = statistics_module.schedule_data[ schedule_list[schedule_id] ]["step_number"]
-       conversion_factor = statistics_module.conversion_rate[ flow_sensor_id ]
-       if step_id > step_number-1:
-          step_id = step_number-1
-       if time_id > 50:
-           time_id = 50
-       flow_sensors      = statistics_module.flow_rate_sensor_names
-       if chart_type == 0:
-            legend_name = "Flow Meter: "+flow_sensors[flow_sensor_id]+"     <br>Schedule:  "+schedule_list[schedule_id]+" <br>Step Number:  "+ str(step_id+1)
-       if chart_type == 1:
-            legend_name = "Flow Meter: "+flow_sensors[flow_sensor_id]+"     <br>Schedule:  "+schedule_list[schedule_id]+" <br>Step Number:  "+ str(step_id+1) +" <br>Time Index:  "+ str(time_id+1)
-
-       if chart_type == 2:
-            legend_name = "Flow Meter: "+flow_sensors[flow_sensor_id]+"     <br>Schedule:  "+schedule_list[schedule_id]+" <br>Step Number:  "+ str(step_id+1)
-            logscale = True
-
-       if chart_type == 3:
-            legend_name = "Coil Current:<br>Schedule:  "+schedule_list[schedule_id]+" <br>Step Number:  "+ str(step_id+1) 
-            conversion_factor = 1.0
-
-       if chart_type == 4:
-            legend_name = "Coil Current:<br>Schedule:  "+schedule_list[schedule_id]+" <br>Step Number:  "+ str(step_id+1) +" <br>Time Index:  "+ str(time_id+1)
-            conversion_factor = 1.0
-       
-    
-       return render_template(  "detail_statistics",
-                                logscale              = logscale,
-                                legend_name           = legend_name,
-                                conversion_factor     = conversion_factor,
-                                chart_list            = chart_list,
-                                chart_data            = chart_data,
-                                chart_type            = chart_type,
-                                flow_sensor_id        = flow_sensor_id,
-                                schedule_id           = schedule_id,
-                                step_id               = step_id,
-                                time_id               = time_id,
-                                header_name           = chart_data["name"],
-                                schedule_list         = schedule_list,
-                                flow_sensors          = flow_sensors,
-                                step_number           = step_number ,
-                                label_array           = chart_data["label_array"],
-                                schedule_data         = json.dumps(statistics_module.schedule_data),
-                                schedule_list_json    = json.dumps( schedule_list) )
-                                
-'''

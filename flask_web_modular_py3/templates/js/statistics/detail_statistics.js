@@ -3,20 +3,120 @@ var data_length = 0
 var draw_array = []
 var x_start_range = 0
 var x_start_index = 0
-var v_min = Number.MAX_SAFE_INTEGER;
-var v_max = -Number.MAX_SAFE_INTEGER;
 
-var v_min
 var v_max_ref 
 var hh = {}
 var selected_field;
-var selected_attribute;    
+var selected_attribute;
+var draw_data;
+
+
+
+function auto_scale()
+{
+   v_min = Number.MAX_SAFE_INTEGER;
+   v_max = -Number.MAX_SAFE_INTEGER;
+
+  for( i = 0; i < draw_array.length;i++)
+  {
+      if( v_min > draw_array[i][2] )
+     {
+        
+        v_min = draw_array[i][2] 
+     }
+     if( v_max < draw_array[i][2] )
+     {
+        v_max = draw_array[i][2] 
+     }
+     
+   }
+   
+   if( v_min < 0 )
+   {
+      v_min = 1.25*v_min
+   }
+   else
+   { 
+      v_min = .75 *v_min
+   }
+   if( v_min == 0 )
+   {
+      v_min = -.5
+   }
+   if( v_max > 0 )
+   {
+      v_max = 1.25*v_max
+   }
+   else
+   { 
+      v_max = .75 *v_max
+   }
+   if( v_max == 0 )
+   {
+      v_max = .5
+   }
+   
+   return_value = [ v_min,v_max]
+   return return_value
+ 
+
+}
+function display_data( field_name,attribute_name )
+{
+  
+  
+  $("#field_description").html("Current Selected Measurement Field/Attribute is:  "+field_name+":"+attribute_name )
+ 
+ 
+  
+  draw_array = []
+  for( let i = 0; i < irrigation_data.length; i++)
+  {
+     
+     var item = irrigation_data[i]
+     field_data = item["fields"]
+     limit_field_data = limit_data["fields"]
+     if( !(field_name in field_data) )
+     {
+         break;
+     }
+     
+     limit_field = limit_field_data[field_name]
+     data_field = field_data[field_name]
+     if( !(attribute_name in data_field ))
+     {
+         break;
+     }
+     // valid point
+     limit_point = limit_field[attribute_name]
+     data_point = data_field[attribute_name];
+     time_data = new Date(item["time"]*1000)
+     draw_array.push([time_data,limit_point ,data_point])
+
+  }
+  
+  
+   x_axis  = "time"
+   y_axis  = "data"
+   let scale = auto_scale()
+   
+
+   hh.updateOptions( { 'file': draw_array,
+                        'valueRange': scale,
+                        labels: ["time", "limit","data"]
+
+                        } )
+  
+} 
+    
 
 function make_refresh()
 {
    let schedule_id  =    $("#schedule_select").val()
    let step_id      =    $("#step_select").val()
-   let temp     = "/detail_statistics/"+schedule_id+"/"+step_id
+   let field_id     =    $("#field_select")[0].selectedIndex
+   let attribute_id     =    $("#attribute_select")[0].selectedIndex
+   let temp     = "/detail_statistics/"+schedule_id+"/"+step_id+"/"+field_id+"/"+attribute_id
    
    window.location.href = temp
 }    
@@ -68,6 +168,7 @@ function populate_schedule_step()
 
     $("#step_select")[0].selectedIndex = step;
     $("#step_select").selectmenu("refresh")
+    populate_field_attribute()
 }
 
  
@@ -75,8 +176,9 @@ function display_new_field_attribute()
 {
    selected_field       =    $("#field_select").val()
    selected_attribute   =    $("#attribute_select").val()
+    
   
-   alert(selected_field+":"+selected_attribute)
+   display_data( selected_field,selected_attribute )
    $( "#change_field_attribute" ).popup( "close" )
 }    
 
@@ -125,8 +227,8 @@ $(document).ready(
     
    draw_array = []
 
-   selected_field       =  field_list[0]
-   selected_attribute   =  sub_field_list[0]   
+   selected_field       =  field_list[field_id]
+   selected_attribute   =  sub_field_list[attribute_id]   
  
    limit_low = 0
    limit_high = 40
@@ -141,7 +243,10 @@ $(document).ready(
                             valueRange: [limit_low, limit_high ],
                             labels: [x_axis, y_axis]
                           });
-     
+   irrigation_data.reverse()
+   let field_name = field_list[field_id]
+   let attribute_name = sub_field_list[attribute_id]                       
+   display_data(field_name,attribute_name)
    $("#save_schedule_step").bind("click",make_refresh);
    $( "#schedule_select").bind("change",schedule_change);
    $("#cancel_schedule_step").bind("click",cancel_schedule_step);
@@ -153,222 +258,7 @@ $(document).ready(
    $("#cancel_field_attribute").bind("click",cancel_field_attribute);
    $("#change_field_attribute").on("popupafteropen", populate_field_attribute );                      
                            
-   //display_data(ref_field_index)
    
-  //$("#cancel_index_changes").bind("click",cancel_field_index);
-  //$("#make_index_changes").bind("click", save_field_index );
-  //$("#change_index").on("popupafteropen", change_field_index );
-                          
-
-  //$("#cancel_time_changes").bind("click",cancel_time_index);                          
-  //$("#make_time_changes").bind("click", save_time_index )
-  //$("#change_time_index").on("popupafteropen", change_time_index );
-                    
-  //$("#cancel_vertical_changes").bind("click",cancel_vertical_index);
-  //$("#make_vertical_changes").bind("click", save_vertical_index )
-  //$("#change_vertical_index").on("popupafteropen", change_vertical_index );
-
-  //$("#footer-button_4").bind("click",make_refresh)
   })
 
-  /*
-  function change_field_index()
-{
-    
-    $("#field_index").empty()
-    for( i = 0; i < field_keys.length; i++)
-    {
-        
-        $("#field_index").append($("<option></option>").val(i).html(field_keys[i]));
-    } 
-
-    $("#field_index")[0].selectedIndex = ref_field_index;
-    $("#field_index").selectmenu("refresh")
-}
-function change_time_index()
-{
-    $("#time_slider_1").val(x_start_index*100).slider('refresh');
-    $("#time_slider_2").val(x_start_range*100).slider('refresh');
-    
-}
-function change_vertical_index()
-{
-    
-    v_min_ref = v_min
-    v_max_ref = v_max
-    auto_scale()
-    $("#v_slider_1").prop({
-        min: v_min,
-        max: v_max
-     }).slider("refresh");
-     $("#v_slider_1").val(v_min_ref).slider("refresh")
-      
-    $("#v_slider_2").prop({
-        min: v_min,
-        max: v_max
-     }).slider("refresh");
-     $("#v_slider_2").val(v_max_ref).slider("refresh")
-     v_min = v_min_ref 
-     v_max = v_max_ref
- }
- 
-function cancel_field_index()
-{
-     
-     $( "#change_index" ).popup( "close" )
-}
-
-function save_field_index()
-{
-    ref_field_index = $("#field_index").val()
-    v_min = Number.MAX_SAFE_INTEGER
-    v_max = -Number.MAX_SAFE_INTEGER 
-    x_start_index = .75
-    x_start_range = .25    
-    display_data( ref_field_index )
-    $( "#change_index" ).popup( "close" )
-}
-    
   
-function cancel_time_index()
-{
-     
-     $( "#change_time_index" ).popup( "close" )
-}
-function save_time_index()
-{
-    
-    x_start_index = ($("#time_slider_1").val()/100);
-    x_start_range = ($("#time_slider_2").val()/100); 
-    display_data( ref_field_index )
-    $( "#change_time_index" ).popup( "close" )
-    
-}    
-
-
-function cancel_vertical_index()
-{
-  
-     $( "#change_vertical_index" ).popup( "close" )
-}
-function save_vertical_index()
-{
-    v_min = $("#v_slider_1").val()
-    v_max = $("#v_slider_2").val()
-     display_data( ref_field_index )
-
-    $( "#change_vertical_index" ).popup( "close" )
-}
-
-
-function prepare_data( )
-{
-  data_length = time_data.length
-  let temp_keys = Object.keys(time_data[0])
-  
-  field_keys = []
-  for( i =0; i< temp_keys.length; i++)
-  {
-     if( (temp_keys[i] != "time_stamp") &&(temp_keys[i] != "namespace"))
-     {
-       
-        field_keys.push(temp_keys[i])
-     }
-  }
-  draw_array = []
-  time_data.reverse()
-  /*
-  for( i = 0; i < data_length; i++)
-  {
-     
-     temp_data = [ new Date(time_data[i]["time_stamp"]),time_data[i][field_keys[0]] ]
-     
-     draw_array.push(temp_data)
-  }
-
-  x_start_index = .75
-  x_start_range = .25
-  v_min = Number.MAX_SAFE_INTEGER;
-  v_max = -Number.MAX_SAFE_INTEGER;
-  
-  
-}
-
-function auto_scale()
-{
-
-  for( i = 0; i < draw_array.length;i++)
-  {
-     if( v_min > draw_array[i][1] )
-     {
-        v_min = draw_array[i][1] 
-     }
-     if( v_max < draw_array[i][1] )
-     {
-        v_max = draw_array[i][1] 
-     }
-   }
-   if( v_min < 0 )
-   {
-      v_min = 1.25*v_min
-   }
-   else
-   { 
-      v_min = .75 *v_min
-   }
-   if( v_min == 0 )
-   {
-      v_min = -.5
-   }
-   if( v_max > 0 )
-   {
-      v_max = 1.25*v_max
-   }
-   else
-   { 
-      v_max = .75 *v_max
-   }
-   if( v_max == 0 )
-   {
-      v_max = .5
-   }
-}
-
-
-function display_data( index )
-{
-
-  draw_array = []
-  let field_key_ref = field_keys[index]
-  $("#field_description").html("Current Selected Stream is:  "+field_key_ref )
-  temp_x = Math.round(time_data.length *x_start_index)
-  temp_x_range = Math.round(x_start_range *time_data.length)
-
-  if( ( temp_x + temp_x_range ) >= time_data.length)
-  {
-     temp_x_range = time_data.length - temp_x
-  } 
-  
- 
-  for( let i = temp_x; i < temp_x+ temp_x_range; i++)
-  {
-    
-     
-     temp_data = [ new Date(time_data[i]["time_stamp"]),time_data[i][field_key_ref] ]
-     draw_array.push(temp_data)
-  }
-   x_axis  = "time"
-   y_axis  = field_key_ref
-   if( v_min == Number.MAX_SAFE_INTEGER)
-   {
-      auto_scale()
-   }
-
-   hh.updateOptions( { 'file': draw_array,
-                        'valueRange': [v_min, v_max ],
-                        labels: [x_axis, y_axis]
-
-                        } )
-  
-} 
-*/

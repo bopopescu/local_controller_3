@@ -28,7 +28,7 @@ class Load_Streaming_Data(object):
        irrigation_data = []
        temp_data = self.redis_new_handle.lrange(self.minute_store, 0,-1) 
        for i in temp_data:
-          irrigation_data.append(json.loads(i))
+           irrigation_data.append(json.loads(i))
        return self.render_template("streaming_data/streaming_data",title="Irrigation Streaming Data",
                                header_name = "Irrigation Streaming Data", data = irrigation_data, start_index = stream_index) 
 

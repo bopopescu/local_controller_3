@@ -72,8 +72,8 @@
         <h3>Irrigation Statistics</h3>
         <ul data-role="listview">        
         <li><a href="/composite_statistics/0/0" target="_self">Composite Statistics</a></li>        
-        <li><a href="/detail_statistics/0/0" target="_self">Detail Statistics</a></li>
-        <li><a href="/irrigation_time_profile/0/0/0/0/0" target="_self">Irrigation Time Profile</a></li>
+        <li><a href="/detail_statistics/0/0/0/0" target="_self">Detail Statistics</a></li>
+        <li><a href="/time_series_statistic/0/0/0/0/0" target="_self">Irrigation Time Profile</a></li>
         </ul>
     </div>
     
