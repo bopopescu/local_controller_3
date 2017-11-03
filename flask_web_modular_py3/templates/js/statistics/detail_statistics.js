@@ -70,25 +70,28 @@ function display_data( field_name,attribute_name )
  
   
   draw_array = []
+  limit_field_data = limit_data["fields"]
+  limit_field = limit_field_data[field_name]
+  limit_point = limit_field[attribute_name]
   for( let i = 0; i < irrigation_data.length; i++)
   {
      
      var item = irrigation_data[i]
      field_data = item["fields"]
-     limit_field_data = limit_data["fields"]
+     
      if( !(field_name in field_data) )
      {
          break;
      }
      
-     limit_field = limit_field_data[field_name]
+     
      data_field = field_data[field_name]
      if( !(attribute_name in data_field ))
      {
          break;
      }
      // valid point
-     limit_point = limit_field[attribute_name]
+     
      data_point = data_field[attribute_name];
      time_data = new Date(item["time"]*1000)
      draw_array.push([time_data,limit_point ,data_point])

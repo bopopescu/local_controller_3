@@ -26,7 +26,7 @@ $(document).ready(
                             valueRange: [limit_low, limit_high ],
                             labels: [x_axis, y_axis]
                           });
-   irrigation_data.reverse()
+   
     if( display_number_index <1 )
     {
         display_number_index = 1;
@@ -110,7 +110,7 @@ function populate_schedule_step()
     $("#step_select").empty()
     for( i = 0; i < step_number; i++)
     {
-        
+        console.log(i)
         $("#step_select").append($("<option></option>").val(i).html(i+1));
     } 
 
@@ -177,7 +177,7 @@ function schedule_change()
 
     let step_number = schedule_data[ schedule_list[schedule_index ] ]["step_number"]
     $("#step_select").empty()
-    for( i = 1; i < step_number+1; i++)
+    for( i = 0; i < step_number; i++)
     {
         
         $("#step_select").append($("<option></option>").val(i).html(i+1));
@@ -225,9 +225,7 @@ function display_new_schedule()
 
 function display_data( field_name, step_index, display_number )
 {
-     console.log(irrigation_data.length)
-     console.log(display_number)
-     console.log(step_index)
+     
     if( irrigation_data.length == 0 )
     {
         return;  // no data canot draw
@@ -241,21 +239,19 @@ function display_data( field_name, step_index, display_number )
     {
         step_index = 0;
     }
-    console.log("before addition",step_index+display_number)
+    
     if( ( step_index + display_number) > irrigation_data.length )
     {
         display_number = irrigation_data.length - step_index-1;
     }
-    console.log(irrigation_data.length)
-     console.log(display_number)
-     console.log(step_index)
+    
     max_data_length = find_max_data_length(field_name,step_index, display_number )
     
     labels = assemble_labels(step_index, display_number)
     
     draw_array = assemble_data( max_data_length, field_name, step_index, display_number)
-    //scale =  auto_scale()
-    scale = [0,25]
+    scale = auto_scale()
+    
     hh.updateOptions( { 'file': draw_array,
                      'valueRange': scale,
                         'labels': labels
@@ -335,7 +331,52 @@ function data_filter( element, index )
 
 function auto_scale()
 {
- 
+   v_min = Number.MAX_SAFE_INTEGER;
+   v_max = -Number.MAX_SAFE_INTEGER;
+
+  for( i = 0; i < draw_array.length;i++)
+  {
+      for( j = 1; j < draw_array[i].length; j++)
+      {
+         if( v_min > draw_array[i][j] )
+         {
+        
+            v_min = draw_array[i][j] 
+         }
+         if( v_max < draw_array[i][j] )
+         {
+          v_max = draw_array[i][j] 
+         }
+     }
+   }
+   
+   if( v_min < 0 )
+   {
+      v_min = 1.25*v_min
+   }
+   else
+   { 
+      v_min = .75 *v_min
+   }
+   if( v_min == 0 )
+   {
+      v_min = -.5
+   }
+   if( v_max > 0 )
+   {
+      v_max = 1.25*v_max
+   }
+   else
+   { 
+      v_max = .75 *v_max
+   }
+   if( v_max == 0 )
+   {
+      v_max = .5
+   }
+   
+   return_value = [ v_min,v_max]
+   return return_value
  
 
 }

@@ -45,6 +45,7 @@ class Load_Statistic_Data(object):
         sub_field_list   =  sorted(set(flatten_data.keys()))
         irrigation_data = self.get_irrigation_data( log_name )
         limit_data      = self.get_limit_data(limit_name,log_name)
+
         return self.render_template("statistics/detail_statistics", 
                                       title = "Time Series Irrigation Profile",
                                       schedule_id = schedule,
@@ -164,7 +165,7 @@ class Load_Statistic_Data(object):
        else:
            print("normal limits")
        temp_limit = json.loads(temp_limit_json )
-       return self.compose_time_array_element(temp_limit)
+       return self.compose_array_element(temp_limit)
        
    def get_limit_time_data( self, limit_name, log_name):
        temp_limit_json = self.redis_old_handle.get(limit_name)
