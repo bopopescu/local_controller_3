@@ -61,60 +61,25 @@
     
 </div>    
     
- <div data-role="popup" id="change_time_index" data-theme="a"
-         data-display="overlay" data-position="right"> 
-    <h4>Select Time Range</h4>
-    <label for="time_slider-1">Starting Time Value (Percent of Full Scale)</label>
-    <input type="range" name="time_slider-1" id="time_slider_1" value="60" min="0" max="100">
-    <label for="time_slider-2">Time Range (Percent of Full Scale)</label>
-    <input type="range" name="time_slider-2" id="time_slider_2" value="60" min="0" max="100">
-
-   <a id="cancel_time_changes"  data-role="button" data-theme="a" data-icon="delete"  >Close</a>
-  <a  id="make_time_changes" data-role="button" data-theme="a"  data-icon="forward">Make Changes</a>
-   
-   
-</div> 
-<div data-role="popup" id="change_vertical_index" data-theme="a"
-         data-display="overlay" data-position="right"> 
-    <h4>Select Vertical Graph Range</h4>
-    <label for="v_slider-1">Minimium Display Value</label>
-    <input type="range" name="v_slider-1" id="v_slider_1" value="60" min="0" max="100">
-    <label for="v-2">Maximium Display Value</label>
-    <input type="range" name="v-2" id="v_slider_2" value="60" min="0" max="100">
-
-
-   <a id="cancel_vertical_changes"  data-role="button" data-theme="a" data-icon="delete"  >Close</a>
-  <a  id="make_vertical_changes" data-role="button" data-theme="a"  data-icon="forward">Make Changes</a>
-   
-  
+ 
  
     
-</div> 
 
 
     <h3 id="title_banner"></h3>   
+    <h4  id="field_description" >This is a field description</h4>
     <div id="div_g" "></div>
    <div data-role="footer"  data-theme="b"> 
     <a id="footer-button_1" data-icon="bars"  
        style="margin-top:10px;"data-rel="popup" 
        data-position-to="window" 
        href="#change_index">Fields</a>
-   <a id="foot-button_2" data-icon="bars"  
-        style="margin-top:10px;" 
-        data-rel="popup" 
-        data-position-to="window" 
-        href="#change_vertical_index">Vertical Display</a>
-   <a id="footer-button_3" data-icon="bars" 
-       style="margin-top:10px;"
-       data-rel="popup"
+   <a id="footer-button_2" data-icon="bars"  
+       style="margin-top:10px;"data-rel="popup" 
        data-position-to="window" 
-       href="#change_time_index">Time Range</a>
-   <a id="footer-button_4" data-icon="bars" 
-       style="margin-top:10px;"
-       data-rel="popup"
-       data-position-to="window" 
-       >Refresh</a>
-    <h4  id="field_description" >This is a field description</h4>
+       >Refresh / Zoom Out</a>
+   
+    
 
  </div>
 

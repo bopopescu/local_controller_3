@@ -26,7 +26,7 @@ class Load_Streaming_Data(object):
        sel_prop = {}
        sel_prop["flow"] = {}
        irrigation_data = []
-       temp_data = self.redis_new_handle.lrange(self.minute_store, 0,-1) 
+       temp_data = self.redis_new_handle.lrange(self.minute_store, 0,1440) 
        for i in temp_data:
            irrigation_data.append(json.loads(i))
        return self.render_template("streaming_data/streaming_data",title="Irrigation Streaming Data",
