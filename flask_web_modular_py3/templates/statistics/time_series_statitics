@@ -40,18 +40,18 @@
      <script type="text/javascript">
      schedule_id = {{ schedule_id }}
      field_list = {{ field_list }};
-     sub_field_list = {{ sub_field_list }};
+    
      schedule_name = '{{ schedule_name }}';
      schedule_list = {{ schedule_list }};
      step_number   = {{ step_number }};
      irrigation_data = {{ irrigation_data }};
      step            = {{ schedule_step }};
      schedule_data = {{ schedule_data }};
-     field_id        =  {{field_id}};
-      attribute_id    =  {{attribute_id}};
+     field_index        =  {{field_index}};
+      
      limit_data      = {{limit_data}};
      time_step_index      =  {{time_step_index}} 
-     display_number    =  {display_number}
+     display_number_index    =  {{display_number_index}}
       {% include  "js/statistics/time_series_statistics.js" %}
      </script>
  
@@ -78,7 +78,7 @@
 <div data-role="popup" id="change_field_index" data-theme="a"
          data-display="overlay" data-position="right"> 
     <h4>Select Field Index</h4>
-    <select id="field_index">
+    <select id="field_select">
     </select>
 
    <a  id="cancel_field_index"   data-role="button" data-theme="a" data-icon="delete"  >Close</a>
@@ -124,11 +124,11 @@
        style="margin-top:10px;"data-rel="popup" 
        data-position-to="window" 
        href="#change_field_index">Change Field  </a>
- 
+
    <a id="footer-button_3" data-icon="bars"  
        style="margin-top:10px;"data-rel="popup" 
        data-position-to="window" 
-       href="#change_time_step">Change Time Step </a>
+       href="#change_step_index">Change Time Step </a>
 
    <a id="footer-button_4" data-icon="bars"  
        style="margin-top:10px;"data-rel="popup" 

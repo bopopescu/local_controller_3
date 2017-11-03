@@ -20,9 +20,9 @@ class Load_Statistic_Data(object):
        a1 = auth.login_required( self.detail_statistics_setup_page )
        app.add_url_rule('/detail_statistics/<int:schedule>/<int:step>/<int:field_id>/<int:attribute_id>',
                              "detail_statistics",a1,methods=["GET"])
-                             
+                           
        a1 = auth.login_required( self.time_series_statistics_setup_page )
-       app.add_url_rule('/time_series_statistic/<int:schedule_index>/<int:step>/<int:field_index>/<int:time_step_index>/<int:display_number>',
+       app.add_url_rule('/time_series_statistics/<int:schedule_index>/<int:step>/<int:field_index>/<int:time_step_index>/<int:display_number_index>',
                              "time_series_statistics",a1,methods=["GET"])
 
    def detail_statistics_setup_page(self, schedule,step ,field_id, attribute_id ):
@@ -62,7 +62,7 @@ class Load_Statistic_Data(object):
                                       
                                       
                                       
-   def time_series_statistics_setup_page(self, schedule_index ,step , field_index, time_step_index, display_number):
+   def time_series_statistics_setup_page(self, schedule_index ,step , field_index, time_step_index, display_number_index):
     
         schedule_data = self.get_schedule_data()
         schedule_list = sorted(list(schedule_data.keys()))
@@ -76,10 +76,16 @@ class Load_Statistic_Data(object):
         log_name = "log_data:unified:"+schedule_name+":"+str(step+1)
         limit_name = "limit_data:unified:"+schedule_name+":"+str(step+1)
         data = self.redis_old_handle.lindex(log_name,0)
-        data = json.loads(data)
-        field_list = sorted(set(data["fields"].keys()))
-        irrigation_data = self.get_irrigation_time_data( log_name )
-        limit_data      = self.get_limit_time_data(limit_name,log_name)
+        if data == None:
+             data = []
+             field_list = []
+             irrigation_data = []
+             limit_data = []
+        else:
+            data = json.loads(data)
+            field_list = sorted(set(data["fields"].keys()))
+            irrigation_data = self.get_irrigation_time_data( log_name )
+            limit_data      = self.get_limit_time_data(limit_name,log_name)
         return self.render_template("statistics/time_series_statitics",
                                       title = "Time Irrigation Profile",
                                       schedule_id = schedule_index,
@@ -93,7 +99,7 @@ class Load_Statistic_Data(object):
                                       limit_data      = limit_data,
                                       field_index       =  field_index,
                                       time_step_index      =  time_step_index,
-                                      display_number    = display_number )                                      
+                                      display_number_index    = display_number_index )                                      
                                       
 #  correct step
 #  add step number
@@ -144,7 +150,7 @@ class Load_Statistic_Data(object):
        temp_list = self.redis_old_handle.lrange(log_name, 0,-1) 
        for i in temp_list:
           temp_dict = json.loads(i)
-          return_value.append(self.compose_array_element( temp_dict ))
+          return_value.append(self.compose_time_array_element( temp_dict ))
        return return_value
 
 
