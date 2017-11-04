@@ -24,6 +24,11 @@ class Load_Statistic_Data(object):
        a1 = auth.login_required( self.time_series_statistics_setup_page )
        app.add_url_rule('/time_series_statistics/<int:schedule_index>/<int:step>/<int:field_index>/<int:time_step_index>/<int:display_number_index>',
                              "time_series_statistics",a1,methods=["GET"])
+                       
+       a1 = auth.login_required( self.composite_statistics )
+       app.add_url_rule('/composite_statistics/<int:schedule_index>/<int:field_index>',
+                             "composite_statistics",a1,methods=["GET"])
+
 
    def detail_statistics_setup_page(self, schedule,step ,field_id, attribute_id ):
     
@@ -100,7 +105,43 @@ class Load_Statistic_Data(object):
                                       limit_data      = limit_data,
                                       field_index       =  field_index,
                                       time_step_index      =  time_step_index,
-                                      display_number_index    = display_number_index )                                      
+                                      display_number_index    = display_number_index )    
+
+
+
+   def composite_statistics(self,schedule_index, field_index):
+       history = 14
+       schedule_data = self.get_schedule_data()
+       schedule_list = sorted(list(schedule_data.keys()))
+       schedule_name = schedule_list[schedule_index]
+       
+       step_number = schedule_data[schedule_name]["step_number"]
+       limit_name_list = []
+       limit_name_exits_list = []
+       for i in range(0,step_number):
+              limit_name_list.append( "limit_data:unified:"+schedule_name+":"+str(i+1))
+              limit_name_exits_list.append(self.redis_old_handle.exists(limit_name_list[-1]))
+
+       schedule_name_list = []
+       schedule_name_exists_list = []
+       for i in range(0,step_number):
+              schedule_name_list.append( "log_data:unified:"+schedule_name+":"+str(i+1))
+              schedule_name_exists_list.append(self.redis_old_handle.exists(schedule_name_list[-1]))
+       #generate data header
+       data_object = {}
+       
+       for i in range(0,len(schedule_name_list)):
+           if schedule_name_exists_list[i] and limit_name_exits_list[i] :
+               print(i)
+               # get limit data
+               # merge into header
+               # get array slice
+               # merge into header
+               
+       print( data_object)        
+       return "SUCCESS"
+       
+       
                                       
 #  correct step
 #  add step number

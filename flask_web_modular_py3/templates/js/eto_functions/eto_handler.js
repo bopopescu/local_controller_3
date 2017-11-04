@@ -13,7 +13,7 @@
 */
 function load_data() 
 {
-     
+   
    json_object = "ETO_RESOURCE"
    ajax_post_get("/ajax/redis_hgetall", json_object, getQueueEntries, "Init Data Error!!!") 
 }
@@ -25,11 +25,14 @@ function save_data()
        var json_string;
        var i;
             
-       json_object = {}
+       
        temp = {}
+       json_object = []
        for( i = 0; i < keys.length; i++ )
        {
-           json_object["ETO_RESOURCE"] = {"key": keys[i] , "value": eto_current_data[i] }
+           temp = { "redis_key": "ETO_RESOURCE","hash":keys[i],"value":eto_current_data[i] }
+               
+           json_object.push(temp)
        }
        
 	      uncheck_elements()
@@ -46,7 +49,7 @@ function getQueueEntries( data )
    var temp;       
    eto_current_data = []
    eto_ref_data     = []
-         
+     
    $("#eto_list").empty();
    keys = Object.keys(data)      
    if( keys.length == 0 )
@@ -100,9 +103,12 @@ function process_end_results()
 	        uncheck_elements()
 	        save_check_state();
 	        break;
-	
+         case 8: 
+            
+            load_data()
+            break;	
 	     case 9: save_data()
-		       break;
+            break;
    }
    display_data( eto_current_data );  
 }
@@ -131,9 +137,7 @@ function process_data(i)
 	      case 5:
            eto_current_data[i] = eto_current_data[i] +.05;   
            break;
-       case 8: 
-           load_data()
-           break;
+ 
 	 
    }
        

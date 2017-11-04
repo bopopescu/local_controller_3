@@ -195,9 +195,9 @@ class Load_Redis_Access(object):
    def redis_hset(self ):
        return_value = []
        param = self.request.get_json()
-       
-       for i,items in param.items():
-           self.redis_handle.hset( i,items["key"],items["value"] )
+
+       for j in param:
+           self.redis_handle.hset( j["redis_key"],j["hash"],j["value"] )
        return json.dumps('SUCCESS')
 
 
