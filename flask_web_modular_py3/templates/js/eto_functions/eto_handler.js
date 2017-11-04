@@ -51,7 +51,8 @@ function getQueueEntries( data )
    eto_ref_data     = []
      
    $("#eto_list").empty();
-   keys = Object.keys(data)      
+   keys = Object.keys(data)  
+   keys.sort()    
    if( keys.length == 0 )
    {
        var html = "";

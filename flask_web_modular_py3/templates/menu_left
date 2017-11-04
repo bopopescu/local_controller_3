@@ -44,7 +44,7 @@
            <li><a href ='/control/display_past_alerts' target="_self">Past Alerts</a></li>
            <li><a href ='/control/display_past_actions' target="_self">Past Actions</a></li>
            <li><a href="/control/display_irrigation_queue" target="_self">Pending Irrigation Actions</a></li>
-           <li><a href ='/irrigation_streaming_data/display_minute_irrigation/0' target="_self">Irrigation 1 minute data</a></li>
+           <li><a href ='/irrigation_streaming_data/display_minute_irrigation/3' target="_self">Irrigation 1 minute data</a></li>
  
             
         </ul>
