@@ -22,7 +22,7 @@ class Load_Statistic_Data(object):
        self.redis_new_handle = redis_new_handle
        self.gm               = gm
        detail_elements = Detail_Elements( redis_old_handle, render_template, app_files)
-       composite_elements = Composite_Elements(render_template,redis_old_handle, app_files )
+       composite_elements = Composite_Elements(14,render_template,redis_old_handle, app_files )
  
        a1 = auth.login_required( detail_elements.detail_statistics_setup_page )
        app.add_url_rule('/detail_statistics/<int:schedule>/<int:step>/<int:field_id>/<int:attribute_id>',

@@ -41,9 +41,9 @@ class BASIC_FILES( object ):
         self.redis_handle.hset(self.key, name, json_data )
 
     def load_file(self, name):
-        print("name",name)
+        
         json_data= self.redis_handle.hget(self.key, name)
-        print("****************",type(json_data))
+        
         data = json.loads(json_data )
         return data
 
