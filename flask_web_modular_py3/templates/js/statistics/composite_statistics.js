@@ -70,7 +70,7 @@ function cancel_field_attribute()
 
 function populate_field_attribute()
 {
-    alert(field_list.length)
+   
     
     $("#field_select").empty()
     for( let i = 0; i < field_list.length; i++)
@@ -93,6 +93,8 @@ $(document).ready(
     
    draw_array = []
 
+   bullet_initialize_canvas( step_number)
+   canvas_draw( 0, [5,4,3,2,1] , 3 ,[.25,.25,.25,.25] ,  10 )
    selected_field       =  field_list[field_id]
 
    let field_name = field_list[field_id]

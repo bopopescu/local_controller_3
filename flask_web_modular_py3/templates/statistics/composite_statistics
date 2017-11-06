@@ -20,7 +20,7 @@
         }
     </style>
 	 
-  {% set header_name = title %}
+ 
 
 	 
         
@@ -42,7 +42,8 @@
      schedule_data  = {{schedule_data}}
      step_number    = {{step_number}}
      schedule_index = {{schedule_index}}
-     field_id       = {{field_index}}      
+     field_id       = {{field_index}}   
+     {% include "js/statistics/bullet_graphics.js" %}     
      {% include  "js/statistics/composite_statistics.js" %}
      </script>
  
@@ -77,14 +78,17 @@
     
 </div>   
    <center>
-    <h5 id=legend_name>Data for Schedule {{schedule_name}}  </h5>
-    <h5 id=field_description></h5>
+    <h3 id=legend_name>Data for Schedule {{schedule_name}}  </h3>
+    <h3 id=field_description>Field:  {{field_name}}</h3>
    
    </center>    
 
-   <div id="bullet_area">
-   </div>
-
+{% for i in range(0,step_number+1):  %}
+   
+           <canvas id="canvas{{i}}"  width="200" height="50" ></canvas>
+        
+          
+{% endfor %}
     
  
    <div data-role="footer"  data-theme="b"> 

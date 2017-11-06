@@ -17,26 +17,35 @@ class Composite_Elements(object):
        schedule_name = schedule_list[schedule_index]
        
        step_number = schedule_data[schedule_name]["step_number"]
-       limit_list = []
-       limit_exits_list = []
-       for i in range(0,step_number):
-              limit_list.append( "limit_data:unified:"+schedule_name+":"+str(i+1))
-              limit_exits_list.append(self.redis_handle.exists(limit_list[-1]))
-
        step_list = []
        step_exists_list = []
        for i in range(0,step_number):
               step_list.append( "log_data:unified:"+schedule_name+":"+str(i+1))
               step_exists_list.append(self.redis_handle.exists(step_list[-1]))
 
-       field_list = self.get_field_list(limit_list, limit_exits_list )
+       
+       
+       limit_list = []
+       for i in range(0,step_number):
+           if step_exists_list[i] == True:
+              limit_list.append( "limit_data:unified:"+schedule_name+":"+str(i+1))
+              if self.redis_handle.exists(limit_list[-1]) == False:  # limit doesnot exist
+                   temp_name = step_list[i]                              # then use the latest value
+                   temp_data = self.redis_handle.lindex(temp_name,0)
+                   temp_name = limit_list[-1]
+                   self.redis_handle.set(temp_name,temp_data)
+                   
+           else:
+               limit_list.append(None)
+               
+       field_list = self.get_field_list(limit_list )
           
        data_object = []
        
        for i in range(0,len(step_list)):
            
            
-           if step_exists_list[i] and limit_exits_list[i] :
+           if step_exists_list[i]  :
                temp_entry = {}
                self.get_limit_data("limit_data:unified:"+schedule_name+":"+str(i+1))
                self.get_schedule_list_data( self.history,"log_data:unified:"+schedule_name+":"+str(i+1))
@@ -61,10 +70,10 @@ class Composite_Elements(object):
            
        return "SUCCESS"
 
-   def get_field_list(self, limit_list, limit_exists_list ):
-        for i in  range(0,len(limit_list)):
-           if limit_exists_list[i] == True :
-               limit_data_json = self.redis_handle.lindex(step_list[i],0)
+   def get_field_list(self, limit_list ):
+       for i in  range(0,len(limit_list)):
+           if limit_list[i] != None :
+               limit_data_json = self.redis_handle.get(limit_list[i])
                limit_data = json.loads(limit_data_json)
                fields = set(limit_data["fields"].keys())
                return sorted(fields)
