@@ -33,7 +33,7 @@ function draw_field( field_id )
        }
     }
     maximium = maximium/.75
-
+    maximium = Math.ceil(maximium/5)*5;
     $("#field_description").html("Field: "+ field_name + "  Chart Range: "+maximium )
     
     for( let i= 0; i<step_number; i++)
@@ -45,9 +45,10 @@ function draw_field( field_id )
            temp_field = temp[field_name]
            temp_data = temp_field['data']
            temp_limit = temp_field['limit']
+           canvas_draw( i, temp_data , temp_limit, maximium ) 
         }
         
-        canvas_draw( i, temp_data , temp_limit, maximium )  
+         
              
     }            
 

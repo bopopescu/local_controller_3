@@ -44,17 +44,19 @@ class Composite_Elements(object):
        
        for i in range(0,len(step_list)):
            
-           
-           if step_exists_list[i]  :
-               temp_entry = {}
-               self.get_limit_data("limit_data:unified:"+schedule_name+":"+str(i+1))
-               self.get_schedule_list_data( self.history,"log_data:unified:"+schedule_name+":"+str(i+1))
-               temp_entry = {}
-               for j in field_list:
-                   temp_field_element = {}
-                   temp_field_element["limit"] = self.assemble_limit_data(j)
-                   temp_field_element["data"]  = self.assemble_field_data(j)
-                   temp_entry[j] = temp_field_element
+           try:
+               if step_exists_list[i]  :
+                   temp_entry = {}
+                   self.get_limit_data("limit_data:unified:"+schedule_name+":"+str(i+1))
+                   self.get_schedule_list_data( self.history,"log_data:unified:"+schedule_name+":"+str(i+1))
+                   temp_entry = {}
+                   for j in field_list:
+                       temp_field_element = {}
+                       temp_field_element["limit"] = self.assemble_limit_data(j)
+                       temp_field_element["data"]  = self.assemble_field_data(j)
+                       temp_entry[j] = temp_field_element
+           except:
+               temp_entry = "None"
            else:
                temp_entry = 'None'
            data_object.append(temp_entry)
@@ -82,12 +84,14 @@ class Composite_Elements(object):
        return [] 
        
    def get_limit_data(self, redis_key ):
-        temp_data_json = self.redis_handle.get( redis_key )
+       
+           temp_data_json = self.redis_handle.get( redis_key )
         
-        limit_data = json.loads(temp_data_json)
-        self.limit_data = {}
-        for key,item in limit_data["fields"].items():
-            self.limit_data[key] = item["curve_fit"]["c"]
+           limit_data = json.loads(temp_data_json)
+           self.limit_data = {}
+           for key,item in limit_data["fields"].items():
+               self.limit_data[key] = item["curve_fit"]["c"]
+      
         
         
         
