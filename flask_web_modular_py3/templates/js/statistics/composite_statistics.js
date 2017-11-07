@@ -10,7 +10,48 @@ var selected_field;
 var selected_attribute;
 var draw_data;
 
+function draw_field( field_id )
+{
+    let field_name = field_list[field_id]
+    let maximium =   -Number.MAX_SAFE_INTEGER;
+    bullet_initialize_canvas( step_number)
+    for( i= 0; i< data_object.length; i++)
+    {
+        
+        temp = data_object[i]
+        if( temp != "None")
+        {
+           temp_field = temp[field_name]
+           temp_data = temp_field['data']
+           for( j = 0; j < temp_data.length; j++ )
+           {
+               if( temp_data[j] > maximium )
+               {
+                   maximium = temp_data[j]
+               }
+           }
+       }
+    }
+    maximium = maximium/.75
 
+    $("#field_description").html("Field: "+ field_name + "  Chart Range: "+maximium )
+    
+    for( let i= 0; i<step_number; i++)
+    {
+
+        temp = data_object[i]
+        if( temp != "None")
+        {
+           temp_field = temp[field_name]
+           temp_data = temp_field['data']
+           temp_limit = temp_field['limit']
+        }
+        
+        canvas_draw( i, temp_data , temp_limit, maximium )  
+             
+    }            
+
+}
 
 
 function make_refresh()
@@ -53,7 +94,7 @@ function display_new_field_attribute()
 {
    selected_field       =    $("#field_select").val()
    field_id             =    $("#field_select")[0].selectedIndex
-    
+   draw_field( field_id )
   
    
    $( "#change_field_attribute" ).popup( "close" )
@@ -94,10 +135,10 @@ $(document).ready(
    draw_array = []
 
    bullet_initialize_canvas( step_number)
-   canvas_draw( 0, [5,4,3,2,1] , 3 ,[.25,.25,.25,.25] ,  10 )
-   selected_field       =  field_list[field_id]
-
-   let field_name = field_list[field_id]
+   
+   
+   draw_field( field_id)
+   
                      
    
    $("#save_schedule_step").bind("click",make_refresh);

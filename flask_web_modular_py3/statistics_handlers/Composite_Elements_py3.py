@@ -49,15 +49,16 @@ class Composite_Elements(object):
                temp_entry = {}
                self.get_limit_data("limit_data:unified:"+schedule_name+":"+str(i+1))
                self.get_schedule_list_data( self.history,"log_data:unified:"+schedule_name+":"+str(i+1))
-               temp_entry[i] = {}
+               temp_entry = {}
                for j in field_list:
                    temp_field_element = {}
                    temp_field_element["limit"] = self.assemble_limit_data(j)
                    temp_field_element["data"]  = self.assemble_field_data(j)
                    temp_entry[j] = temp_field_element
            else:
-               temp_entry = None
+               temp_entry = 'None'
            data_object.append(temp_entry)
+
        return self.render_template("statistics/composite_statistics", 
                                      header_name = "Composite Irrigation",
                                      field_list = field_list,
@@ -66,7 +67,8 @@ class Composite_Elements(object):
                                      schedule_data  = schedule_data,
                                      step_number    = step_number,
                                      schedule_index = schedule_index,
-                                     field_index       = field_index )
+                                     field_index       = field_index,
+                                     data_object       = data_object   )
            
        return "SUCCESS"
 

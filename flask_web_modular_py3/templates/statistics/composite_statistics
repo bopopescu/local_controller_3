@@ -43,6 +43,7 @@
      step_number    = {{step_number}}
      schedule_index = {{schedule_index}}
      field_id       = {{field_index}}   
+     data_object    = {{data_object}}
      {% include "js/statistics/bullet_graphics.js" %}     
      {% include  "js/statistics/composite_statistics.js" %}
      </script>

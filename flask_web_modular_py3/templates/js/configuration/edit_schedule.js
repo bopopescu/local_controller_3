@@ -35,6 +35,7 @@ function save_button(event, ui)
      get_data_valve_data(temp_data)
      schedule_data[new_schedule] = temp_data
      confirmation_string = "Do you want to modify " + schedule_name
+     
      make_change_update( new_schedule, schedule_data ,confirmation_string)
      location.reload()
 
