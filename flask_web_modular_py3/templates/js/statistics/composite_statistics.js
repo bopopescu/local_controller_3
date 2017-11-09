@@ -15,6 +15,7 @@ function draw_field( field_id )
     let field_name = field_list[field_id]
     let maximium =   -Number.MAX_SAFE_INTEGER;
     bullet_initialize_canvas( step_number)
+    
     for( i= 0; i< data_object.length; i++)
     {
         
@@ -23,6 +24,7 @@ function draw_field( field_id )
         {
            temp_field = temp[field_name]
            temp_data = temp_field['data']
+           
            for( j = 0; j < temp_data.length; j++ )
            {
                if( temp_data[j] > maximium )
@@ -33,6 +35,7 @@ function draw_field( field_id )
        }
     }
     maximium = maximium/.75
+   
     maximium = Math.ceil(maximium/5)*5;
     $("#field_description").html("Field: "+ field_name + "  Chart Range: "+maximium )
     
@@ -77,15 +80,14 @@ function cancel_schedule_step()
 function populate_schedule_step()
 {
     
-    
     $("#schedule_select").empty()
     for( i = 0; i < schedule_list.length; i++)
     {
         
         $("#schedule_select").append($("<option></option>").val(i).html(schedule_list[i]));
     } 
-
-    $("#schedule_select").val(schedule_index);
+    
+    $("#schedule_select")[0].selectedIndex = schedule_index
     $("#schedule_select").selectmenu("refresh")
     
  }   
@@ -121,7 +123,7 @@ function populate_field_attribute()
         $("#field_select").append($("<option></option>").val(field_list[i]).html(field_list[i]));
     } 
 
-    $("#field_select").val(selected_field)
+    $("#field_select")[0].selectedIndex = field_id
     $("#field_select").selectmenu("refresh")
     
     

@@ -30,18 +30,16 @@ class Load_Configuration_Data(object):
        a1 = auth.login_required( self.edit_schedules )
        app.add_url_rule('/edit_schedules',"edit_schedules",a1,methods=["GET"])
 
-       a1 = auth.login_required( self.overall_flow_limits )
-       app.add_url_rule('/configure_flow_limits/<int:flow_id>/<int:schedule_id>',
-                        "configure_flow_limits",a1,methods=["GET"])
-
-       a1 = auth.login_required( self.overall_current_limits )
-       app.add_url_rule('/configure_current_limits/<int:schedule_id>',
-                           "configure_current_limits",a1,methods=["GET"])
-
+ 
        a1 = auth.login_required( self.overall_resistance_limits )
        app.add_url_rule('/configure_resistance_limits/<int:controller_id>',
                           "configure_resistance_limits",a1,methods=["GET"])
-
+                          
+                          
+       a1 = auth.login_required( self.configure_irrigation_limits )
+       app.add_url_rule('/configure_irrigation_limits/<int:schedule_id>',
+                          "configure_irrigation_limits",a1,methods=["GET"])
+                          
        a1 = auth.login_required( self.update_schedule )
        app.add_url_rule("/ajax/update_schedule",
                           "ajax_update_schedule",a1,methods=["POST"])
@@ -49,15 +47,12 @@ class Load_Configuration_Data(object):
        a1 = auth.login_required( self.update_resistance_limit )
        app.add_url_rule('/ajax/update_resistance_limit',
                           "update_resistance_limit",a1,methods=["POST"])
+                          
+       a1 = auth.login_required( self.update_irrigation_limits )
+       app.add_url_rule('/ajax/update_irrigation_limits',
+                          "update_irrigation_limits",a1,methods=["POST"])
 
-       a1 = auth.login_required( self.update_current_limit )
-       app.add_url_rule('/ajax/update_current_limit',
-                          "update_current_limit",a1,methods=["POST"])
-
-       a1 = auth.login_required( self.update_flow_limit )
-       app.add_url_rule('/ajax/update_flow_limit',
-                          "update_flow_limit",a1,methods=["POST"])
-
+ 
 
 
 
@@ -112,33 +107,7 @@ class Load_Configuration_Data(object):
   
  
   
-   def overall_flow_limits(self, flow_id, schedule_id ):
-       schedule_data = self.get_schedule_data()  
-       schedule_list = list(schedule_data.keys())
-       sensor_name  = self.get_flow_rate_sensor_names()[flow_id]
-       max_flow_rate = 33
-       canvas_list = self.generate_canvas_list( schedule_list[schedule_id], flow_id ,schedule_data  ) 
-       return self.render_template("configuration/overall_flow_limits", 
-                               schedule_id=schedule_id,
-                               flow_id=flow_id,  
-                               header_name="Flow Overview  Max Flow Rate "+str(max_flow_rate), 
-                               flow_sensors = self.get_flow_rate_sensor_names(),
-                               schedule_list = schedule_list, 
-                               max_flow_rate = max_flow_rate, 
-                               canvas_list= canvas_list )
-
-   def overall_current_limits(self, schedule_id):
-       max_current = 30
-       schedule_data = self.get_schedule_data()  
-       schedule_list = list(schedule_data.keys())
-       canvas_list = self.generate_current_canvas_list( schedule_list[schedule_id] ,schedule_data ) 
-       return self.render_template("configuration/overall_current_limits", 
-                               schedule_id=schedule_id,
-                               header_name="Valve Current Overview  Max Current "+str(max_current),
-                               schedule_list = schedule_list, 
-                               max_flow_rate = max_current, 
-                               canvas_list= canvas_list )
-
+ 
   
    def overall_resistance_limits(self, controller_id):
        max_current      = 30
@@ -152,6 +121,20 @@ class Load_Configuration_Data(object):
                                max_current       = max_current, 
                                canvas_list       = canvas_list,
                                valve_list_json   = json.dumps(valve_list) )
+
+   def configure_irrigation_limits(self,schedule_id):
+       schedule_data = self.get_schedule_data()  
+       schedule_list = sorted(set(schedule_data.keys()))
+       schedule_name = schedule_list[schedule_id]
+       
+       step_number = schedule_data[schedule_name]["step_number"]
+       return self.render_template( "configuration/configure_irrigation_limits", 
+                               schedule_name = schedule_name,
+                               step_number = step_number,
+                               header_name  =  "Tag Irrigation Limits",
+                               schedule_list      =  schedule_list,
+                               schedule_id        = schedule_id )
+
 
 
 
@@ -181,15 +164,18 @@ class Load_Configuration_Data(object):
        self.process_resistance_limit_values( controller, data)
        return json.dumps("SUCCESS")
 
-   def update_flow_limit(self):
-       return_value     = {}
-       param              = self.request.get_json() 
-       schedule           = param["schedule"]
-       sensor             = param["sensor"] 
-       data               = param["limit_data"]
 
-       self.process_flow_limit_values( sensor, schedule, data)
+   def update_irrigation_limits(self ):
+       param = self.request.get_json()
+       schedule_name = param["schedule_name"]
+       step_list    =  param["step_list"]
+       print(schedule_name)
+       print(step_list)
+       for i in step_list:
+           if i == True :
+               pass # update limit
        return json.dumps("SUCCESS")
+       
 
    #
    #  Internal functions
@@ -582,3 +568,21 @@ class Load_Configuration_Data(object):
     
        return returnValue
 
+   '''
+   discontinued code
+         a1 = auth.login_required( self.overall_flow_limits )
+       app.add_url_rule('/configure_flow_limits/<int:flow_id>/<int:schedule_id>',
+                        "configure_flow_limits",a1,methods=["GET"])
+
+       a1 = auth.login_required( self.overall_current_limits )
+       app.add_url_rule('/configure_current_limits/<int:schedule_id>',
+                           "configure_current_limits",a1,methods=["GET"])
+
+         #a1 = auth.login_required( self.update_current_limit )
+       #app.add_url_rule('/ajax/update_current_limit',
+                          "update_current_limit",a1,methods=["POST"])
+
+       #a1 = auth.login_required( self.update_flow_limit )
+       #app.add_url_rule('/ajax/update_flow_limit',
+                          "update_flow_limit",a1,methods=["POST"])
+   '''

@@ -84,9 +84,8 @@
             <li><a href="/copy_schedule"               target="_self">Copy Schedule </a></li>
             <li><a href="/delete_schedules"           target="_self">Delete Schedule </a></li>
             <li><a href="/edit_schedules"             target="_self">Edit Schedule </a></li>
-            <li><a href="/configure_flow_limits/0/0"      target="_self">Flow Limits</a></li>
-            <li><a href="/configure_current_limits/0"   target="_self">Current Limits</a></li>
             <li><a href ='/configure_resistance_limits/0' target="_self">Coil Resistance Limits</a></li>
+            <li><a href ='/configure_irrigation_limits/0' target="_self">Tag Irrigation Limits</a></li>
             <li><a href="/system_actions"   target="_self">Configure System Actions </a></li>
 
         </ul>

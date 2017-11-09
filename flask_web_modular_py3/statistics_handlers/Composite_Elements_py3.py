@@ -57,8 +57,6 @@ class Composite_Elements(object):
                        temp_entry[j] = temp_field_element
            except:
                temp_entry = "None"
-           else:
-               temp_entry = 'None'
            data_object.append(temp_entry)
 
        return self.render_template("statistics/composite_statistics", 
