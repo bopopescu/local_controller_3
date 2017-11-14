@@ -1105,5 +1105,6 @@ def detail_1(chart_type, flow_sensor_id,schedule_id,step_id,time_id):
                                 
 
 if __name__ == '__main__':
-  print "startup_dict",startup_dict
-  app.run(threaded=True , use_reloader=True, host='0.0.0.0',port=int(startup_dict["PORT"]) ,ssl_context=(startup_dict["crt_file"], startup_dict["key_file"]))
+   print "startup_dict",startup_dict
+   #app.run(threaded=True , use_reloader=True, host='0.0.0.0',port=int(startup_dict["PORT"]) ,ssl_context=(startup_dict["crt_file"], startup_dict["key_file"]))
+   app.run(threaded=True , use_reloader=True, host='0.0.0.0',port=80)

@@ -30,18 +30,25 @@ from flask import request, session
 
 class PI_Web_Server(object):
 
-   def __init__(self , name, redis_handle, redis_new_handle, app_files, sys_files,gm, users ):
+   def __init__(self , name, redis_handle, redis_new_handle, app_files, sys_files,gm, startup_dict ):
        app         = Flask(name) 
        auth = HTTPDigestAuth()
        auth.get_password( self.get_pw )
-       
+       self.startup_dict = startup_dict
        self.app = app
-       self.users = users
-       app.config["DEBUG"]  = True
-       app.config["SECRET_KEY"] = "ABCEDER"
+      
        app.template_folder       =   'flask_web_modular_py3/templates'
        app.static_folder         =   'flask_web_modular_py3/static'  
-
+       app.config['SECRET_KEY']      = startup_dict["SECRET_KEY"]
+       app.config["DEBUG"]           = startup_dict["DEBUG"]
+       self.users                    = json.loads(startup_dict["users"])
+       #authDB = FlaskRealmDigestDB(startup_dict["RealmDigestDB"])
+       '''
+       temp =  json.loads(startup_dict["users"])
+       for i in temp.keys():
+            print(temp[i])
+            authDB.add_user(i, temp[i] )
+       '''
        Load_Static_Files( app, auth )
        Load_App_Sys_Files( app,auth,request, app_files, sys_files)
        Load_Redis_Access(  app,auth,request,redis_handle)
@@ -64,7 +71,8 @@ class PI_Web_Server(object):
        self.app.run(threaded=True , use_reloader=True, host='0.0.0.0',port=80)
 
    def run_https( self ):
-       app.run(threaded=True , use_reloader=True, host='0.0.0.0',
+       startup_dict          = self.startup_dict
+       self.app.run(threaded=True , use_reloader=True, host='0.0.0.0',
            port=int(startup_dict["PORT"]) ,ssl_context=(startup_dict["crt_file"], startup_dict["key_file"]))
        
  
@@ -81,7 +89,7 @@ class PI_Web_Server(object):
        
 if __name__ == "__main__":
 
-   redis_startup         = redis.StrictRedis(  )
+   redis_startup         = redis.StrictRedis( decode_responses=True )
 
 
    gm = farm_template_py3.Graph_Management(
@@ -100,7 +108,9 @@ if __name__ == "__main__":
 
    sys_files = load_files_py3.SYS_FILES(redis_handle)
    app_files = load_files_py3.APP_FILES(redis_handle)
-   users = {"admin":"password"}
-   pi_web_server = PI_Web_Server(__name__, redis_handle,redis_new_handle, app_files, sys_files,gm, users )
-   pi_web_server.run_http()
+   startup_dict = redis_startup.hgetall("web")
+   print(startup_dict)
+   pi_web_server = PI_Web_Server(__name__, redis_handle,redis_new_handle, app_files, sys_files,gm, startup_dict )
+   pi_web_server.run_https()
+   
    
