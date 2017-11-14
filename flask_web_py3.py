@@ -20,6 +20,7 @@ from flask_web_modular_py3.load_streaming_data_py3            import Load_Stream
 from flask_web_modular_py3.load_linux_controller_data_py3  import Load_Linux_Controller_Data
 from flask_web_modular_py3.load_statistic_data_py3  import Load_Statistic_Data
 
+
 import flask
 from flask import Flask
 from flask import render_template,jsonify
@@ -54,8 +55,8 @@ class PI_Web_Server(object):
        Load_Streaming_Data(app,auth,render_template,request , app_files,sys_files,
                                redis_handle,redis_new_handle,gm )
        Load_Linux_Controller_Data( app, auth, request,render_template ,redis_new_handle)
-       Load_Statistic_Data(app,auth,render_template,request , app_files,sys_files,
-                               redis_handle,redis_new_handle,gm )
+       
+       Load_Statistic_Data(app,auth,render_template,request , app_files,sys_files, redis_handle,redis_new_handle,gm )
 
         
 

@@ -169,11 +169,23 @@ class Load_Configuration_Data(object):
        param = self.request.get_json()
        schedule_name = param["schedule_name"]
        step_list    =  param["step_list"]
-       print(schedule_name)
-       print(step_list)
-       for i in step_list:
-           if i == True :
-               pass # update limit
+       for i in range(0,len(step_list)):
+           step_state = step_list[i]
+         
+           if step_state == True :
+               limit_name = "limit_data:unified:"+schedule_name+":"+str(i+1)
+               sched_data  = "log_data:unified:"+schedule_name+":"+str(i+1)
+               if self.redis_old_handle.exists( sched_data) == False:
+                   
+                   break
+               if self.redis_old_handle.type(sched_data ) != "list":
+                   
+                   break
+                   
+               data = self.redis_old_handle.lindex(sched_data,0)
+               print(i,"sched_data saved")
+               self.redis_old_handle.set(limit_name,data)
+               
        return json.dumps("SUCCESS")
        
 

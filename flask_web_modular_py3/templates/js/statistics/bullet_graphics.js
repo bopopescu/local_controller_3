@@ -15,6 +15,18 @@ var minor_grid_divisor = 20
 Public Functions
 */
 
+function bullet_initialize_canvas_a( valve_number, valve_list )
+{
+ 
+    window_width  = $( window ).width()*.95
+    for( let i = 0; i < valve_number; i++ )
+    {
+        _initialize_a_canvas_a(valve_list[i],window_width)
+    }
+  
+    
+}
+
 
 function bullet_initialize_canvas( step_number)
 {
@@ -64,6 +76,25 @@ function _initialize_a_canvas_(step_index)
      context.fillStyle = "Black"
      context.textAlign = "left";
      context.fillText("Step "+(step_index+1),text_indent_x,canvas_height*.5);
+                
+}
+
+function _initialize_a_canvas_a(valve_index)
+{
+     
+     let canvas_id = document.getElementById("canvas"+valve_index)
+     
+     canvas_id_array.push(canvas_id)
+     canvas_id.height = canvas_height+5
+     canvas_id.width  = window_width    
+     context =  canvas_id.getContext("2d"); 
+     context_array.push(context)
+     context.font="15px sans-serif";  
+     context.fillStyle = "Grey";
+     context.fillRect(text_boundary,0,window_width,canvas_height );
+     context.fillStyle = "Black"
+     context.textAlign = "left";
+     context.fillText("valve "+(valve_index),text_indent_x,canvas_height*.5);
                 
 }
 

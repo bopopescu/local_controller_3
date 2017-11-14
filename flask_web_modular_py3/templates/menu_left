@@ -74,7 +74,9 @@
         <li><a href="/composite_statistics/0/0" target="_self">Composite Statistics</a></li>        
         <li><a href="/detail_statistics/0/0/0/0" target="_self">Detail Statistics</a></li>
         <li><a href="/time_series_statistics/0/0/0/0/10" target="_self">Irrigation Time Profile</a></li>
+        <li><a href="/valve_resistance/0" target="_self">Valve Resistance</a></li>
         </ul>
+        
     </div>
     
        <div data-role="collapsible" data-theme="a"  data-iconpos="right" data-collapsed="True" data-content-theme="c">
