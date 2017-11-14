@@ -133,11 +133,11 @@ class Valve_Resistance_Check(object):
        print( "coil current",coil_current )
        queue = "log_data:resistance_log:"+str(self.remote)+":"+str(self.output)
        self.redis_handle.lpush(queue, coil_current )  # necessary for web server
-       self.redis_handle.ltrim(queue,0,10)
+       self.redis_handle.ltrim(queue,0,30)
        queue = "log_data:resistance_log_cloud:"+str(self.remote)+":"+str(self.output)
        self.redis_handle.lpush(queue, 
               json.dumps( { "current": coil_current, "time":time.time()} ))  #necessary for cloud
-       self.redis_handle.ltrim(queue,0,10)
+       self.redis_handle.ltrim(queue,0,30)
        self.io_control.disable_all_sprinklers()
                
 

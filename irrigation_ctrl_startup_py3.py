@@ -386,4 +386,11 @@ if __name__ == "__main__":
    sprinkler_control = SprinklerControl(io_control, alarm_queue, 
                            redis_old_handle,cf,master_valve,irrigation_queue_management )
 
-   cf.execute()
+   try:
+       cf.execute()
+   except:
+      #
+      #Deleting current irrigation job to prevent circular reboots
+      #
+      self.redis_handle.delete("QUEUES:SPRINKLER:IRRIGATION_CELL_QUEUE")  
+      raise
