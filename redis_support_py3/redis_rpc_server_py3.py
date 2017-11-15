@@ -1,9 +1,9 @@
+import uuid
 import json
 import time
 
 
-
-class RedisRpcServer(object):
+class Redis_Rpc_Server(object):
 
     def __init__( self, redis_handle , redis_rpc_queue ):
        self.redis_handle = redis_handle
@@ -11,35 +11,43 @@ class RedisRpcServer(object):
        self.handler = {}
        
 
-    def register_call_back( self, method_name, handler)
+    def register_call_back( self, method_name, handler):
         self.handler[method_name] = handler
     
     def start( self ):
-        response = self.redis_handle.brpop(self.redis_rpc_queue, 60 )
-        if response == None:
-            print("no response")
-         else:
-             channel      = response[0]
-             request_json = response[1]
-             if request_json[
-  def start(self):
-    print("Starting RPC server for " + self.list_name)
-    while True:
-      channel, request = self.client.brpop('fib')
-      request = msgpack.unpackb(request, encoding='utf-8')
+        while True:
+            try:
+               input_json = self.redis_handle.rpop(self.redis_rpc_queue)
+               
+               if input_json == None:
+                    #print("no response")
+                    pass
+               else:
+                   input = json.loads(input_json)
+                   self.process_message(  input )
+                       
+            except:
+                 pass         
+            time.sleep(.5)
+                
+ 
+    def process_message( self, input):
 
-      print("Working on request: " + request['id'])
-
-      result = getattr(self.klass, request['method'])(*request['params'])
-
-      reply = {
-        'jsonrpc': '2.0',
-        'result': result,
-        'id': request['id']
-      }
-
-      self.client.rpush(request['id'], msgpack.packb(reply, use_bin_type=True))
-      self.client.expire(request['id'], 30)
-
-
-RedisRpcServer('redis://localhost:6379', 'fib', Fibonacci()).start()
+        id      = input["id"]
+        method  =  input["method"]
+        params  = input["params"]
+        response = self.handler[method](params)
+       
+        self.redis_handle.lpush( id, json.dumps(response))        
+        self.redis_handle.expire(id, 30)
+ 
+if __name__ == "__main__":
+    def echo_handler(  parameters ):
+        return parameters
+    
+    import redis
+    redis_handle = redis.StrictRedis("127.0.0.1", 6379 ,5,decode_responses = True )
+    redis_rpc_server = Redis_Rpc_Server( redis_handle, "redis_rpc_server")
+    redis_rpc_server.register_call_back( "echo",echo_handler )
+    redis_rpc_server.start()
+        

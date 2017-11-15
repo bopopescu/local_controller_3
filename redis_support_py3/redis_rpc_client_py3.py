@@ -23,13 +23,13 @@ class Redis_Rpc_Client(object):
         self.redis_handle.delete(request["id"] )
         self.redis_handle.lpush(self.redis_rpc_queue, request_json)
         data =  self.redis_handle.brpop(request["id"],timeout = timeout )
-        print(data)
+        
         self.redis_handle.delete(request["id"] )
         if data == None:
             raise Rpc_Server_Error("No Communication with Modbus Server")
-        respose = json.loads(data)
+        response = json.loads(data[1])
         
-        return response["result"]
+        return response
                 
 if __name__ == "__main__":
     import redis
@@ -38,7 +38,7 @@ if __name__ == "__main__":
     while True:
         try:
             result = redis_rpc_client.send_rpc_message("echo","echo test_message",2)
-            prinst("result",result)
+            print("result",result)
         except Rpc_Server_Error:
             print("no rpc communication")
             
