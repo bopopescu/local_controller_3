@@ -16,7 +16,7 @@ class Web_Client_Interface():
    def __init__( self ):
       pass
 
-   def get_path( self, path="/", user="admin", password="password"):
+   def get_path( self, path="/", user="admin", password="password",timeout = 5.):
       url = "https://127.0.0.1"
       if len(path) > 0:
          
@@ -29,7 +29,7 @@ class Web_Client_Interface():
       #print( "r",r.status_code)    
       return { "success":(requests.codes.ok==r.status_code), "status":r.status_code   ,"results": r.text   }
 
-   def post_path( self, path="/", user="admin", password="password",payload = ""):
+   def post_path( self, path="/", user="admin", password="password",payload = "",timeout = 5.):
       url = "https://127.0.0.1"
       if len(path) > 0:
          
