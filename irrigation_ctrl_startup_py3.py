@@ -392,5 +392,5 @@ if __name__ == "__main__":
       #
       #Deleting current irrigation job to prevent circular reboots
       #
-      self.redis_handle.delete("QUEUES:SPRINKLER:IRRIGATION_CELL_QUEUE")  
+      redis_old_handle.delete("QUEUES:SPRINKLER:IRRIGATION_CELL_QUEUE")  
       raise
