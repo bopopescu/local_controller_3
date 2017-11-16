@@ -12,6 +12,13 @@ if __name__ == "__main__":
   
 
    gm = Graph_Management("PI_1","main_remote","LaCima_DataStore")
+   #  get redis handler
+   #  get serial links
+   #  # get remote units
+   
+   
+   
+   '''
    # Cheating here only assuming one udp io server and one serial link
    udp_io_server = gm.match_relationship("UDP_IO_SERVER")[0]
    temp_link   = gm.match_relationship("SERIAL_LINK")[0]
@@ -46,3 +53,4 @@ if __name__ == "__main__":
 
 
    msg_mgr.add_device( 255,    redis_handler) # This is for local server function
+   '''

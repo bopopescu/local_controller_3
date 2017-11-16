@@ -7,11 +7,13 @@ import os
 import redis
 import logging
 from redis_graph_py3 import farm_template_py3
+import msgpack
 
 global connection
 
-
-
+import msgpack
+import gzip
+import io
 from web_access_py3 import *
 
 class Remote_Interface_server():
@@ -24,8 +26,9 @@ class Remote_Interface_server():
         self.cmds["PING"]          = self.ping
 
    def get_web_page( self, command_data ):
-          
+       
        results = web_client.get_path( command_data["path"] )
+       
        return results
 
    def post_web_page( self, command_data ):
@@ -37,6 +40,14 @@ class Remote_Interface_server():
       pass
 
           
+   def gzip_str(self,string_):
+       out = io.BytesIO()
+
+       with gzip.GzipFile(fileobj=out, mode='w') as fo:
+           fo.write(string_.encode())
+
+       bytes_obj = out.getvalue()
+       return bytes_obj
 
 
    def process_commands( self, command_data ):
@@ -48,8 +59,11 @@ class Remote_Interface_server():
            
            if  command in self.cmds:
                result = self.cmds[command]( command_data)
+               result["results" ] = self.gzip_str(json.dumps(result["results"]))
+               result["results"] = base64.b64encode( result["results"]).decode()
+               return json.dumps(result)
                
-               return  json.dumps( result )
+               
            else:
            
               object_data = {}
@@ -73,7 +87,7 @@ def on_request(ch, method, props, body):
        #print("ouput data",output_data) 
        
     except:
-       print("exception")
+       raise
        output_data = {} 
        output_data["reply"] = "BAD_COMMAND_3"
        output_data["results"] = None
