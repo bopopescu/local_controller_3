@@ -19,7 +19,7 @@ python3 load_files_py3.py
 cd flask_web
 ./flask_web.bsh&
 cd ..
-python3 flask_web_py3.py&
+./flask_web_py3.bsh&
 sleep 20 #let io server resolve 485 buses
 #start sprinkler control
 ./irrigation_monitoring.bsh&

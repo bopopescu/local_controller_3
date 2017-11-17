@@ -1,21 +1,37 @@
 if __name__ == "__main__":
+   import   sys
    import   json
-   import   python_udp_serial_server_py3.modbus_redis_mgr_py3
-   import   python_udp_serial_server_py3.rs485_mgr_py3   
-   import   python_udp_serial_server_py3.modbus_serial_ctrl_py3
-   import   python_udp_serial_server_py3.msg_manager_py3
-   #import   python_udp_serial_server_py3.python_udp_server_py3
+   import   modbus_redis_server_py3.modbus_redis_mgr_py3
+   import   modbus_redis_server_py3.rs485_mgr_py3   
+   import   modbus_redis_server_py3.modbus_serial_ctrl_py3
+   import   modbus_redis_server_py3.msg_manager_py3
+   
    from redis_graph_py3.farm_template_py3 import Graph_Management
 
+   server_index = 0
    
-
-  
-
+   server_name =  sys.argv[1]
+   
    gm = Graph_Management("PI_1","main_remote","LaCima_DataStore")
    #  get redis handler
    #  get serial links
-   #  # get remote units
+   #  # get  units
+   temp_sets = (gm.match_relationship( "UDP_IO_SERVER" )) 
+   print(list(temp_sets))
+   server_dict = gm.to_dictionary( list(temp_sets), "UDP_IO_SERVER" , json_flag = True)
+   server = server_dict[server_name]
    
+   
+   print(server)
+   quit()
+   serial_set = gm.match_terminal_relationship("SERIAL_LINK",starting_set = temp_sets)
+   serial_link= {}
+   for i in serial_set:
+       serial_link[i["name"]] = i
+   #print("serial_link",serial_link)
+ 
+    
+  #match_terminal_relationship( self, relationship, label= None , starting_set = None,property_values = None, data_flag = True )  
    
    
    '''

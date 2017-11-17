@@ -125,9 +125,11 @@ class Query_Configuration(object):
         self.redis_handle = redis_handle
         basic_init(self)  
 
-   def to_dictionary( self, list, key ):
+   def to_dictionary( self, list, key, json_flag = False ):
        return_value = {}
        for i in list:
+           if json_flag == True:
+               i = json.loads(i)
            return_value[i[key]] = i
        return return_value
 

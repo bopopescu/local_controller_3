@@ -65,13 +65,13 @@ function change_gallon_trigger(event, ui)
 function general_change_function( key, value,confirmation_message )
 {
    temp = {}
-   temp["key"] = key
+   temp["redis_key"] = "CONTROL_VARIABLES"
+   temp["hash"] = key
    temp["value"] = value
-   json_object = {}  
-   json_object["CONTROL_VARIABLES"] = temp
-   alert(JSON.stringify(json_object))
-  //ajax_post_confirmation(url_path, json_object, confirmation_string, 
-  //                                     "CHANGES MADE", "Data Not Saved!!!!!" )
+   json_object = [temp]  
+   
+   ajax_post_confirmation("/ajax/redis_hset", json_object, confirmation_message, 
+                                         "CHANGES MADE", "Data Not Saved!!!!!" )
    
 }
 
