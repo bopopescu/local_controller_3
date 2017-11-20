@@ -58,7 +58,7 @@ class MessageManager():
           #print "address",i , self.dict.keys()
           i = int(i)
                     
-          if self.dict.has_key(i) :
+          if i in self.dict :
             
             return_value.append({ "address":i,  "result":self.dict[ i].ping_device( i ) } )
           else:

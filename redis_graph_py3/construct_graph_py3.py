@@ -388,6 +388,8 @@ if __name__ == "__main__" :
    properties["port"] = 5005   
    properties["redis_host"] = "192.168.1.84"
    properties["redis_db"]   = 0
+   properties["redis_rpc_db"] = 5
+   properties["redis_rpc_key"] = "#_RPC_QUEUE_"
    cf.add_header_node( "UDP_IO_SERVER","main_remote", properties = properties, json_flag= True )
  
    properties                           = {}

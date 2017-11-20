@@ -18,31 +18,29 @@ class ModbusSerialCtrl():
        self.remote_devices          = remote_devices
        self.message_manager         = message_manager
        self.interfaces              = self._find_interfaces()
-       #print "open logical interfaces", self.interfaces
+       
        self._open_modbus_logical_interfaces()
-       #print "pinging devices"
-       self.ping_all_devices()
-       #print "made it past ping all devices"
+       #print(self.ping_device(100))
 
        
 
    def find_remote( self, address):
-       #print "find_remote",address
+       
        for i in self.remote_devices.keys():
           logical_interface          = self.remote_devices[i]["interface"]
           parameters                 = self.remote_devices[i]["parameters"]
           handler                    = self.serial_interfaces[logical_interface]["handler"]
           interface_parameters       = self.serial_interfaces[ logical_interface ]["interface_parameters"]
           remote_addr                = handler.find_address(  parameters)
-          #print "remote_addr",remote_addr
+          
           if address == remote_addr :
-             #print "parameters",parameters
+             
              return handler,interface_parameters, parameters
           
        return None,None,None
 
    def ping_all_devices( self ):
-       #print "ping all devices",self.remote_devices.keys()
+       
        return_value = {}
        for i , j, in self.remote_devices.items():
 
@@ -51,7 +49,7 @@ class ModbusSerialCtrl():
            interface_parameters      = self.serial_interfaces[ logical_interface ]["interface_parameters"]
            parameters                = j["parameters"]
            address                   = handler.find_address( parameters )
-           #print "parameters",parameters
+          
            flag                      = handler.probe_register( parameters )
            if flag == False:
               return_value[address] = False
@@ -111,7 +109,7 @@ class ModbusSerialCtrl():
           raise Exception('interface_error', interface_id )
  
    def _open_floating_interface( self,serial_interface ):
- 
+       
        for interface in  self.interfaces:
 
           if self._try_interface( interface ,serial_interface):
@@ -121,6 +119,7 @@ class ModbusSerialCtrl():
        raise Exception('interface_error', serial_interface )
 
    def _try_interface( self, interface, serial_interface ):
+      
        if self.check_other_interfaces(interface) == True:
            handler    = serial_interface["handler"]
            parameters = serial_interface["interface_parameters"]
@@ -155,26 +154,26 @@ class ModbusSerialCtrl():
             
               
 if __name__ == "__main__":
-    from msg_manager import *
-    from rs485_mgr   import *
+    from .msg_manager_py3 import *
+    from .rs485_mgr_py3   import *
     #
     #  USB interface id's can change based upon startup processes
     #  if device is null then the device was found by locating a search device on the network
     #  if the device is specified then the search device is not needed
-    rs485_interface_1 = RS485_Mgr()
-    #rs485_interface_2 = RS485_Mgr()
+   
+    rs485_interface_2 = RS485_Mgr()
     serial_interfaces = {}
-    serial_interfaces[ "rtu_1" ] = { "handler":rs485_interface_1,"interface_parameters":{ "interface":"COM9", "timeout":.15, "baud_rate":38400 } ,"search_device":"current_monitor" } 
-    #serial_interfaces[ "rtu_2" ] = { "handler":rs485_interface_2,"interface_parameters":{ "interface":None, "timeout":.15, "baud_rate":38400 } ,"search_device":"main_controller" } 
+    
+    serial_interfaces[ "rtu_2" ] = { "handler":rs485_interface_2,"interface_parameters":{ "interface":None, "timeout":.15, "baud_rate":38400 } ,"search_device":"main_controller" } 
     remote_devices = {}
-    remote_devices["current_monitor"] = { "interface": "rtu_1", "parameters":{ "address":31 , "search_register":1, "register_number":10 } }
-    #remote_devices["main_controller"] = { "interface": "rtu_2", "parameters":{ "address":100 , "search_register":0} }
+    
+    remote_devices["main_controller"] = { "interface": "rtu_2", "parameters":{ "address":100 , "search_register":0,"register_number":5} }
     message_manager = MessageManager()
-    message_manager.add_device( 31, rs485_interface_1 )
-    #message_manager.add_device( 100, rs485_interface_2 )
+   
+    message_manager.add_device( 100, rs485_interface_2 )
      
     modbus_serial_ctrl = ModbusSerialCtrl( serial_interfaces,remote_devices,message_manager)
-    print( modbus_serial_ctrl.ping_device( 31 ))
-    #print modbus_serial_ctrl.ping_device( 100 )
+    
+    print( modbus_serial_ctrl.ping_device( 100 ))
  
 

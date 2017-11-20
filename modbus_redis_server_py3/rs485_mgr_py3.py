@@ -46,7 +46,7 @@ class RS485_Mgr():
            #print i
            try:
 
-               response = ""
+               response = b""
                #print "message ",len(message)
                response =  self.instrument._communicate( message, 1024)
                time.sleep(.05)
@@ -57,7 +57,7 @@ class RS485_Mgr():
                    responseWithoutChecksum   = response[0 : len(response) - 2]
                    calculatedChecksum = self._calculateCrcString(responseWithoutChecksum)
                    #print "crc",[receivedChecksum, calculatedChecksum], ord(message[0]),parameters["address"]
-                   if (receivedChecksum == calculatedChecksum) and (ord(message[0]) == parameters["address"] ): # check checksum
+                   if (receivedChecksum == calculatedChecksum) and (message[0] == parameters["address"] ): # check checksum
                        #print "made it here",#
                        if counters != None:
                            counters["counts"] = counters["counts"] +1
@@ -97,7 +97,7 @@ class RS485_Mgr():
        return_value = receivedChecksum == calculatedChecksum # check checksum
        
        if return_value == True :
-             return_value = address == ord(response[0])  # check address
+             return_value = address == (response[0])  # check address
        #else:
        #   print "probe failure"
        return return_value
@@ -119,7 +119,7 @@ class RS485_Mgr():
        register = 0xFFFF
        for character in inputstring:
            # XOR with each character
-           register = register ^ ord(character)
+           register = register ^ character
            # Rightshift 8 times, and XOR with polynom if carry overflows
            for i in range(8):
                register, carrybit = self._rightshift(register)

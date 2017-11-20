@@ -1067,12 +1067,12 @@ class Instrument():
         self.serial.write(message)
 
         # Read response
-        answer = ""
+        answer = b""
         for i in range( 0, 50):  # .5 second wait
            #print "first i",i
            new_answer = self.serial.read(number_of_bytes_to_read)
            if len(new_answer) > 0:
-              answer = answer + new_answer
+              answer += new_answer
               break 
 
         for i in range(0,20):  # .
