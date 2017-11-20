@@ -115,7 +115,7 @@
      
     
  
-   <div data-role="footer"  data-theme="b"> 
+   <div data-role="footer"  data-position="fixed" data-theme="b"> 
     <a id="footer-button_1" data-icon="bars"  
        style="margin-top:10px;"data-rel="popup" 
        data-position-to="window" 
@@ -130,7 +130,7 @@
        data-position-to="window" 
        href="#change_step_index">Change Time Step </a>
 
-   <a id="footer-button_4" data-icon="bars"  
+   <a id="footer-button_4"  data-icon="bars"  
        style="margin-top:10px;"data-rel="popup" 
        data-position-to="window" 
        href="#change_display_number">Change Time Display Number </a>
