@@ -112,6 +112,8 @@
            <li><a href ='/display_environmental_conditions' , target="_self">Equip Environ Params</a></li>
             <li><a href="/view_running_process"  target="_self">View Running Python Processes</a></li>
             <li><a href="/list_reboot_files"  target="_self">View Python Reboot Time Stamps</a></li>
+            <li><a href="/list_reboot_file_data"  target="_self">View Python Reboot Error Logs</a></li>
+            <li><a href='/list_linux_time_history/0'  target="_self">Linux Time History</a></li>
             
         </ul>
     </div>

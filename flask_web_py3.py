@@ -109,7 +109,7 @@ if __name__ == "__main__":
    sys_files = load_files_py3.SYS_FILES(redis_handle)
    app_files = load_files_py3.APP_FILES(redis_handle)
    startup_dict = redis_startup.hgetall("web")
-   print(startup_dict)
+
    pi_web_server = PI_Web_Server(__name__, redis_handle,redis_new_handle, app_files, sys_files,gm, startup_dict )
    pi_web_server.run_https()
    

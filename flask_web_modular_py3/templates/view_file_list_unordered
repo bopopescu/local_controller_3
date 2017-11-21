@@ -25,12 +25,12 @@
    <!-- /header -->
  
    <h3>{{header}}</h3>
- <ol>
+ <ul>
 {% for entry in file_list %}
 <li>{{entry}}</li>
  
 {% endfor %}
-</ol>
+</ul>
    
 
 
