@@ -1,4 +1,5 @@
 <div  id=edit_a_step data-role="content" class="content" >
+
    <input type="button" id = "edit_a_step_back" value="Back" /> 
    <div id="edit_step_run_time">
       <label for="step-run_time" class="select"><h3>Select Schedule Run Time:</h3></label>

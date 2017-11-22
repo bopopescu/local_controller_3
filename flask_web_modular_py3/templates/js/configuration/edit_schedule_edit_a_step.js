@@ -25,7 +25,7 @@ function show_edit_a_step_panel()
 }    
 
 
-function back_button()
+function back_button_step()
 {
   
   show_start_panel();
@@ -49,7 +49,8 @@ function initialize_runtime()
 
 function initialize_edit_a_step()
 {
-   $( "#edit_a_step_back").bind("click",back_button )  
+   $( "#edit_a_step_back").bind("click",back_button_step )  
+
    $( "#step_choice" ).bind( "change", step_choice );
    $( "#step_run_timea").bind("change",run_time_function);
    initialize_runtime()
@@ -223,6 +224,7 @@ function generate_valve(index, working_data)
    var temp1a
    var i
    working_index     = index
+   
    working_valves    = working_data["controller_pins"][index] 
 
    if( working_valves.length == 0 )

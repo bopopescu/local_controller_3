@@ -36,26 +36,27 @@
         
 
    <div data-role="collapsible" data-theme="a"  data-iconpos="right" data-collapsed="True" data-content-theme="c">
-        <h3>Trendlines</h3>
+        <h3>System State</h3>
         <ul data-role="listview">
-           <li><a href ='/control/display_past_system_alerts'  target="_self">Past System Alerts</a></li>
-            <li><a href ='/control/display_past_system_actions' target="_self">Past System Actions</a></li>
+           <li><a href ='/control/display_past_system_alerts'  target="_self">Current System State</a></li>
+            <li><a href ='/control/display_past_system_actions' target="_self">Manage Alerts</a></li>
 
-           <li><a href ='/control/display_past_alerts' target="_self">Past Alerts</a></li>
-           <li><a href ='/control/display_past_actions' target="_self">Past Actions</a></li>
-           <li><a href="/control/display_irrigation_queue" target="_self">Pending Irrigation Actions</a></li>
-           <li><a href ='/irrigation_streaming_data/display_minute_irrigation/3' target="_self">Irrigation 1 minute data</a></li>
+           <li><a href ='/control/display_past_alerts' target="_self">Manage Tickets</a></li>
+           <li><a href ='/control/display_past_actions' target="_self">Generate Alert</a></li>
+           <li><a href="/control/display_irrigation_queue" target="_self">Generate Ticket</a></li>
+           
  
             
         </ul>
     </div>
    <div data-role="collapsible" data-theme="a"  data-iconpos="right" data-collapsed="True" data-content-theme="c">
-        <h3>Automatic Operations </h3>
+        <h3>Irrigation Operations </h3>
         <ul data-role="listview">
          <li><a href="/control/control" target="_self">Control Operation</a></li>
          <li><a href="/control/parameters" target="_self">Manage Parameters</a></li>
-         <li><a href="/control/irrigation_queue" target="_self">Manage Irrigation Queue</a></li>
-
+         <li><a href="/control/irrigation_queue" target="_self">Manage Pending Irrigation Queue</a></li>
+         <li><a href ='/control/display_past_actions' target="_self">Past Actions</a></li>
+         <li><a href ='/irrigation_streaming_data/display_minute_irrigation/3' target="_self">Irrigation 1 minute data</a></li>
         </ul>
     </div>
    <div data-role="collapsible" data-theme="a"  data-iconpos="right" data-collapsed="True" data-content-theme="c">

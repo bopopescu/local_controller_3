@@ -3,7 +3,7 @@ function initialize_steps_control()
 {
   
   $( "#steps_choice" ).bind( "change", choice_1_function );
-}show_edit_a_step
+}
 
 
 function show_steps_panel()
@@ -62,7 +62,7 @@ function choice_1_function(event, ui)
       working_data["controller_pins"].push([])
       working_data["steps"].push(0)
       generate_steps(working_data)
-
+      $("#current_valve").html("<h3>No Valves Defined</h3>")
       show_edit_a_step( working_data, working_data["steps"].length - 1  )
      
   }
@@ -70,7 +70,8 @@ function choice_1_function(event, ui)
   {
      status = check_step_selection()
      if( status[0] == true )
-     {
+     { 
+        
         working_data["controller_pins"].splice(status[1],0,[])
         working_data["steps"].splice(status[1],0,0)
         generate_steps(working_data)
