@@ -23,4 +23,4 @@ cd ..
 sleep 20 #let io server resolve 485 buses
 #start sprinkler control
 ./irrigation_monitoring.bsh&
-./irrigation_ctrl_startup.bsh
+./irrigation_ctrl_startup.bsh&

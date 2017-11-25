@@ -5,10 +5,13 @@ import base64
 import time
 
 class AlarmQueue(object):
-   def __init__(self,redis_server, alarm_queue = "QUEUES:CLOUD_ALARM_QUEUE", action_queue = "QUEUES:SPRINKLER:PAST_ACTIONS"):
+   def __init__(self,redis_server, time_history_queue = "QUEUES:IRRIGATION:TIME_HISTORY", event_hash = "QUEUES:IRRIGAITION:EVENTS", history = 120):
+   
        self.redis = redis_server
-       self.alarm_queue = alarm_queue
-       self.action_queue = action_queue
+       self.time_history_queue = time_history_queue 
+       self.event_hash = event_hash
+     
+       
 
    def store_past_action_queue( self, event, status ,data = None):
        log_data = {}
@@ -17,36 +20,27 @@ class AlarmQueue(object):
        log_data["time" ]    = time.time()
        log_data["status"]   = status
        json_data            = json.dumps(log_data)
-       json_data            =  base64.b64encode( json_data.encode() )
-       self.redis.lpush( self.action_queue , json_data)
-       self.redis.ltrim( self.action_queue ,0, 120 )
-       self.store_alarm_queue( event,status, data )
+       print("alert data", event,status,log_data)
+       self.redis.lpush( self.time_history_queue , json_data)
+       self.redis.ltrim( self.time_history_queue ,0, 120 )
+       self.redis.hset(self.event_hash,event, log_data["time"] )
+       
 
 
-   def store_alarm_queue( self, event,status, data ):
-       log_data = {}
-       log_data["event"] = event
-       log_data["data"]     = data
-       log_data["time" ]    = time.time()
-       log_data["status"]   = status
-       json_data            = json.dumps(log_data)
-       json_data            =  base64.b64encode( json_data.encode() )
-       self.redis.lpush( self.alarm_queue , json_data)
-       self.redis.ltrim( self.alarm_queue ,0, 1000 )
+   def store_alarm_queue( self, event,status, data =None):
+       self.store_past_action_queue( self, event, status ,data)
 
-   def store_event_queue( self, event, data ):
-       log_data = {}
-       log_data["event"] = event
-       log_data["status"] = "INFO"
-       log_data["data"]  = data
-       log_data["time"]  = time.time()
-       json_data = json.dumps(log_data)
-       json_data = base64.b64encode(json_data.encode())
-       self.redis.lpush( self.alarm_queue, json_data)
-       self.redis.ltrim( self.alarm_queue, 0,800)
+   def get_events( self ):
+       return self.hgetall(self.event_hash)
+       
+       
+   def store_event_queue( self, event, data=None ):
+       self.store_past_action_queue(  event, status="GREEN" ,data=data )
   
    def update_time_stamp( self,*args ):
          self.redis.hset( "CONTROL_VARIABLES", "sprinkler_time_stamp", time.time() )
+         
+       
 
 if __name__ == "__main__":
    import redis

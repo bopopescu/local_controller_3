@@ -64,7 +64,7 @@ class SprinklerControl():
        self.redis_handle.hset("CONTROL_VARIABLES","SUSPEND","ON")
 
    def resume( self, *args ):
-
+       self.alarm_queue.store_past_action_queue("SUSPEND_OPERATION","YELLOW"  )
        self.sprinkler_ctrl.resume_operation()
        self.cf.send_event("IRI_MASTER_VALVE_RESUME",None)
 
@@ -72,7 +72,7 @@ class SprinklerControl():
        self.redis_handle.hset("CONTROL_VARIABLES","SUSPEND","OFF")
 
    def skip_station( self, *args ):
-       self.alarm_queue.store_past_action_queue("SKIP_STATION","YELLOW" ,{"skip": "action"} )
+       self.alarm_queue.store_past_action_queue("SKIP_STATION","YELLOW"  )
        self.sprinkler_ctrl.skip_operation()
 
    def resistance_check( self, object_data, chainFlowHandle, chainObj, parameters, event ):
@@ -80,7 +80,7 @@ class SprinklerControl():
         json_object["type"]   = "RESISTANCE_CHECK"
         json_string = json.dumps( json_object)
         self.redis_handle.lpush(  "QUEUES:SPRINKLER:IRRIGATION_QUEUE", json_string )
-        alarm_queue.store_past_action_queue( "RESISTANCE_CHECK", "GREEN",  { "action":"start" } )        
+        #alarm_queue.store_past_action_queue( "RESISTANCE_CHECK", "GREEN",  { "action":"start" } )        
 
 
    def check_off( self,object_data,chainFlowHandle, chainObj, parameters,event ):
@@ -89,21 +89,22 @@ class SprinklerControl():
         json_string = json.dumps( json_object)
         
         self.redis_handle.lpush(  "QUEUES:SPRINKLER:IRRIGATION_QUEUE", json_string )
-        alarm_queue.store_past_action_queue( "CHECK_OFF", "GREEN",  { "action":"start" } )        
+        #alarm_queue.store_past_action_queue( "CHECK_OFF", "GREEN",  { "action":"start" } )        
 
    def clean_filter( self, object_data,chainFlowHandle, chainObj, parameters,event ):
         json_object = {}
         json_object["type"]  = "CLEAN_FILTER"
         json_string = json.dumps( json_object)
         self.redis_handle.lpush(  "QUEUES:SPRINKLER:IRRIGATION_QUEUE", json_string )
-        alarm_queue.store_past_action_queue( "CLEAN_FILTER", "GREEN",  { "action":"start" } )        
+        #alarm_queue.store_past_action_queue( "CLEAN_FILTER", "GREEN",  { "action":"start" } )        
 
   
  
    def clear( self, object_data,chainFlowHandle, chainObj, parameters,event ):
        self.clear_redis_sprinkler_data()
        self.clear_redis_irrigate_queue()
-       self.sprinkler_ctrl.skip_operation()       
+       self.sprinkler_ctrl.skip_operation() 
+       alarm_queue.store_past_action_queue( "CLEAR", "YELLOW"  )          
 
 
          
@@ -113,7 +114,7 @@ class SprinklerControl():
        self.load_auto_schedule(self.schedule_name)
        #self.redis_handle.hset("CONTROL_VARIABLES","SUSPEND","OFF")  
        self.redis_handle.hset("CONTROL_VARIABLES","SKIP_STATION","OFF") 
-       self.alarm_queue.store_past_action_queue("QUEUE_SCHEDULE","GREEN",{ "schedule":self.schedule_name } ) 
+    
     
    
    def queue_schedule_step( self,  object_data,chainFlowHandle, chainObj, parameters,event ):
@@ -121,10 +122,7 @@ class SprinklerControl():
        self.schedule_name =  object_data["schedule_name"]
        self.schedule_step =  object_data["step"]
        self.schedule_step =   int(self.schedule_step)
-       self.alarm_queue.store_past_action_queue("QUEUE_SCHEDULE_STEP","GREEN",{ "schedule":self.schedule_name,"step":self.schedule_step } )
-       #print "queue_schedule",self.schedule_name,self.schedule_step
        self.load_step_data( self.schedule_name, self.schedule_step ,None,True ) 
-       #self.redis_handle.hset("CONTROL_VARIABLES","SUSPEND","OFF")
        self.redis_handle.hset("CONTROL_VARIABLES","SKIP_STATION","OFF")  
 
    def queue_schedule_step_time_a( self, object_data,chainFlowHandle, chainObj, parameters,event ):   
@@ -133,10 +131,8 @@ class SprinklerControl():
        self.schedule_step =   int(self.schedule_step)
        self.schedule_step_time        =  object_data["run_time"]
 
-       self.alarm_queue.store_past_action_queue("QUEUE_SCHEDULE_STEP","GREEN",{ "schedule":self.schedule_name,"step":self.schedule_step } )
-       #print "queue_schedule",self.schedule_name,self.schedule_step
+       self.alarm_queue.store_past_action_queue("QUEUE_SCHEDULE_STEP","GREEN",{ "schedule":self.schedule_name,"step":self.schedule_step } )      
        self.load_step_data( self.schedule_name, self.schedule_step ,self.schedule_step_time,True ) 
-       #self.redis_handle.hset("CONTROL_VARIABLES","SUSPEND","OFF")
        self.redis_handle.hset("CONTROL_VARIABLES","SKIP_STATION","OFF")  
 
  
@@ -155,7 +151,8 @@ class SprinklerControl():
        print("direct valve control")     
        remote                = object_data["controller"] 
        pin                   = object_data["pin"]         
-       schedule_step_time    = object_data["run_time"]        
+       schedule_step_time    = object_data["run_time"]  
+       alarm_queue.store_past_action_queue( "DIRECT", "YELLOW", object_data )        
        pin = int(pin)
        schedule_step_time = int(schedule_step_time)  
        self.load_native_data( remote,pin,schedule_step_time)
@@ -166,7 +163,7 @@ class SprinklerControl():
 
    def open_master_valve( self, object_data,chainFlowHandle, chainObj, parameters,event ):
        self.alarm_queue.store_past_action_queue("OPEN_MASTER_VALVE","YELLOW" )
-       print("open master valve")
+      
        chainFlowHandle.send_event("IRI_OPEN_MASTER_VALVE",None)
 
      
@@ -180,13 +177,13 @@ class SprinklerControl():
 
 
    def  reset_system( self, *args ):
-      self.alarm_queue.store_past_action_queue("REBOOT","RED"  )
+      self.alarm_queue.store_past_action_queue("REBOOT","YELLOW"  )
       self.redis_handle.hset( "CONTROL_VARIABLES","sprinkler_ctrl_mode","RESET_SYSTEM")
       os.system("reboot")  
 
 
    def restart_program( self, *args ):
-       self.alarm_queue.store_past_action_queue("RESTART","RED"  )
+       self.alarm_queue.store_past_action_queue("RESTART","YELLOW"  )
        self.redis_handle.hset( "CONTROL_VARIABLES","sprinkler_ctrl_mode","RESTART_PROGRAM")
        quit()
        
@@ -373,6 +370,7 @@ if __name__ == "__main__":
    remote_classes = construct_classes_py3.Construct_Access_Classes(io_server_ip,io_server_port)
    io_control  = IO_Control(gm,remote_classes, redis_old_handle,redis_new_handle)
    alarm_queue = AlarmQueue(redis_old_handle)
+   alarm_queue.store_past_action_queue("REBOOT", "RED" )
    cf = CF_Base_Interpreter()
    cluster_control = Cluster_Control(cf)
 
