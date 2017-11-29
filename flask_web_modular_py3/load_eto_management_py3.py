@@ -19,8 +19,12 @@ class Load_ETO_Management(object):
        self.eto_measurement    = temp[0]["measurement"]
        temp = gm.match_terminal_relationship("RAIN_SOURCES")
        self.rain_measurement    =  temp[0]["measurement"]
+       temp = gm.match_terminal_relationship("RAIN_QUEUE")[0]
+       self.rain_queue = temp["name"]
+       temp = gm.match_terminal_relationship("ETO_QUEUE")[0]
+       self.eto_queue = temp["name"]
        
-
+ 
        a1 = auth.login_required( self.eto_setup )
        app.add_url_rule('/eto/eto_setup',"eto_setup",a1)
 
@@ -31,6 +35,12 @@ class Load_ETO_Management(object):
        a1 = auth.login_required( self.eto_manage )
        app.add_url_rule('/eto/eto_manage',"eto_manage",a1)
        
+       a1 = auth.login_required( self.eto_rain_queue )
+       app.add_url_rule('/eto/eto_rain_queue',"eto_rain_queue",a1)
+       
+       a1 = auth.login_required( self.eto_eto_queue )
+       app.add_url_rule('/eto/eto_eto_queue',"eto_eto_queue",a1)
+        
 
 
    def eto_setup(self):
@@ -44,7 +54,7 @@ class Load_ETO_Management(object):
 
 
    def eto_readings(self):
-       print(self.eto_measurement)
+       
        eto_data =  self.redis_new_handle.get(self.eto_measurement)
        rain_data = self.redis_new_handle.get(self.rain_measurement)
        return self.render_template( "eto_templates/eto_readings",eto_data = eto_data, rain_data = rain_data ) 
@@ -52,3 +62,47 @@ class Load_ETO_Management(object):
 
    def eto_manage( self ):
        return self.render_template("eto_templates/eto_manage")
+       
+   def eto_rain_queue(self):
+       temp = self.redis_new_handle.lrange(self.rain_queue,0,-1)
+       rain_data = []
+       for i_json in temp:
+           i = json.loads(i_json)
+           print(i)
+           temp = {}
+         
+           temp["timestamp"] = i["timestamp"]
+          
+           del i["timestamp"]
+           value = 0.0
+           for j, item in i.items():
+               if float(item) > value:
+                   value = float(item)
+           temp["value"] = value
+           rain_data.append(temp)
+       return self.render_template("eto_templates/streaming_data",title="Rain TIME HISTORY",y_axis = "Rain data hundreds of inch",
+                               header_name = "RAIN_TIME_HISTORY", data = rain_data ) 
+  
+       
+   def eto_eto_queue(self):
+       temp = self.redis_new_handle.lrange(self.eto_queue,0,-1)
+       eto_data = []
+       for i_json in temp:
+           i = json.loads(i_json)
+           print(i)
+           temp = {}
+         
+           temp["timestamp"] = i["timestamp"]
+          
+           del i["timestamp"]
+           value = 0.0
+           for j, item in i.items():
+               if float(item) > value:
+                   value = float(item)
+           temp["value"] = value
+           eto_data.append(temp)
+       return self.render_template("eto_templates/streaming_data",title="ETO TIME HISTORY",y_axis = "ETO data hundreds of inch",
+                               header_name = "ETO_TIME_HISTORY", data = eto_data ) 
+        
+         
+         

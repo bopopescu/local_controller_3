@@ -356,8 +356,8 @@ if __name__ == "__main__" :
    cf.end_header_node("RAIN_MEASUREMENTS")
    cf.add_info_node("INTEGRATED_RAIN_ESTIMATE","LACIMA_INTEGRATED_RAIN_ESTIMATE",properties={},json_flag = True )
 
-
-   
+   cf.add_info_node("RAIN_QUEUE","QUEUES:ETO:RAIN",properties={"list_length":300},json_flag = True )  
+   cf.add_info_node("ETO_QUEUE","QUEUES:ETO:ETO",properties={"list_length":300},json_flag = True )
    cf.add_info_node("INTEGRATED_ETO_ESTIMATE","LACIMA_INTEGRATED_ETO_ESTIMATE",properties={"list_length":300},json_flag = True )
 
    cf.add_header_node("ETO_MEASUREMENTS")

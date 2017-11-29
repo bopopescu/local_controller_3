@@ -55,7 +55,7 @@
          <li><a href="/control/control" target="_self">Control Operation</a></li>
          <li><a href="/control/parameters" target="_self">Manage Parameters</a></li>
          <li><a href="/control/irrigation_queue" target="_self">Manage Pending Irrigation Queue</a></li>
-         <li><a href ='/control/display_past_actions' target="_self">Past Actions</a></li>
+         <li><a href ='/control/display_past_actions/ALL' target="_self">Past Actions</a></li>
          <li><a href ='/irrigation_streaming_data/display_minute_irrigation/3' target="_self">Irrigation 1 minute data</a></li>
         </ul>
     </div>
@@ -65,7 +65,9 @@
          <li><a href='/eto/eto_manage' target="_self">Manage ETO Valve Values</a></li>
          <li><a href="/eto/eto_setup" target="_self">Setup ETO Valves</a></li>
          <li><a href='/eto/eto_readings' target="_self">Display ETO Daily Values</a></li>
-         
+         <li><a href='/eto/eto_eto_queue' target="_self">Display ETO History</a></li>
+         <li><a href='/eto/eto_rain_queue' target="_self">Display Rain History</a></li>
+        
         </ul>
     </div>
 

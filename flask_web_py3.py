@@ -19,7 +19,7 @@ from flask_web_modular_py3.load_configuration_py3         import Load_Configurat
 from flask_web_modular_py3.load_streaming_data_py3            import Load_Streaming_Data
 from flask_web_modular_py3.load_linux_controller_data_py3  import Load_Linux_Controller_Data
 from flask_web_modular_py3.load_statistic_data_py3  import Load_Statistic_Data
-
+from irrigation_control_py3.alarm_queue_py3  import  AlarmQueue
 
 import flask
 from flask import Flask
@@ -42,18 +42,12 @@ class PI_Web_Server(object):
        app.config['SECRET_KEY']      = startup_dict["SECRET_KEY"]
        app.config["DEBUG"]           = startup_dict["DEBUG"]
        self.users                    = json.loads(startup_dict["users"])
-       #authDB = FlaskRealmDigestDB(startup_dict["RealmDigestDB"])
-       '''
-       temp =  json.loads(startup_dict["users"])
-       for i in temp.keys():
-            print(temp[i])
-            authDB.add_user(i, temp[i] )
-       '''
+       alarm_queue              = AlarmQueue(redis_handle)
        Load_Static_Files( app, auth )
        Load_App_Sys_Files( app,auth,request, app_files, sys_files)
        Load_Redis_Access(  app,auth,request,redis_handle)
        Load_Irrigation_Pages(app,auth,render_template, redis_handle = redis_handle,
-                             redis_new_handle =redis_new_handle, request = request)
+                             redis_new_handle =redis_new_handle, request = request, alarm_queue = alarm_queue)
 
        Load_ETO_Management(app, auth, request, app_files, sys_files, gm, redis_new_handle,render_template )
        Load_Site_Data(app,auth,render_template)

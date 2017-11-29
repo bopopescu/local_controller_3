@@ -10,7 +10,7 @@ python3 load_files_py3.py
 ./linux_monitoring.bsh&
 #./moisture_monitoring.bsh&
 ./eto.bsh&
-./python_udp_server_startup.bsh&
+#./python_udp_server_startup.bsh&
 #./rabbit_redis_access.bsh&
 ./rabbit_web_access.bsh&
 ./rabbit_cloud_status_publish.bsh&
@@ -19,8 +19,8 @@ python3 load_files_py3.py
 cd flask_web
 ./flask_web.bsh&
 cd ..
-./flask_web_py3.bsh&
+#./flask_web_py3.bsh&
 sleep 20 #let io server resolve 485 buses
 #start sprinkler control
 ./irrigation_monitoring.bsh&
-./irrigation_ctrl_startup.bsh&
+#./irrigation_ctrl_startup.bsh&

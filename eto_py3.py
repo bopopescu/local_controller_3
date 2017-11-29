@@ -21,6 +21,7 @@ import copy
 import load_files_py3
 import rabbit_cloud_status_publish_py3
 from redis_graph_py3 import farm_template_py3
+import datetime
 
 
 ONE_DAY = 24 * 3600
@@ -28,6 +29,7 @@ ONE_DAY = 24 * 3600
 
 class Eto_Management(object):
     def __init__(self, redis_handle, eto_sources, rain_sources):
+
         self.eto_sources = eto_sources
         self.rain_sources = rain_sources
         self.redis_handle = redis_handle
@@ -52,7 +54,7 @@ class Eto_Management(object):
             chainObj,
             parameters,
             event):
-        print( "check_for_eto_update")
+        #print( "check_for_eto_update")
         return
         eto_update_flag = int(
             self.redis_handle.hget(
@@ -123,12 +125,14 @@ class Eto_Management(object):
 
         if event["name"] == "INIT":
             return "CONTINUE"
-
+        if int(self.redis_handle.hget("ETO_VARIABLES", "ETO_UPDATE_FLAG")) == 1:
+            print("ETO_UPDATE_FLAG is one")
+            return
         #print( "make measurements", self.eto_sources)
         return_value = True
         self.start_sensor_integration()
         for i in self.eto_sources:
-            print( i["measurement_tag"])
+            #print( i["measurement_tag"])
             data_store = i["measurement"]
 
             data_value = self.redis_handle.lindex(data_store, 0)
@@ -142,7 +146,6 @@ class Eto_Management(object):
             data_store = i["measurement"]
             data_value = self.redis_handle.lindex(data_store, 0)
             flag, data = self.eto_calculators.rain_calc(i)
-            
             if flag:
                 temp = data
                 #self.redis_handle.lset(data_store, 0, temp)
@@ -229,16 +232,31 @@ class Eto_Management(object):
     def store_integrated_data(self):
         #print "integrating data"
         #print json.dumps(self.mv_eto_sensors)
-        print( self.rain_sensors, self.eto_sensors) 
+        #print( self.rain_sensors, self.eto_sensors) 
+        temp_eto_json = json.dumps(self.eto_sensors)
+        temp_eto = json.loads(temp_eto_json)
+        temp_eto["timestamp"] = time.time()
+        temp_eto["date"] = datetime.datetime.now().strftime("%I:%M%p on %B %d, %Y")
+        temp_rain_json = json.dumps(self.rain_sensors)
+        temp_rain = json.loads(temp_rain_json)
+        temp_rain["timestamp"] = time.time()
+        temp_rain["date"] = datetime.datetime.now().strftime("%I:%M%p on %B %d, %Y")
         self.redis_handle.set(
             self.eto_integrated_measurement,json.dumps(self.mv_eto_sensors))
         self.redis_handle.set(
             self.eto_measurement, json.dumps(
-                self.eto_sensors))
+                temp_eto))
         self.redis_handle.set(
             self.rain_measurement, json.dumps(
-                self.rain_sensors))
-
+                temp_rain))
+        del temp_eto["date"]          
+        self.redis_handle.lpush(self.eto_queue["name"], json.dumps(temp_eto))
+        self.redis_handle.ltrim(self.eto_queue["name"], 0, self.eto_queue["list_length"] )
+        del temp_rain["date"]          
+        self.redis_handle.lpush(self.rain_queue["name"], json.dumps(temp_rain))
+        self.redis_handle.ltrim(self.rain_queue["name"], 0, self.rain_queue["list_length"] )
+                 
+                
     def get_eto_integration_data(self):
         #print "get_eto_integration_data"
         try:
@@ -272,7 +290,7 @@ class Eto_Management(object):
         return return_value
 
     def get_max_data(self, json_data):
-        print("json_data",json_data)
+        #print("json_data",json_data)
         data = json.loads(json_data)
         #print "get_max_data", data
         key_length = len(data.keys())
@@ -287,6 +305,7 @@ class Eto_Management(object):
         return return_value
 
     def store_cloud_data(self):
+        return
         data = {}
         data["namespace"] = self.cloud_namespace
         data["eto"] = self.get_max_data(
@@ -343,7 +362,7 @@ class ETO_Calculators(object):
         self.rain_handlers["SRUC1_RAIN"] = self.sruc1_rain
 
     def eto_calc(self, eto_source):
-        print( "made it eto_calc",eto_source["measurement_tag"])
+        #print( "made it eto_calc",eto_source["measurement_tag"])
 
         try:
 
@@ -351,14 +370,14 @@ class ETO_Calculators(object):
 
                 result = self.eto_handlers[eto_source["measurement_tag"]](
                     eto_source)
-                print( "eto_calc", eto_source["measurement_tag"])
+                #print( "eto_calc", eto_source["measurement_tag"])
                 return True, result
             else:
                 print( "handler is bad")
                 #raise ValueError("non existance handler")
         except BaseException:
             #raise
-            print( "problem with handler " + eto_source["measurement_tag"])
+            #print( "problem with handler " + eto_source["measurement_tag"])
             return False, 0.0
 
         return False, 0
@@ -373,8 +392,8 @@ class ETO_Calculators(object):
             else:
                 raise ValueError("non existance handler")
         except BaseException:
-            #print "problem with handler " + rain_source["measurement_tag"]
-
+            print( "problem with handler " + rain_source["measurement_tag"])
+            #raise
             return False, 0.0
     #
     #  ETO Calculation handlers
@@ -389,7 +408,7 @@ class ETO_Calculators(object):
         #print( "eto_data",eto_data)
         cimis_eto = CIMIS_ETO(eto_data)
         cimis_results = cimis_eto.get_eto(time=time.time() - 24 * 3600)
-        print("cimis_results",cimis_results)
+        #print("cimis_results",cimis_results)
         result = cimis_results["eto"]
         return result
 
@@ -432,8 +451,11 @@ class ETO_Calculators(object):
         return result
 
     def sruc1_rain(self, eto_data):
+        
         messo_precp = Messo_Precp(eto_data)
+       
         result = messo_precp.get_daily_data(time=time.time())
+        print("result",result)
         return result
 
     #
@@ -518,7 +540,7 @@ class CIMIS_ETO(object):
         self.station = self.cimis_data["station"]
 
     def get_eto(self, time=time.time() - 1 * ONE_DAY):  # time is in seconds for desired day
-        print("made it here")
+        #print("made it here")
         date = datetime.datetime.fromtimestamp(time).strftime('%Y-%m-%d')
 
         url = self.cimis_url + "?" + self.app_key + "&targets=" + \
@@ -526,9 +548,9 @@ class CIMIS_ETO(object):
         req = urllib.request.Request(url)
         response = urllib.request.urlopen(req)
         temp = response.read()
-        print("temp",temp)
+        #print("temp",temp)
         data = json.loads(temp.decode())
-        print("data",data)
+        #print("data",data)
         return {
             "eto": float(
                 data["Data"]["Providers"][0]["Records"][0]['DayAsceEto']["Value"]),
@@ -630,11 +652,13 @@ class Messo_Precp(object):
 
         url = self.url + "stid=" + self.station + self.token + \
             start_time + end_time + "&obtimezone=local"
-
+        
         req = urllib.request.Request(url)
+       
         response = urllib.request.urlopen(req)
         temp = response.read()
-        data = json.loads(temp)
+        data = json.loads(temp.decode())
+        
 
         station = data["STATION"]
         station = station[0]
@@ -678,7 +702,12 @@ def construct_eto_instance(gm, redis_handle):
 
     rain_source_temp_list = gm.form_key_list("measurement", eto.rain_sources)
     rain_store_temp_list = gm.form_key_list("name", eto.rain_data_stores)
-
+    
+    eto.rain_queue = gm.match_terminal_relationship("RAIN_QUEUE")[0]
+    eto.eto_queue = gm.match_terminal_relationship("ETO_QUEUE")[0]
+    
+    
+    
     assert len(set(rain_source_temp_list) ^ set(
         rain_store_temp_list)) == 0, "graphical data base error"
 
@@ -687,6 +716,7 @@ def construct_eto_instance(gm, redis_handle):
     #
     status_stores = gm.match_terminal_relationship("CLOUD_STATUS_STORE")
 
+    # cloud publish will be redesigned
     temp = gm.match_terminal_relationship("ETO_SITES")
     cloud_namespace = temp[0]["namespace"]
     eto.cloud_namespace = cloud_namespace
@@ -702,6 +732,7 @@ def construct_eto_instance(gm, redis_handle):
         redis_handle, queue_name)
 
     #eto.eto_default = .20
+
     return eto
 
 
@@ -715,7 +746,7 @@ def add_eto_chains(eto, cf):
 
     cf.define_chain("enable_measurement", True)
     cf.insert.log("starting enable_measurement")
-    cf.insert.wait_tod_ge( hour =  8 )
+    cf.insert.wait_tod_ge( hour =  7 )
     cf.insert.enable_chains(["eto_make_measurements"])
     cf.insert.log("enabling making_measurement")
     cf.insert.wait_tod_ge( hour =  18 )
@@ -731,9 +762,9 @@ def add_eto_chains(eto, cf):
     cf.insert.log("Receiving Hour tick")
     cf.insert.reset()
 
-    cf.define_chain("test_generator",True)
-    #insert.send_event("DAY_TICK", 0)
-    #cf.insert.log("Sending Day Tick")
+    cf.define_chain("test_generator",False)
+    cf.insert.send_event("DAY_TICK", 0)
+    cf.insert.log("Sending Day Tick")
     cf.insert.wait_event_count( event = "TIME_TICK" ,count = 1)
     cf.insert.enable_chains(["eto_make_measurements"])
     cf.insert.log("Enabling chain")

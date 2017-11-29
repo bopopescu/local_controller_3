@@ -1,15 +1,17 @@
 import json
 import base64
+import time
 
 class Load_Irrigation_Pages(object):
 
-   def __init__( self, app, auth, render_template, redis_handle, redis_new_handle, request ):
+   def __init__( self, app, auth, render_template, redis_handle, redis_new_handle, request,alarm_queue ):
        self.app             = app
        self.auth            = auth
        self.redis_handle    = redis_handle
        self.redis_new_handle = redis_new_handle
        self.render_template = render_template
        self.request         = request
+       self.alarm_queue     = alarm_queue
 
        a1 = auth.login_required( self.get_index_page )
        app.add_url_rule('/index.html',"get_index_page",a1) 
@@ -35,7 +37,11 @@ class Load_Irrigation_Pages(object):
 
        a1= auth.login_required( self.manage_parameters )
        app.add_url_rule("/control/parameters","manage_parameters",a1)
+       
+       a1= auth.login_required( self.display_past_actions )
+       app.add_url_rule("/control/display_past_actions/<string:event>","display_past_actions",a1)
 
+       
 
    def irrigation_control(self):
        return self.render_template("irrigation_templates/irrigation_control")
@@ -96,5 +102,22 @@ class Load_Irrigation_Pages(object):
        return json.dumps("SUCCESS")
  
 
-
+   def display_past_actions( self,event):
+       fields = self.alarm_queue.get_events()
+       fields['ALL'] = time.time()
+       time_data = self.alarm_queue.get_time_data()
+       sorted_data = []
+       if event in fields:
+           if event == "ALL":
+              sorted_data = time_data
+           else:
+               for i in time_data:
+                   print(i,event)
+                   if i["event"] == event:
+                       sorted_data.append(i)   
+                             
+       
+       print(sorted_data)
+       return self.render_template("irrigation_templates/display_action_queue" ,time_history = sorted_data, events = fields, ref_field_index=event,
+                  header_name="Past Events"       )
   
