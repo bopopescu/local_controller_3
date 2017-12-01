@@ -1,6 +1,8 @@
 
 import os
 import json
+from datetime import datetime
+import time
 
 class Load_ETO_Management(object):
 
@@ -71,7 +73,7 @@ class Load_ETO_Management(object):
            print(i)
            temp = {}
          
-           temp["timestamp"] = i["timestamp"]
+           temp["timestamp"] = time.strftime( "%b %d %Y %H:%M:%S",time.localtime(i["timestamp"]))
           
            del i["timestamp"]
            value = 0.0
@@ -92,7 +94,7 @@ class Load_ETO_Management(object):
            print(i)
            temp = {}
          
-           temp["timestamp"] = i["timestamp"]
+           temp["timestamp"] = time.strftime( "%b %d %Y %H:%M:%S",time.localtime(i["timestamp"]))
           
            del i["timestamp"]
            value = 0.0

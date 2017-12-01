@@ -6,6 +6,8 @@ var x_start_range = 1.0
 var v_min
 var v_max_ref 
 var hh = {}
+var False = false
+var True  = true
 
 function make_refresh()
 {
@@ -47,8 +49,35 @@ function prepare_data( )
   field_keys = Object.keys(events)
   field_keys.sort()
  
-  time_data.reverse()
-  
+  for( i= 0; i < data_length; i++ )
+  {
+     let status = time_data[i].status
+     if( status == "GREEN")
+     {    
+        $("#radio-choice-v"+i).next('label').children('span').css('background-color', 'green');
+        $("#radio-choice-v"+i).next('label').children('span').css('color', 'yellow');
+        $("#radio-choice-v"+i).checkboxradio("refresh");    
+     }
+     else if( status == "YELLOW")
+     {    
+        $("#radio-choice-v"+i).next('label').children('span').css('background-color', 'yellow');
+        $("#radio-choice-v"+i).next('label').children('span').css('color', 'black');
+        $("#radio-choice-v"+i).checkboxradio("refresh");    
+     }
+     else if( status == "RED")
+     {    
+        $("#radio-choice-v"+i).next('label').children('span').css('background-color', 'red');
+        $("#radio-choice-v"+i).next('label').children('span').css('color', 'white');
+        $("#radio-choice-v"+i).checkboxradio("refresh");    
+     }
+     else
+     {
+         alert("this should not happen")
+     }
+
+      
+  }
+   
  
 
 }
@@ -63,7 +92,8 @@ function display_data( index )
 
 function radio_select()
 {
- 
+  
+   
     $("#description").html( "Event Data: "+JSON.stringify(time_data[this.value].data) )
 }
  

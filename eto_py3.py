@@ -22,7 +22,7 @@ import load_files_py3
 import rabbit_cloud_status_publish_py3
 from redis_graph_py3 import farm_template_py3
 import datetime
-
+from   irrigation_control_py3.alarm_queue_py3     import AlarmQueue
 
 ONE_DAY = 24 * 3600
 
@@ -35,6 +35,7 @@ class Eto_Management(object):
         self.redis_handle = redis_handle
         self.redis_old = redis.StrictRedis(
             host='192.168.1.84', port=6379, db=0 , decode_responses=True)
+        self.alarm_queue = AlarmQueue(self.redis_old)
         try:
              eto_update_flag = int(
                   self.redis_handle.hget(
@@ -176,6 +177,7 @@ class Eto_Management(object):
         return return_value
 
     def update_all_bins(self, eto_data):
+        self.alarm_queue.store_past_action_queue( "ETO_UPDATE", "GREEN" ,data = eto_data)
         eto_update_flag = int(
             self.redis_handle.hget(
                 "ETO_VARIABLES",
@@ -682,6 +684,7 @@ def construct_eto_instance(gm, redis_handle):
     rain_sources = gm.match_relationship_list([["RAIN_ENTRY",None]] )
 
     eto = Eto_Management(redis_handle, eto_sources, rain_sources)
+
     eto.eto_calculators = ETO_Calculators(redis_handle)
     #
     # find eto data stores

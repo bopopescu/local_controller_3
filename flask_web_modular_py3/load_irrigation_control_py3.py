@@ -117,7 +117,9 @@ class Load_Irrigation_Pages(object):
                        sorted_data.append(i)   
                              
        
-       print(sorted_data)
+       for i in sorted_data:
+          temp = i["time"]
+          i["time"]  = time.strftime( "%b %d %Y %H:%M:%S",time.localtime(temp))
        return self.render_template("irrigation_templates/display_action_queue" ,time_history = sorted_data, events = fields, ref_field_index=event,
                   header_name="Past Events"       )
   

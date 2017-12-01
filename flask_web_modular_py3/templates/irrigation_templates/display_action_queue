@@ -33,6 +33,9 @@
 
 
 	<script type="text/javascript" >
+    False = false
+    True  = true
+
      None      = ""
      time_data = {{time_history}};
      events    = {{events}};
@@ -65,9 +68,6 @@
     
 </div>    
     
- 
- 
-    
 
 
     <h3 id="title_banner"></h3>   
@@ -77,9 +77,11 @@
     <fieldset data-role="controlgroup" id="fieldset">
         <legend>Past Event Data For: {{ref_field_index}}</legend>
         {% for i in time_history %}
-           {% set label = "Event:   "+i["event"] +"   ------ TIME_STAMP:  "+i["time"]|string %}
-          <input type="radio" name="radio-choice" id="radio-choice-v{{loop.index}}" value={{loop.index0}} >
-          <label for="radio-choice-v{{loop.index}}">{{label}}</label>
+           {% set label = "Status: "+i["status"]+"  Event:   "+i["event"] +"   ------ TIME_STAMP:  "+i["time"]|string %}
+           
+          <input type="radio" name="radio-choice" id="radio-choice-v{{loop.index0}}" value={{loop.index0}} >
+          <label for="radio-choice-v{{loop.index0}}">{{label}}</label>
+        
         {% endfor %}
      </fieldset>
     

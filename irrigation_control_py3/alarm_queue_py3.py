@@ -14,6 +14,7 @@ class AlarmQueue(object):
        
 
    def store_past_action_queue( self, event, status ,data = None):
+      
        log_data = {}
        log_data["event"]   = event
        log_data["data"]     = data
@@ -22,7 +23,7 @@ class AlarmQueue(object):
        json_data            = json.dumps(log_data)
       
        self.redis.lpush( self.time_history_queue , json_data)
-       self.redis.ltrim( self.time_history_queue ,0, 120 )
+       self.redis.ltrim( self.time_history_queue ,0, 1000 )
        self.redis.hset(self.event_hash,event, log_data["time"] )
        
 

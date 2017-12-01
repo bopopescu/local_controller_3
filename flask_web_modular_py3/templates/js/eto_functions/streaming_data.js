@@ -87,7 +87,7 @@ function display_data(  )
   for( let i = 0; i < time_data.length; i++)
   {
     
-     
+
      temp_data = [ new Date(time_data[i]["timestamp"]),time_data[i]["value"]*100 ]
      draw_array.push(temp_data)
   }
@@ -95,7 +95,7 @@ function display_data(  )
  
  
    auto_scale()
-
+   
  
    hh.updateOptions( { 'file': draw_array,
                         'valueRange': [v_min, v_max ],
