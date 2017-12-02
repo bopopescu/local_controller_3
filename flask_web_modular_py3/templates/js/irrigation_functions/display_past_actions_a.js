@@ -51,7 +51,7 @@ function prepare_data( )
  
   for( i= 0; i < data_length; i++ )
   {
-     let status = time_data[i].status
+     let status = time_data[i].status.toUpperCase();
      if( status == "GREEN")
      {    
         $("#radio-choice-v"+i).next('label').children('span').css('background-color', 'green');

@@ -288,7 +288,7 @@ class Opcodes(object):
         reset_event  = parameters[1]
         reset_flag   = parameters[2]
         verifyFn     = parameters[0]
-        
+        print("made it here",cf_handle,chainObj,parameters,event)
         if verifyFn (cf_handle, chainObj, parameters, event):
             returnValue = "CONTINUE"
         else:

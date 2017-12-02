@@ -50,17 +50,19 @@ class Irrigation_Logging(object):
 
 
    def post( self, sprinkler_object):
-       obj = self.log["flow_log"]       
-       self.alarm_queue.store_past_action_queue("IRRIGATION:END","GREEN", { "schedule_name":obj["schedule_name"],"step_name":obj["step"] } )
-       self.store_object( self.log["current_log"],   "coil"    )
-       self.store_object( self.log["flow_log"],      "flow"    )
-       self.store_object( self.log["unified_log"],   "unified"    )
-       obj                        = {}
-       obj["coil"]                = self.log["current_log"]
-       obj["flow"]                = self.log["flow_log"]
-       obj["unified"]             = self.log["unified_log"]
-       # pass data to cloud server
-       self.alarm_queue.store_event_queue( "irrigatation_store_object", obj )
+       if hasattr( self, 'log') == True:
+         
+           obj = self.log["flow_log"]       
+           self.alarm_queue.store_past_action_queue("IRRIGATION:END","GREEN", { "schedule_name":obj["schedule_name"],"step_name":obj["step"] } )
+           self.store_object( self.log["current_log"],   "coil"    )
+           self.store_object( self.log["flow_log"],      "flow"    )
+           self.store_object( self.log["unified_log"],   "unified"    )
+           obj                        = {}
+           obj["coil"]                = self.log["current_log"]
+           obj["flow"]                = self.log["flow_log"]
+           obj["unified"]             = self.log["unified_log"]
+           # pass data to cloud server
+      
        self.current_log_object    = None
        self.flow_log_object       = None
        self.unified_log_object    = None
@@ -112,7 +114,7 @@ class Irrigation_Logging(object):
        obj["coil"]                = self.log["current_log"]
        obj["flow"]                = self.log["flow_log"]
        obj["unified"]             = self.log["unified"]
-       self.alarm_queue.store_event_queue( "irrigatation_store_object", obj )
+       
        self.log = None # reclaim object
 
    def store_object( self, obj ,queue_type ):

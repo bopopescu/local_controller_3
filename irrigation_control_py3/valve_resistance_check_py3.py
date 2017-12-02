@@ -12,6 +12,7 @@ class Valve_Resistance_Check(object):
        self.cf           = cf
        self.cluster_control = cluster_control
        self.io_control      = io_control
+       self.alarm_queue     = alarm_queue
        
 
 
@@ -110,6 +111,7 @@ class Valve_Resistance_Check(object):
        if length > 0:
            return_value = True
        else:
+           self.alarm_queue.store_past_action_queue("Valve_Resistance_Check_Done","Green" )
            return_value = False
        print("return_value",return_value)
        return return_value

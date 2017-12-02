@@ -87,8 +87,11 @@ class Manage_Eto(object):
                run_time = self.find_largest_runtime( self.json_object["run_time"], self.sensor_list )
                
                if run_time == 0:
+                   data = {}
+                   data["io_setup"] = self.json_object["io_setup"]
+                   data["run_time"] = self.json_object["run_time"]
                    self.alarm_queue.store_past_action_queue("IRRIGATION:START:ETO_RESTRICTION",
-                        "YELLOW", self.json_object  )
+                        "YELLOW", data  )
                    return_value = False
                if run_time < self.json_object["run_time"] :
                    self.json_object["run_time"] = run_time

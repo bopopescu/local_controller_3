@@ -18,7 +18,7 @@ class Check_Off(object):
         temp = float(self.redis_handle.hget( "CONTROL_VARIABLES","global_flow_sensor_corrected" ))
         self.redis_handle.hset("CONTROLLER_STATUS", "check_off",temp )
         if temp   > 1.:
-           self.action_queue.store_past_action_queue( "CHECK_OFF", "RED",  { "action":"bad","flow_rate":temp } )           
+           self.alarm_queue.store_past_action_queue( "CHECK_OFF", "RED",  { "action":"bad","flow_rate":temp } )           
            return_value = "DISABLE"
         else:
            self.redis_handle.hset("CONTROL_VARIABLES","SUSPEND","OFF")

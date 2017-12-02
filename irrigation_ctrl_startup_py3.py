@@ -47,7 +47,7 @@ class SprinklerControl():
                   if object_data["command"] in self.commands :
                        self.commands[object_data["command"]]( object_data,chainFlowHandle, chainObj, parameters,event )
                   else:
-                      self.alarm_queue.store_past_action_queue("Bad Irrigation Command","RED",object_data  )
+                      self.alarm_queue.store_past_action_queue("Bad_Irrigation_Command","RED",object_data["command"]  )
                       raise
            except:
                print( "exception in dispatch mode") # issue log message
@@ -64,7 +64,7 @@ class SprinklerControl():
        self.redis_handle.hset("CONTROL_VARIABLES","SUSPEND","ON")
 
    def resume( self, *args ):
-       self.alarm_queue.store_past_action_queue("SUSPEND_OPERATION","YELLOW"  )
+       self.alarm_queue.store_past_action_queue("RESUME_OPERATION","YELLOW"  )
        self.sprinkler_ctrl.resume_operation()
        self.cf.send_event("IRI_MASTER_VALVE_RESUME",None)
 
@@ -80,7 +80,7 @@ class SprinklerControl():
         json_object["type"]   = "RESISTANCE_CHECK"
         json_string = json.dumps( json_object)
         self.redis_handle.lpush(  "QUEUES:SPRINKLER:IRRIGATION_QUEUE", json_string )
-        #alarm_queue.store_past_action_queue( "RESISTANCE_CHECK", "GREEN",  { "action":"start" } )        
+             
 
 
    def check_off( self,object_data,chainFlowHandle, chainObj, parameters,event ):
@@ -131,7 +131,7 @@ class SprinklerControl():
        self.schedule_step =   int(self.schedule_step)
        self.schedule_step_time        =  object_data["run_time"]
 
-       self.alarm_queue.store_past_action_queue("QUEUE_SCHEDULE_STEP","GREEN",{ "schedule":self.schedule_name,"step":self.schedule_step } )      
+       #self.alarm_queue.store_past_action_queue("QUEUE_SCHEDULE_STEP","GREEN",{ "schedule":self.schedule_name,"step":self.schedule_step } )      
        self.load_step_data( self.schedule_name, self.schedule_step ,self.schedule_step_time,True ) 
        self.redis_handle.hset("CONTROL_VARIABLES","SKIP_STATION","OFF")  
 
@@ -152,7 +152,11 @@ class SprinklerControl():
        remote                = object_data["controller"] 
        pin                   = object_data["pin"]         
        schedule_step_time    = object_data["run_time"]  
-       alarm_queue.store_past_action_queue( "DIRECT", "YELLOW", object_data )        
+       data = {}
+       data["remote"] =remote
+       data["pin"]  = pin
+       data["time"] = schedule_step_time
+       alarm_queue.store_past_action_queue( "DIRECT", "YELLOW", data )        
        pin = int(pin)
        schedule_step_time = int(schedule_step_time)  
        self.load_native_data( remote,pin,schedule_step_time)
@@ -177,13 +181,13 @@ class SprinklerControl():
 
 
    def  reset_system( self, *args ):
-      self.alarm_queue.store_past_action_queue("REBOOT","YELLOW"  )
+      self.alarm_queue.store_past_action_queue("REBOOT","RED"  )
       self.redis_handle.hset( "CONTROL_VARIABLES","sprinkler_ctrl_mode","RESET_SYSTEM")
       os.system("reboot")  
 
 
    def restart_program( self, *args ):
-       self.alarm_queue.store_past_action_queue("RESTART","YELLOW"  )
+       self.alarm_queue.store_past_action_queue("RESTART","RED"  )
        self.redis_handle.hset( "CONTROL_VARIABLES","sprinkler_ctrl_mode","RESTART_PROGRAM")
        quit()
        
