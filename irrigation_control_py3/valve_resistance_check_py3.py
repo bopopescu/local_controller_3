@@ -28,7 +28,7 @@ class Valve_Resistance_Check(object):
        cf.insert.send_event("IRI_MASTER_VALVE_RESUME",None)
        cf.insert.terminate() 
 
-       cf.define_chain("test_each_valve",False,init_function= self.check_queue)
+       cf.define_chain("test_each_valve",False,init_function= self.check_queue_a)
        cf.insert.wait_event_count( count = 1 )
        cf.insert.one_step(self.valve_setup)
        cf.insert.wait_event_count(count =2)
@@ -103,9 +103,15 @@ class Valve_Resistance_Check(object):
        dictionary[remote][pin] = list( dictionary[remote][pin])
        self.add_resistance_entry( remote_dictionary, pin_dictionary, remote, pin )
 
+   def check_queue(self,cf_handle, chainObj, parameters, event ):
+       if event["name"] == "INIT":
+          return True
+       else:
+          return self.check_queue_a()
+          
+       
 
-
-   def check_queue( self,*args ):
+   def check_queue_a( self,*args ):
        length = self.redis_handle.llen(  "QUEUES:SPRINKLER:RESISTANCE_CHECK_QUEUE" )
        print("check_queue",length)
        if length > 0:

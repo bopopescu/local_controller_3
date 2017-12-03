@@ -93,8 +93,8 @@ function display_data( index )
 function radio_select()
 {
   
-   
-    $("#description").html( "Event Data: "+JSON.stringify(time_data[this.value].data) )
+    
+    $("#description").html( JSON.stringify(time_data[this.value].data) )
 }
  
 $(document).ready(
@@ -111,7 +111,7 @@ $(document).ready(
   $("#cancel_index_changes").bind("click",cancel_field_index);
   $("#make_index_changes").bind("click", make_refresh );
   $("#change_index").on("popupafteropen", change_field_index );
-  $('input[type=radio][name=radio-choice]').change(radio_select); 
+  //$('input[type=radio][name=radio-choice]').change(radio_select); 
 
   
   })
