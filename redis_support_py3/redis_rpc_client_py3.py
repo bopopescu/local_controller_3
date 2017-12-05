@@ -4,7 +4,7 @@ import json
 import time
 
 
-class Rpc_Server_Error(Exception):
+class Rpc_No_Communication(Exception):
    """Base class for rpc server errors"""
    pass
 class Redis_Rpc_Client(object):
@@ -26,7 +26,7 @@ class Redis_Rpc_Client(object):
         
         self.redis_handle.delete(request["id"] )
         if data == None:
-            raise Rpc_Server_Error("No Communication with Modbus Server")
+            raise Rpc_No_Communication("No Communication with Modbus Server")
         response = json.loads(data[1])
         
         return response
@@ -39,6 +39,6 @@ if __name__ == "__main__":
         try:
             result = redis_rpc_client.send_rpc_message("echo","echo test_message",2)
             print("result",result)
-        except Rpc_Server_Error:
+        except Rpc_No_Communication:
             print("no rpc communication")
             

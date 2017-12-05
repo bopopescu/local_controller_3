@@ -123,15 +123,11 @@
    <div data-role="collapsible" data-theme="a"  data-iconpos="right" data-collapsed="True" data-content-theme="c">
         <h3>PLC Status</h3>
         <ul data-role="listview">
-            <li><a href ='/display_environmental_conditions' , target="_self">Equip Environ Params</a></li>
-            <li><a href=/modbus_statistics target="_self">Modbus Statistics</a></li>
-            <li><a href=/modbus_ping target ="_self">Modbus Ping </a></li>
-            <li><a href="/strip_chart/plc"  target="_self">View PLC Current History</a></li>
-            <li><a href="/view_running_process"  target="_self">View Running Python Processes</a></li>
-            <li><a href="/list_reboot_files"  target="_self">View Python Reboot Time Stamps</a></li>
-            <li><a href="/reboot_system"  target="_self">Reboot The System Over The Web</a></li>
-
-     
+            <li><a href ="/ping_device" , target="_self">Ping Modbus Device</a></li>
+            <li><a href="/modbus_current_status" target="_self">Current Modbus Conditions</a></li>
+            <li><a href="/modbus_basic_status" target ="_self">Hourly Basic Status </a></li>
+            <li><a href="/modbus_message_queue"  target="_self">Hourly Message Queue</a></li>
+            <li><a href="/modbus_device_status"  target="_self">Hourly Device Status</a></li>
 
         </ul>
     </div>

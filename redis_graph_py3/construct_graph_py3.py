@@ -390,6 +390,7 @@ if __name__ == "__main__" :
    properties["redis_db"]   = 0
    properties["redis_rpc_db"] = 5
    properties["redis_rpc_key"] = "#_RPC_QUEUE_"
+   properties["logging_key"]  = "QUEUES:MODBUS_LOGGING"
    cf.add_header_node( "UDP_IO_SERVER","main_remote", properties = properties, json_flag= True )
  
    properties                           = {}

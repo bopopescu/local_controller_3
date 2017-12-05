@@ -20,7 +20,7 @@ from flask_web_modular_py3.load_streaming_data_py3            import Load_Stream
 from flask_web_modular_py3.load_linux_controller_data_py3  import Load_Linux_Controller_Data
 from flask_web_modular_py3.load_statistic_data_py3  import Load_Statistic_Data
 from irrigation_control_py3.alarm_queue_py3  import  AlarmQueue
-
+from flask_web_modular_py3.load_modbus_data_py3  import Load_Modbus_Data
 import flask
 from flask import Flask
 from flask import render_template,jsonify
@@ -58,7 +58,7 @@ class PI_Web_Server(object):
        Load_Linux_Controller_Data( app, auth, request,render_template ,redis_new_handle)
        
        Load_Statistic_Data(app,auth,render_template,request , app_files,sys_files, redis_handle,redis_new_handle,gm )
-
+       Load_Modbus_Data(app, auth, request,render_template ,redis_new_handle, gm )
         
 
    def run_http( self):
