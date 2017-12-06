@@ -9,41 +9,23 @@
 class MessageManager():
    def __init__(self ):
        self.dict     = {}
-       self.counters = {}
-    
-   def get_counters( self ):
-        return self.counters
-  
-   def clear_all_counters( self ):
-       for i in self.counters.keys():
-            self.counters[i]["counts"] = 0
-            self.counters[i]["failures"] = 0
-            self.counters[i]["total_failures"] = 0
-
-   def clear_counter( self, address ):
-       if self.counters.has_key( address ) :
-            self.counters[address]["counts"]         = 0
-            self.counters[address]["failures"]       = 0
-            self.counters[address]["total_failures"] = 0
 
    def add_device( self, address, handler ):
-       self.counters[address]  = {}
-       self.counters[address]["counts"]         = 0
-       self.counters[address]["failures"]       = 0
-       self.counters[address]["total_failures"] = 0
        self.dict[address] = handler      
 
    
    def process_msg( self, msg ): 
        #try:
-         #print "made it here", list(msg)
+         
          address = ord(msg[0])
-         #print "address",address
+         print("address",address)
+         print(self.dict)
+         quit()
          
          
-         if self.dict.has_key(address) :
+         if address in self.dict:
              
-             response = self.dict[ address].process_msg( address, msg, self.counters[address] )
+             response = self.dict[ address].process_msg( address, msg )
              if len(response) == 0 :
                 return ""
              return response

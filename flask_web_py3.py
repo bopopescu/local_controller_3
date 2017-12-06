@@ -21,6 +21,7 @@ from flask_web_modular_py3.load_linux_controller_data_py3  import Load_Linux_Con
 from flask_web_modular_py3.load_statistic_data_py3  import Load_Statistic_Data
 from irrigation_control_py3.alarm_queue_py3  import  AlarmQueue
 from flask_web_modular_py3.load_modbus_data_py3  import Load_Modbus_Data
+from redis_support_py3.redis_rpc_client_py3      import Redis_Rpc_Client
 import flask
 from flask import Flask
 from flask import render_template,jsonify
@@ -58,7 +59,27 @@ class PI_Web_Server(object):
        Load_Linux_Controller_Data( app, auth, request,render_template ,redis_new_handle)
        
        Load_Statistic_Data(app,auth,render_template,request , app_files,sys_files, redis_handle,redis_new_handle,gm )
-       Load_Modbus_Data(app, auth, request,render_template ,redis_new_handle, gm )
+       
+       search_node =    gm.match_terminal_relationship("UDP_IO_SERVER")[0]
+       ip = search_node[ 'redis_host']
+       db = search_node["redis_rpc_db"]
+       logging_key = search_node["logging_key"]
+       redis_rpc_queue = search_node['redis_rpc_key']
+       redis_rpc_handle = redis.StrictRedis(host = ip,db =db, decode_responses=True)
+ 
+       rpc_client = Redis_Rpc_Client(redis_rpc_handle,redis_rpc_queue)
+       
+       
+       # find remote devices
+       search_nodes =    gm.match_relationship_list ( [["UDP_IO_SERVER",None]], starting_set = None, property_values = None, fetch_values = False )
+      
+       remote_lists = gm.match_terminal_relationship("REMOTE_UNIT",starting_set = search_nodes)
+       address_list = []
+       for i in remote_lists:
+          address_list.append(i["modbus_address"])
+
+
+       Load_Modbus_Data(app, auth, request,render_template ,redis_new_handle,redis_handle,rpc_client,address_list,logging_key )
         
 
    def run_http( self):

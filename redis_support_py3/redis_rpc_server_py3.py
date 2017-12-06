@@ -11,6 +11,7 @@ class Redis_Rpc_Server(object):
        self.timeout_function = timeout_function
        self.timeout_value  = timeout_value
        self.handler = {}
+       self.redis_handle.delete(redis_rpc_queue)
        
 
     def register_call_back( self, method_name, handler):

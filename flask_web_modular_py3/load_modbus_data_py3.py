@@ -1,17 +1,20 @@
 
 import os
 import json
-from   redis_support_py3.redis_rpc_client_py3  import Redis_Rpc_Client
+
 class Load_Modbus_Data(object):
 
-   def __init__( self, app, auth, request,render_template,redis_new_handle, gm ):
+   def __init__( self, app, auth, request,render_template,redis_new_handle, redis_old_handle, rpc_client, address_list,logging_key ):
        self.app      = app
        self.auth     = auth
        self.request  = request
        self.render_template  = render_template
        self.redis_new_handle = redis_new_handle
-       self.gm         = gm
-
+       self.redis_old_handle = redis_old_handle
+       self.rpc_client  = rpc_client
+       self.address_list = address_list
+       self.logging_key = logging_key
+       
        #self.rpc_client =     Redis_Rpc_Client(redis_rpc_handle  , server_dict["redis_rpc_key"])   
        a1 = auth.login_required( self.ping_device )
        app.add_url_rule('/ping_device',"ping_device",a1)
@@ -29,16 +32,10 @@ class Load_Modbus_Data(object):
        app.add_url_rule("/modbus_device_status","modbus_device_status",a1)
        
        a1 = auth.login_required( self.ajax_ping_modbus_device )
-       app.add_url_rule('/ajax/ping_modbus_device',"ajax_ping_modbus_device",a1)
+       app.add_url_rule('/ajax/ping_modbus_device',"ajax_ping_modbus_device",a1,methods=["POST"])
 
        
-       # find remote devices
-       search_nodes =    gm.match_relationship_list ( [["UDP_IO_SERVER",None]], starting_set = None, property_values = None, fetch_values = False )
-      
-       remote_lists = gm.match_terminal_relationship("REMOTE_UNIT",starting_set = search_nodes)
-       self.address_list = []
-       for i in remote_lists:
-          self.address_list.append(i["modbus_address"])
+          
       
 
    def ping_device( self ):
@@ -58,4 +55,18 @@ class Load_Modbus_Data(object):
        
        
    def ajax_ping_modbus_device(self):
-       return self.rpc_client.send_rpc_message("ping_message" ,json.dumps() )
+      
+      param            = self.request.get_json()
+      remote           = param["remote"]
+      
+      try:
+          result           = self.rpc_client.send_rpc_message( "ping_message",remote,timeout=30 )
+          if result == True:
+               return_value = "ping received for remote: "+remote
+          else:
+               return_value = "ping NOT received for remote: "+remote
+      except:
+          print("ping exception")
+          return_value = "ping NOT received for remote: "+remote
+      return json.dumps(return_value)
+

@@ -18,7 +18,7 @@ $(document).ready(
 	    var json_object;
 	    var json_string;
 	    json_object = {}
-        json_object["interface"] = $("#interface_type").val()
+        
         json_object["remote"]    = $("#remote_unit").val()
 
 

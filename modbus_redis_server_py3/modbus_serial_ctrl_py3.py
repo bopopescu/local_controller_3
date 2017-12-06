@@ -67,12 +67,12 @@ class ModbusSerialCtrl():
       else:
            return False          
 
-   def process_msg(self,  address, msg, counter ):
+   def process_msg(self,  address, msg ):
       #print "made it here",address
       handler, interface_parameters, parameters   = self.find_remote( address)
       #print "handler",handler,interface_parameters,parameters
       if handler != None:
-           return handler.process_message( parameters, msg, counter )
+           return handler.process_message( parameters, msg )
       else:
           raise "no address recognized"
      

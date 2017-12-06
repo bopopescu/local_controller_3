@@ -20,6 +20,7 @@ class Statistic_Handler( object ):
         
         
         
+        
         self.current_queues = []
         self.redis_current_key = self.graph_key+":RECENT_DATA"
         self.redis_hour_key    = self.graph_key+":HOUR_DATA"
@@ -54,7 +55,7 @@ class Statistic_Handler( object ):
         data["counts"] = self.message_count
         data["losses"] = self.message_loss        
         self.redis_handle.set(self.redis_current_key, json.dumps(data ) )
-        print(self.redis_basic_queue,data)
+        
         return data
  
 
@@ -130,9 +131,9 @@ class Statistic_Handler( object ):
         
         
     def process_start_message( self , modbus_address ):
-        self.message_count += l
+        self.message_count += 1
         self.start_base = time.time()
-        waiting_number = self.redis_rpc_queue.llindex( self.modbus_key, self.redis_rpc_queue )
+        waiting_number = self.redis_handle.llen(self.rpc_queue )
         if waiting_number >= self.max_queue:
            waiting_number = self.max_queue -1
         self.queue[waiting_number] += 1
@@ -173,18 +174,26 @@ class Modbus_Server( object ):
  
  
    def process_ping_message(self, address):
-        return self.msg_handler.ping_devices([address])   
+        print("address",address)
+        temp = self.msg_handler.ping_devices([address])
+        print("ping result",temp[0]["result"])
+        return temp[0]["result"]        
         
    def process_modbus_message( self,input_msg ):
-       self.statistic_handler.process_start_message(input[0])
+       temp = input_msg
+       print(temp,type(temp))
+       self.statistic_handler.process_start_message(temp[0])
        
-       assert len(parameters) ==1, "rpc server client miss match"
-       output_msg ,retries = self.msg_handler.process_msg( input_msg )
+       
+       print(self.msg_handler.process_msg,input_msg)
+       #### TO DO  look into retries  handle bad address
+       output_msg,retries = self.msg_handler.process_msg( input_msg )
+       
        if output_msg == "":
            output_msg = "@"
-           self.statistic_handler.log_bad_message( input_msg[0], retries )
+           self.statistic_handler.log_bad_message( temp[0], retries )
        else:
-            self.statistic_handler.log_good_message( input_msg[0], retries )
+            self.statistic_handler.log_good_message( temp[0], retries )
        self.statistic_handler.process_end_message()
        return [output_msg]
         
@@ -242,10 +251,6 @@ if __name__ == "__main__":
    from redis_graph_py3.farm_template_py3 import Graph_Management
 
    
-   def do_test_messages():
-         from   redis_support_py3.redis_rpc_client_py3  import Redis_Rpc_Client
-         rpc_client =     Redis_Rpc_Client(redis_rpc_handle  , server_dict["redis_rpc_key"])   
-         rpc_client.send_rpc_message( "ping_message",100)  
    
    server_index = 0
    
@@ -259,8 +264,8 @@ if __name__ == "__main__":
   
    rs485_interface =   RS485_Mgr() 
    msg_mgr = MessageManager()
-   redis_rpc_handle   =  redis.StrictRedis(  server_dict["ip"] , 6379, server_dict["redis_rpc_db"] )
-   redis_handle       =  redis.StrictRedis(  server_dict["ip"] , 6379, 0 )
+   redis_rpc_handle   =  redis.StrictRedis(  server_dict["ip"] , 6379, server_dict["redis_rpc_db"],decode_responses=True )
+   redis_handle       =  redis.StrictRedis(  server_dict["ip"] , 6379, 0,decode_responses=True )
    master_remote_dictionary = []
    for i,item in serial_links.items():
        remote_dict = setup.find_and_register_remotes( item , rs485_interface, msg_mgr )
@@ -273,7 +278,7 @@ if __name__ == "__main__":
        msg_mgr.add_device( 255,    redis_handle) 
         
    print(msg_mgr.ping_devices([100]))
-   #do_test_messages()
+  
    Modbus_Server( redis_handle, redis_rpc_handle,msg_mgr, server_dict, master_remote_dictionary,"modbus_relay","ping_message"  )
     
 
