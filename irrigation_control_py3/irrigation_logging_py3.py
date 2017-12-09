@@ -50,7 +50,7 @@ class Irrigation_Logging(object):
 
 
    def post( self, sprinkler_object):
-       if (hasattr( self, 'log') == True) and (self.alarm_queue.alarm_state == True ):
+       if (hasattr( self, 'log') == True) and (self.alarm_queue.alarm_state == False ):
          
            obj = self.log["flow_log"]       
            self.alarm_queue.store_past_action_queue("IRRIGATION:END","GREEN", { "schedule_name":obj["schedule_name"],"step_name":obj["step"] } )
