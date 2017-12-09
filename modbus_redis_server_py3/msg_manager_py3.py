@@ -15,20 +15,20 @@ class MessageManager():
 
    
    def process_msg( self, msg ): 
-       #try:
+       try:
+         msg = msg.encode()
+       except:
+         pass
+         address = msg[0]
          
-         address = ord(msg[0])
-         print("address",address)
-         print(self.dict)
-         quit()
          
          
          if address in self.dict:
              
              response = self.dict[ address].process_msg( address, msg )
-             if len(response) == 0 :
-                return ""
              return response
+         else:
+            raise # badd address
        #except:
         #   return ""
           

@@ -1,5 +1,6 @@
 
 import time
+import base64
 from datetime import datetime
 
 class No_Server_In_Graph(Exception):
@@ -40,10 +41,20 @@ class Statistic_Handler( object ):
         self.initialize_logging_data()
  
     def update_current_state(self):
+        data = self.update_current_state_a()
+ 
+        data["remotes"] = {}
+        for i in self.remote_units:           
+            data["remotes"][i] = self.remote_data[i]
+        self.redis_handle.set(self.redis_current_key, json.dumps(data ) )       
+        return data
+        
+    def update_current_state_a(self):
+    
         if self.message_count == 0:
-            message_ratio = 100
+            message_ratio = 0
         else:
-            message_ratio = (self.message_count - self.message_loss )/self.message_count *100
+            message_ratio = ( self.message_loss )/self.message_count *100
         total_time = self.busy_time + self.idle_time
         if total_time == 0 :
             time_ratio = 0   
@@ -53,11 +64,13 @@ class Statistic_Handler( object ):
         data["message_ratio"] = message_ratio
         data["time_ratio"] = time_ratio
         data["counts"] = self.message_count
-        data["losses"] = self.message_loss        
-        self.redis_handle.set(self.redis_current_key, json.dumps(data ) )
+        data["losses"] = self.message_loss 
+        data["retries"] = self.retries
+        
         
         return data
  
+
 
        
     def update_list( self, key, data ):
@@ -73,13 +86,14 @@ class Statistic_Handler( object ):
 
         
     def initialize_logging_data( self ):
-        self.datetime = datetime.now()
+        self.hour = datetime.now().hour
         #initial basic stuff
         self.time_stamp = datetime.now()
         self.busy_time = 0
         self.idle_time = 0
         self.message_count = 0
         self.message_loss = 0
+        self.retries  = 0
         
         #initialize server queue stuff
         self.queue = {}
@@ -91,9 +105,10 @@ class Statistic_Handler( object ):
         self.remote_data = {}
         for i in self.remote_units:
            item = {}
-           item["attempted"] = 0
-           item["loss"] = 0
-           self.remote_data = item
+           item["message_count"] = 0
+           item["message_loss"] = 0
+           item["retries"] = 0
+           self.remote_data[i] = item
                 
         
     def hour_rollover( self ):
@@ -105,7 +120,7 @@ class Statistic_Handler( object ):
         self.initialize_logging_data()
         
     def hour_basic_stuff( self ):
-        data = self.update_current_state()
+        data = self.update_current_state_a()
         self.update_list(self.redis_basic_queue, json.dumps(data ) )
   
     def hour_queue_stuff( self ):
@@ -113,7 +128,7 @@ class Statistic_Handler( object ):
 
     def hour_remote_stuff( self ):
         for i, item in self.remote_data.items():
-           self.update_list(self.redis_basic_queue[i], json.dumps(item))
+           self.update_list(self.redis_remote_queues[i], json.dumps(item))
         
 
     def process_null_message( self ):
@@ -122,7 +137,7 @@ class Statistic_Handler( object ):
         delta_t = temp - self.time_base
         self.time_base = temp
         self.idle_time = self.idle_time + delta_t
-        if self.datetime.hour != datetime.now().hour:
+        if self.hour != datetime.now().hour:
             
              self.hour_rollover()
 
@@ -137,27 +152,35 @@ class Statistic_Handler( object ):
         if waiting_number >= self.max_queue:
            waiting_number = self.max_queue -1
         self.queue[waiting_number] += 1
-        if modbus_address in self.remote_units:
-           self.remote_attempted[modbus_address] += 1
-        
+       
         
          
-    def process_end_messager( self ):
+    def process_end_message( self ):
         self.time_base = time.time()
         delta_t = self.time_base - self.start_base
         self.busy_time += delta_t
-        if self.datetime.hour != datetime.now().hour():
+        if self.hour != datetime.now().hour:
              self.hour_rollover()
         self.update_current_state()
         
-
-    def log_bad_message( self, modbus_address ):
+ 
+    def log_bad_message( self, modbus_address,retries ):
+        self.message_count +=1
         self.message_loss += 1
+        self.retries +=1
         if modbus_address in self.remote_units:
-            self.remote_losses[modbus_address] += 1
+            self.remote_data[modbus_address]["message_count"] += 1
+            self.remote_data[modbus_address]["message_loss"] += 1
+            self.remote_data[modbus_address]["retries"] += 1
+
         
-    def log_good_message( self, modbus_address ):
-        pass
+    def log_good_message( self, modbus_address,retries ):
+        self.message_count +=1
+        self.retries +=1
+        if modbus_address in self.remote_units:
+            self.remote_data[modbus_address]["message_count"] += 1
+            self.remote_data[modbus_address]["retries"] += 1
+
         
 class Modbus_Server( object ):
     
@@ -173,29 +196,28 @@ class Modbus_Server( object ):
        self.redis_rpc_server.start()
  
  
-   def process_ping_message(self, address):
-        print("address",address)
+   def process_ping_message(self, address):    
         temp = self.msg_handler.ping_devices([address])
-        print("ping result",temp[0]["result"])
         return temp[0]["result"]        
         
    def process_modbus_message( self,input_msg ):
-       temp = input_msg
-       print(temp,type(temp))
-       self.statistic_handler.process_start_message(temp[0])
+       input_msg = base64.b64decode(input_msg)
+       address = input_msg[0]
+       
+       self.statistic_handler.process_start_message( address )
+      
        
        
-       print(self.msg_handler.process_msg,input_msg)
-       #### TO DO  look into retries  handle bad address
-       output_msg,retries = self.msg_handler.process_msg( input_msg )
+      
+       failure, retries, output_message = self.msg_handler.process_msg( input_msg )
        
-       if output_msg == "":
+       if failure != 0:
            output_msg = "@"
-           self.statistic_handler.log_bad_message( temp[0], retries )
+           self.statistic_handler.log_bad_message( address, retries )
        else:
-            self.statistic_handler.log_good_message( temp[0], retries )
+            self.statistic_handler.log_good_message( address, retries )
        self.statistic_handler.process_end_message()
-       return [output_msg]
+       return base64.b64encode(output_message).decode()
         
 
    def process_null_msg( self ):
@@ -276,7 +298,7 @@ if __name__ == "__main__":
            msg_mgr.add_device( k["modbus_address"], modbus_serial_ctrl )  
            master_remote_dictionary.append(k["modbus_address"])           
        msg_mgr.add_device( 255,    redis_handle) 
-        
+   
    print(msg_mgr.ping_devices([100]))
   
    Modbus_Server( redis_handle, redis_rpc_handle,msg_mgr, server_dict, master_remote_dictionary,"modbus_relay","ping_message"  )

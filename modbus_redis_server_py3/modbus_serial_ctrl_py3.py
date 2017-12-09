@@ -111,11 +111,12 @@ class ModbusSerialCtrl():
    def _open_floating_interface( self,serial_interface ):
        
        for interface in  self.interfaces:
-
+          
           if self._try_interface( interface ,serial_interface):
+            
              if self._try_ping(serial_interface):
                 return
-       #print "made it here"
+       
        raise Exception('interface_error', serial_interface )
 
    def _try_interface( self, interface, serial_interface ):
@@ -143,8 +144,9 @@ class ModbusSerialCtrl():
        interface_parameters      = serial_interface["interface_parameters"]
        search_device             = serial_interface["search_device"]
        parameters                = self.remote_devices[search_device]["parameters"]
-       flag                      = handler.probe_register( parameters )
- 
+     
+       flag   = handler.probe_register( parameters )
+      
        if flag == False:
            serial_interface["interface_parameters"]["interface"] = None
            handler.close()

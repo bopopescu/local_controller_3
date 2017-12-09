@@ -41,40 +41,38 @@ class RS485_Mgr():
        pass 
 
    def process_message( self, parameters, message, counters = None ):
-       #print "made it to rs485"
+
+       retries = 0
+       total_failures = 0
+
        for i in range(0,5):
-           #print i
+           
            try:
 
                response = b""
-               #print "message ",len(message)
+             
                response =  self.instrument._communicate( message, 1024)
                time.sleep(.05)
                #print "response ",len(response)
-               #print "message",[message],len(response),[response]
+              
                if len(response  ) > 4:
                    receivedChecksum          = response[-2:]
                    responseWithoutChecksum   = response[0 : len(response) - 2]
                    calculatedChecksum = self._calculateCrcString(responseWithoutChecksum)
                    #print "crc",[receivedChecksum, calculatedChecksum], ord(message[0]),parameters["address"]
                    if (receivedChecksum == calculatedChecksum) and (message[0] == parameters["address"] ): # check checksum
-                       #print "made it here",#
-                       if counters != None:
-                           counters["counts"] = counters["counts"] +1
-                       #print i,len(response)
-                       return response
+                        
+                        return  total_failures, retries ,response
               
                if counters != None:
-                   counters["failures"] = counters["failures"] +1
+                   retries +=1
                
            except:
               raise # serial errror              
               response = ""
-       if counters != None:  
-           counters["total_failures"] = counters["total_failures"] +1
-           counters["counts"] = counters["counts"] +1
-       
-       return response
+ 
+       total_failures =1 
+       return total_failures , retries , response
      
 
 
@@ -83,23 +81,26 @@ class RS485_Mgr():
 
 
    def probe_register( self, parameters, counters = None ):
+      
        address     = parameters["address"]
        register    = parameters["search_register"]
        number      = parameters["register_number"]
        payload     = struct.pack("<BBBBBB",address,3,(register>>8)&255,register&255,0,number)  # read register 0 1 length
        calculatedChecksum = self._calculateCrcString(payload)
        payload = payload+calculatedChecksum
-       response = self.process_message(parameters,payload,counters )
+       failure,retries, response = self.process_message(parameters,payload,counters )
 
-       receivedChecksum          = response[-2:]
-       responseWithoutChecksum   = response[0 : len(response) - 2]
-       calculatedChecksum = self._calculateCrcString(responseWithoutChecksum)
-       return_value = receivedChecksum == calculatedChecksum # check checksum
+       #receivedChecksum          = response[-2:]
+       #responseWithoutChecksum   = response[0 : len(response) - 2]
+       #calculatedChecksum = self._calculateCrcString(responseWithoutChecksum)
        
-       if return_value == True :
+       #return_value = receivedChecksum == calculatedChecksum # check checksum
+       
+       if failure == 0 :
              return_value = address == (response[0])  # check address
-       #else:
-       #   print "probe failure"
+             
+       else:
+             return_value = False
        return return_value
  
        
@@ -145,10 +146,10 @@ if __name__ == "__main__":
    counters["total_failures"]  = 0
    if rs485_mgr.open(interface_parameters ):
      for i in range(0,100):
-        #print i
+        
         print( i, rs485_mgr.probe_register( parameters,counters ))
-        #time.sleep(.05)
+       
      rs485_mgr.close()
-   print( counters )  
+   
 
 

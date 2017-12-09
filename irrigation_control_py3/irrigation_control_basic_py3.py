@@ -157,6 +157,7 @@ class Irrigation_Control_Basic(object):
    
 
    def start_logging( self, *args):
+       self.alarm_queue.alarm_state = False
        if self.logging_obj != None:
            self.logging_obj.start( self )
 
@@ -217,7 +218,9 @@ class Irrigation_Control_Basic(object):
            
            return_value = True
            self.current =  self.io_control.measure_valve_current()
+          
            if self.current > 24:
+               self.alarm_queue.alarm_state = True
                self.alarm_queue.store_past_action_queue("IRRIGATION:CURRENT_ABORT",
                    "RED", { "schedule_name":self.json_object["schedule_name"],
                             "step_number":self.json_object["step"] } )
@@ -240,6 +243,7 @@ class Irrigation_Control_Basic(object):
            if (self.json_object["max_flow_time"] >= 2) and (flow_value > self.json_object["max_flow"]):
                self.over_load_time = self.over_load_time + 1
                if self.over_load_time > 2:
+                   self.alarm_queue.alarm_state = True
                    self.alarm_queue.store_past_action_queue("IRRIGATION:FLOW_ABORT","RED",
                    { "schedule_name":self.json_object["schedule_name"],
                      "step_number":self.json_object["step"],

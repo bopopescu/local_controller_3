@@ -1068,21 +1068,23 @@ class Instrument():
 
         # Read response
         answer = b""
-        for i in range( 0, 50):  # .5 second wait
+        
+        for i in range( 0, 5):  # .25 second wait
            #print "first i",i
            new_answer = self.serial.read(number_of_bytes_to_read)
            if len(new_answer) > 0:
               answer += new_answer
               break 
-
-        for i in range(0,20):  # .
-           #print "second i",i
-           new_answer = self.serial.read(number_of_bytes_to_read)
-           answer = answer + new_answer
-           if len(new_answer) ==  0:
-              break 
-            
         
+        if answer != b"":
+            for i in range(0,20):  # .
+             #print "second i",i
+             new_answer = self.serial.read(number_of_bytes_to_read)
+             answer = answer + new_answer
+             if len(new_answer) ==  0:
+                 break 
+            
+        #print("made it here",answer)
         #_LATEST_READ_TIMES[self.serial.port] = time.time()
 
         #if self.close_port_after_each_call:

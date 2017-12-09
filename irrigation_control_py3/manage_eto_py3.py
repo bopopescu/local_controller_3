@@ -90,6 +90,7 @@ class Manage_Eto(object):
                    data = {}
                    data["io_setup"] = self.json_object["io_setup"]
                    data["run_time"] = self.json_object["run_time"]
+                   self.alarm_queue.alarm_state = True
                    self.alarm_queue.store_past_action_queue("IRRIGATION:START:ETO_RESTRICTION",
                         "YELLOW", data  )
                    return_value = False
