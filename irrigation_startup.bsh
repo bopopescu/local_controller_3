@@ -10,7 +10,8 @@ python3 load_files_py3.py
 ./linux_monitoring.bsh&
 #./moisture_monitoring.bsh&
 ./eto.bsh&
-./python_udp_server_startup.bsh&
+#./python_udp_server_startup.bsh&
+./modbus_server.bsh&
 #./rabbit_redis_access.bsh&
 ./rabbit_web_access.bsh&
 ./rabbit_cloud_status_publish.bsh&
