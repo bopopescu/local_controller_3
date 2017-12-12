@@ -1,6 +1,7 @@
 
 import os
 import json
+import datetime
 
 class Load_Modbus_Data(object):
 
@@ -39,10 +40,28 @@ class Load_Modbus_Data(object):
       
 
    def ping_device( self ):
+       
        return self.render_template("modbus/modbus_ping",address_list = self.address_list)
 
    def modbus_current_status(self):
-       return "SUCCESS"
+       recent_data = json.loads(self.redis_old_handle.get("QUEUES:MODBUS_LOGGING:RECENT_DATA"))
+       queue_keys = list(recent_data["queue"].keys())
+       
+       queue_keys.sort()
+       remote_list = list(recent_data["remotes"].keys())
+       temp = []
+       for i in remote_list:
+         temp.append(int(i))
+       remote_list = temp
+       remote_list.sort()
+       temp = []
+       for i in remote_list:
+          temp.append(str(i))
+       remote_list = temp
+       now = datetime.datetime.now()
+       date_string = now.isoformat()
+       print(date_string)
+       return self.render_template("modbus/current_conditions",data = recent_data,queue_keys = queue_keys, remote_list = remote_list,date_string=date_string )
 
    def modbus_basic_status( self ):
        return "SUCCESS"

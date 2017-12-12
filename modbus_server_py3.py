@@ -66,7 +66,7 @@ class Statistic_Handler( object ):
         data["counts"] = self.message_count
         data["losses"] = self.message_loss 
         data["retries"] = self.retries
-        
+        data["queue"]  = self.queue
         
         return data
  
@@ -87,6 +87,7 @@ class Statistic_Handler( object ):
         
     def initialize_logging_data( self ):
         self.hour = datetime.now().hour
+        self.minute = datetime.now().minute
         #initial basic stuff
         self.time_stamp = datetime.now()
         self.busy_time = 0
@@ -112,11 +113,10 @@ class Statistic_Handler( object ):
                 
         
     def hour_rollover( self ):
-        return
-    
-        self.hour_basic_stuff()
-        self.hour_queue_stuff()
-        self.hour_remote_stuff()
+        print("hour rollover")
+        #self.hour_basic_stuff()
+        #self.hour_queue_stuff()
+        #self.hour_remote_stuff()
         self.initialize_logging_data()
         
     def hour_basic_stuff( self ):
@@ -138,7 +138,7 @@ class Statistic_Handler( object ):
         self.time_base = temp
         self.idle_time = self.idle_time + delta_t
         if self.hour != datetime.now().hour:
-            
+        #if self.minute != datetime.now().minute:    
              self.hour_rollover()
 
         self.update_current_state()
@@ -146,7 +146,7 @@ class Statistic_Handler( object ):
         
         
     def process_start_message( self , modbus_address ):
-        self.message_count += 1
+       
         self.start_base = time.time()
         waiting_number = self.redis_handle.llen(self.rpc_queue )
         if waiting_number >= self.max_queue:
@@ -167,19 +167,19 @@ class Statistic_Handler( object ):
     def log_bad_message( self, modbus_address,retries ):
         self.message_count +=1
         self.message_loss += 1
-        self.retries +=1
+        self.retries +=retries
         if modbus_address in self.remote_units:
             self.remote_data[modbus_address]["message_count"] += 1
             self.remote_data[modbus_address]["message_loss"] += 1
-            self.remote_data[modbus_address]["retries"] += 1
+            self.remote_data[modbus_address]["retries"] += retries
 
         
     def log_good_message( self, modbus_address,retries ):
         self.message_count +=1
-        self.retries +=1
+        self.retries +=retries
         if modbus_address in self.remote_units:
             self.remote_data[modbus_address]["message_count"] += 1
-            self.remote_data[modbus_address]["retries"] += 1
+            self.remote_data[modbus_address]["retries"] += retries
 
         
 class Modbus_Server( object ):
