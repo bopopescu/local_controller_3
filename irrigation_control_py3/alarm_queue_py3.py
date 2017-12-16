@@ -35,20 +35,21 @@ class AlarmQueue(object):
  
     def store_past_action_queue_direct( self, event, status ,data = None):
        json_data            = self.jsonize_data(event,status,data)
-      
+
        self.redis_handle.lpush( self.time_history_queue , json_data)
        self.redis_handle.ltrim( self.time_history_queue ,0, self.history )
        self.redis_handle.hset(self.event_hash,event, time.time() )
       
 
     def store_past_action_queue( self, event, status ,data = None):
-      
+       self.redis_handle.hset(self.event_hash,event,time.time())
        if self.redis_handle.hexists(self.bypass_queue, event ) == True:
            json_data            = self.jsonize_data(event,status,data)
            queue = self.redis_handle.hget(self.bypass_queue,event) 
            self.redis_handle.publish(queue,json_data)
        else:
-         self.store_past_action_queue_direct(event,status,event)
+
+         self.store_past_action_queue_direct(event,status,data)
            
        
 

@@ -1,0 +1,13 @@
+while [ 1 ]
+do
+   for i in {1..60}
+   do
+       echo "io monitoring $i"
+       /usr/bin/python3 modbus_server_py3.py main_remote
+  2>  /tmp/modbus_server_py3.err   
+     
+        mv /tmp/modbus_server_py3.err /tmp/modbus_server_py3.errr
+        sleep 5
+   done
+   python3 modbus_server_py3.py "reboot" "modbus server"
+done

@@ -38,6 +38,7 @@
 	
         
      <script type="text/javascript">
+     None = null
      schedule_id = {{ schedule_id }}
      field_list = {{ field_list }};
      sub_field_list = {{ sub_field_list }};

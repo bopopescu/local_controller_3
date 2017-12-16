@@ -13,7 +13,7 @@ class Load_Modbus_Data(object):
        self.redis_new_handle = redis_new_handle
        self.redis_old_handle = redis_old_handle
        self.rpc_client  = rpc_client
-       self.address_list = address_list
+       
        self.logging_key = logging_key
        
        #self.rpc_client =     Redis_Rpc_Client(redis_rpc_handle  , server_dict["redis_rpc_key"])   
@@ -26,28 +26,36 @@ class Load_Modbus_Data(object):
        a1 = auth.login_required( self.modbus_basic_status )
        app.add_url_rule("/modbus_basic_status","modbus_basic_status",a1)
 
-       a1 = auth.login_required( self.modbus_message_queue )
-       app.add_url_rule("/modbus_message_queue","modbus_message_queue",a1)
        
        a1 = auth.login_required( self.modbus_device_status )
-       app.add_url_rule("/modbus_device_status","modbus_device_status",a1)
+       app.add_url_rule("/modbus_device_status/<int:remote_index>","modbus_device_status",a1)
        
        a1 = auth.login_required( self.ajax_ping_modbus_device )
        app.add_url_rule('/ajax/ping_modbus_device',"ajax_ping_modbus_device",a1,methods=["POST"])
-
        
+       temp = []
+       for i in address_list:
+          temp.append(int(i))
+       temp.sort()
+       address_list = []
+       for i in temp:
+          address_list.append(str(i))
           
-      
+       self.address_list = address_list
+          
+         
+
+ 
+       
+ 
 
    def ping_device( self ):
        
        return self.render_template("modbus/modbus_ping",address_list = self.address_list)
 
    def modbus_current_status(self):
-       recent_data = json.loads(self.redis_old_handle.get("QUEUES:MODBUS_LOGGING:RECENT_DATA"))
-       queue_keys = list(recent_data["queue"].keys())
-       
-       queue_keys.sort()
+       recent_data = json.loads(self.redis_old_handle.get(self.logging_key+":RECENT_DATA"))
+ 
        remote_list = list(recent_data["remotes"].keys())
        temp = []
        for i in remote_list:
@@ -61,16 +69,30 @@ class Load_Modbus_Data(object):
        now = datetime.datetime.now()
        date_string = now.isoformat()
        print(date_string)
-       return self.render_template("modbus/current_conditions",data = recent_data,queue_keys = queue_keys, remote_list = remote_list,date_string=date_string )
+       return self.render_template("modbus/current_conditions",data = recent_data, remote_list = remote_list,date_string=date_string )
 
    def modbus_basic_status( self ):
-       return "SUCCESS"
+       recent_data_json = self.redis_old_handle.lrange(self.logging_key+":HOUR_DATA:BASIC_STATS",0,-1)
+       recent_data = []
+       for i in recent_data_json:
+           recent_data.append(json.loads(i))
+       sel_prop = {}
+       sel_prop["flow"] = {}
+       return self.render_template("streaming_data/streaming_data",title="Modbus_Streaming_Data",
+                               header_name  ="Modbus_Streaming_Data", data = recent_data, start_index = 0) 
 
-   def modbus_message_queue( self ):
-       return "SUCCESS"   
 
-   def modbus_device_status( self ):
-       return "SUCCESS"
+   def modbus_device_status( self,remote_index ):
+       recent_data_json = self.redis_old_handle.lrange(self.logging_key+":HOUR_DATA:REMOTES:"+str(self.address_list[remote_index]),0,-1)
+       recent_data = []
+       for i in recent_data_json:
+           recent_data.append(json.loads(i))
+       sel_prop = {}
+       sel_prop["flow"] = {}
+       return self.render_template("modbus/remote_data",title="Modbus Data For Remote "+str(self.address_list[remote_index]),address_list = self.address_list,
+                               header_name  ="Modbus Data For Remote "+str(self.address_list[remote_index]), data = recent_data, start_index = 0, 
+                               remote_index = remote_index) 
+
        
        
    def ajax_ping_modbus_device(self):

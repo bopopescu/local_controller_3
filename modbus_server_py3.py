@@ -14,7 +14,7 @@ class Statistic_Handler( object ):
         # copy instanciation parameters
         self.redis_handle = redis_handle
         self.remote_units = remote_units
-        self.max_queue = 7
+
         self.time_base = time.time()
         self.rpc_queue = rpc_queue
         self.graph_key = graph_key
@@ -22,7 +22,7 @@ class Statistic_Handler( object ):
         
         
         
-        self.current_queues = []
+        self.queue_history_length =  1500
         self.redis_current_key = self.graph_key+":RECENT_DATA"
         self.redis_hour_key    = self.graph_key+":HOUR_DATA"
         self.redis_server_queue = self.redis_hour_key+":SERVER_QUEUE"
@@ -50,23 +50,18 @@ class Statistic_Handler( object ):
         return data
         
     def update_current_state_a(self):
-    
-        if self.message_count == 0:
-            message_ratio = 0
-        else:
-            message_ratio = ( self.message_loss )/self.message_count *100
         total_time = self.busy_time + self.idle_time
         if total_time == 0 :
             time_ratio = 0   
         else:
             time_ratio = ( self.busy_time *100)/total_time
         data = {}
-        data["message_ratio"] = message_ratio
         data["time_ratio"] = time_ratio
         data["counts"] = self.message_count
         data["losses"] = self.message_loss 
         data["retries"] = self.retries
-        data["queue"]  = self.queue
+        data["time_stamp"] = time.strftime( "%b %d %Y %H:%M:%S",time.localtime(time.time()))
+       
         
         return data
  
@@ -75,7 +70,7 @@ class Statistic_Handler( object ):
        
     def update_list( self, key, data ):
         self.redis_handle.lpush(key,data)
-        self.redis_handle.ltrim(key,0,self.queue_length )
+        self.redis_handle.ltrim(key,0,self.queue_history_length  )
        
     def verify_list( self, item ):
             if self.redis_handle.exists(item):
@@ -98,14 +93,13 @@ class Statistic_Handler( object ):
         
         #initialize server queue stuff
         self.queue = {}
-        for i in range(0,self.max_queue ):
-            self.queue[i] = 0
-        
+       
         #initialize remotes
         
         self.remote_data = {}
         for i in self.remote_units:
            item = {}
+           item["time_stamp"] = time.strftime( "%b %d %Y %H:%M:%S",time.localtime(time.time()))
            item["message_count"] = 0
            item["message_loss"] = 0
            item["retries"] = 0
@@ -114,18 +108,14 @@ class Statistic_Handler( object ):
         
     def hour_rollover( self ):
         print("hour rollover")
-        #self.hour_basic_stuff()
-        #self.hour_queue_stuff()
-        #self.hour_remote_stuff()
+        self.hour_basic_stuff()
+        self.hour_remote_stuff()
         self.initialize_logging_data()
         
     def hour_basic_stuff( self ):
         data = self.update_current_state_a()
         self.update_list(self.redis_basic_queue, json.dumps(data ) )
-  
-    def hour_queue_stuff( self ):
-        self.update_list(self.redis_basic_queue, json.dumps(self.queue))
-
+ 
     def hour_remote_stuff( self ):
         for i, item in self.remote_data.items():
            self.update_list(self.redis_remote_queues[i], json.dumps(item))
@@ -148,11 +138,7 @@ class Statistic_Handler( object ):
     def process_start_message( self , modbus_address ):
        
         self.start_base = time.time()
-        waiting_number = self.redis_handle.llen(self.rpc_queue )
-        if waiting_number >= self.max_queue:
-           waiting_number = self.max_queue -1
-        self.queue[waiting_number] += 1
-       
+      
         
          
     def process_end_message( self ):
@@ -169,6 +155,7 @@ class Statistic_Handler( object ):
         self.message_loss += 1
         self.retries +=retries
         if modbus_address in self.remote_units:
+            self.remote_data[modbus_address]["time_stamp"] = time.strftime( "%b %d %Y %H:%M:%S",time.localtime(time.time()))
             self.remote_data[modbus_address]["message_count"] += 1
             self.remote_data[modbus_address]["message_loss"] += 1
             self.remote_data[modbus_address]["retries"] += retries
@@ -178,6 +165,7 @@ class Statistic_Handler( object ):
         self.message_count +=1
         self.retries +=retries
         if modbus_address in self.remote_units:
+            self.remote_data[modbus_address]["time_stamp"] = time.strftime( "%b %d %Y %H:%M:%S",time.localtime(time.time()))
             self.remote_data[modbus_address]["message_count"] += 1
             self.remote_data[modbus_address]["retries"] += retries
 
