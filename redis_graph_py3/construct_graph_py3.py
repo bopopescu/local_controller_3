@@ -442,8 +442,24 @@ if __name__ == "__main__" :
    cf.add_header_node("RABBITMQ_CLIENTS")
    cf.add_rabbitmq_status_queue( "LaCima",vhost="LaCima",queue="status_queue",port=5671,server = 'lacimaRanch.cloudapp.net' )
    cf.end_header_node("RABBITMQ_CLIENTS")
+   properties = {}
+   properties["redis"] = {"ip":"127.0.0.1","port": 6379, "db":0 }
+   properties["error_queue_key"] = "PROCESS:ERROR_QUEUE"
+   properties["web_command_key"] = "PROCESS:WEB_COMMAND_KEY"
+   properties["web_process_data"] = "PROCESS:WEB_PROCESS_DATA"
+   properties["web_display_list"]  = "PROCESS:WEB_DISPLAY_LIST"
+   properties["command_string_list"] = []
+   properties["command_string_list"].append( "linux_acquisition_py3.py")
+   properties["command_string_list"].append( "eto_py3.py")
+   properties["command_string_list"].append( "modbus_server_py3.py")
+   properties["command_string_list"].append( "rabbit_web_access_py3.py")
+   properties["command_string_list"].append("rabbit_cloud_status_publish_py3.py")
+   properties["command_string_list"].append("utilities_py3.py")
+   properties["command_string_list"].append("flask_web_py3.py")
+   properties["command_string_list"].append("irrigation_monitoring_py3.py")
+   properties["command_string_list"].append("irrigation_ctrl_startup_py3.py")
 
-
+   cf.add_info_node("PROCESS_CONTROL","main_processor",properties=properties,json_flag = True )
    #cf.construct_controller(  name="PI_1", ip = "192.168.1.82",type="PI")
    #cf.end_controller()
 
