@@ -41,6 +41,7 @@ class Process_Control(object ):
        if returncode == None:
           return [ True, 0]
        else:
+          self.kill_process(process_handle)
           del process_handle
           return [ False, returncode ]
        
@@ -59,18 +60,21 @@ class Manage_A_Python_Process(Process_Control):
        super(Process_Control,self)
        
        self.restart_flag = restart_flag
+       command_string = "python3   "+command_string
        self.command_string = command_string
        command_list= shlex.split(command_string)
-     
+
        script_file_list = command_list[1].split("/")
      
        self.script_file_name = script_file_list[-1].split(".")[0]
        temp  = error_directory + "/"+self.script_file_name
-       self.error_file = temp+".errr"
-       self.error_file_rollover = temp +".errrr"
-       temp.error = False
+       self.error_file = temp+".err"
+       self.error_file_rollover = temp +".errr"
+       self.error = False
        
-
+   def get_script(self):
+       return self.script_file_name
+       
 
    def launch(self):
       temp = self.launch_process(self.command_string, stderr=self.error_file)
@@ -85,6 +89,7 @@ class Manage_A_Python_Process(Process_Control):
              return True
        else:
            self.rollover()
+           print(self.restart_flag)
            if self.restart_flag == True:
               self.launch()
            return False
@@ -118,43 +123,48 @@ class System_Control(object):
        self.web_display_list_key = web_display_list_key
        self.command_string_list = command_string_list
         
-       self.start_up_list = []
+       self.startup_list = []
        self.process_hash = {}
        self.process_state = {}
-       for command_string in command_list:
+       for command_string in command_string_list:
           temp_class = Manage_A_Python_Process( command_string )
           python_script = temp_class.get_script()
           self.startup_list.append(python_script)
-          temp_class.active = True
+          temp_class.active = False
           self.process_hash[python_script] = temp_class
           
        self.redis_handle.set(self.web_display_list_key,json.dumps(self.startup_list))
-       self.launch_processes()
        self.update_web_display()
+      
        
     
 
        
-   def launch_processes( self ):
-     for script in startup_list:
+   def launch_processes( self,*unused ):
+ 
+     for script in self.startup_list:
         temp = self.process_hash[script]
-        if temp.active == True:
+        if temp.active == False:
             return_value = temp.launch()
-            if return_value[0] == False:
-                temp.active = False
+            if return_value == False:
+                temp.rollover()
                 temp.error = True
-                return_data = json.dumps({ "script": script, "error_file" : temp.error_file})
+                return_data = json.dumps({ "script": script, "error_file" : temp.temp.error_file_rollover})
                 self.redis_handle.publish(self.error_queue_key,return_data)
+            else:
+               temp.active = True
+               temp.error = False
 
    
-   def monitor( self, process_objects ):
-     for script in startup_list:
+   def monitor( self, *unused ):
+     
+     for script in self.startup_list:
         temp = self.process_hash[script]
+       
         if temp.active == True:
            if temp.monitor() == False:
-              pass #fix this
-              
-
+              self.redis_handle.lpush(self.error_queue_key,{"script":script, "error_file":temp.error_file_rollover})       
+     self.update_web_display()
            
    def process_web_queue( self, *unused ):
      
@@ -191,13 +201,16 @@ class System_Control(object):
 
                 
    def update_web_display(self):
+      print("update_web_display")
       process_state = {}
       for script in self.startup_list:
-          if self.process_handle[script].active == True:
+          
+          if self.process_hash[script].active == True:
               process_state[script] = True
           else:
               process_state[script] = False
-      self.redis_handle.set(self.web_command_queue_key,json.dumps(process_state))
+     
+      self.redis_handle.set(self.web_process_data_key,json.dumps(process_state))
       
       
  
@@ -209,16 +222,21 @@ class System_Control(object):
       
    def add_chains(self,cf):
 
-       cf.define_chain("monitor_web_command_queue", True)
+       cf.define_chain("initialization",True)
+       cf.insert.one_step(self.launch_processes)
+       cf.insert.enable_chains( ["monitor_web_command_queue","monitor_active_processes"] )
+       cf.insert.terminate()
+   
+   
+       cf.define_chain("monitor_web_command_queue", False)
        cf.insert.wait_event_count( event = "TIME_TICK", count = 10)
        cf.insert.one_step(self.process_web_queue)
        cf.insert.reset()
        
-       cf.define_chain("monitor_active_processes",True)
+       cf.define_chain("monitor_active_processes",False)
        cf.insert.wait_event_count( event = "TIME_TICK",count = 10)
        cf.insert.one_step(self.monitor)
        cf.insert.reset()
- 
 
 
 
@@ -234,62 +252,20 @@ if __name__ == "__main__":
    redis_data = process_data["redis"]
    redis_handle = redis.StrictRedis(
         host=redis_data["ip"], port=redis_data["port"], db=redis_data["db"], decode_responses=True)
-   web_command_key =process_data['web_command_key'] 
+   web_command_queue_key =process_data['web_command_key'] 
    error_queue_key = process_data['error_queue_key']
    command_string_list  = process_data["command_string_list"]
-   web_process_data = process_data["web_process_data"]
-   web_display_list = process_data["web_display_list"]
-   print(web_command_key,error_queue_key,web_process_data,web_display_list)
-   print(command_string_list)
-   quit()
-   # find process list
-   # find redis ip server
-   # find process list
-   # find error_queue
-   # find active queue
-   system_control = System_Control( redis_handke, error_queue, web_command_queue, command_string_list )
-   system_control.add_chains()
-   
-   
-   # contruct chains
+   web_process_data_key = process_data["web_process_data"]
+   web_display_list_key = process_data["web_display_list"]
+   print(web_process_data_key,web_display_list_key)
+   system_control = System_Control(   redis_handle    = redis_handle,
+                                      error_queue_key = error_queue_key,
+                                      web_command_queue_key = web_command_queue_key,
+                                      web_process_data_key = web_process_data_key,
+                                      web_display_list_key = web_display_list_key,
+                                      command_string_list = command_string_list )
+
+   system_control.add_chains(cf)
+
    cf.execute()
  
-   '''
-   data_store_nodes = gm.find_data_stores()
-    # find ip and port for redis data store
-    data_server_ip = data_store_nodes[0]["ip"]
-    data_server_port = data_store_nodes[0]["port"]
-    # find ip and port for ip server
-    #print "data_server_ip", data_server_ip, data_server_port
-    redis_handle = redis.StrictRedis(
-        host=data_server_ip, port=data_server_port, db=12, decode_responses=True)
-    eto = construct_eto_instance(gm, redis_handle)
-    #
-    # Adding chains
-    #
-    
-    add_eto_chains(eto, cf)
-    #
-    # Executing chains
-    #
-    
-    
-
-  '''
-   '''
-   process_control = Process_Control()
-   print( process_control.run_process_to_completion("ls *.py",shell_flag=True))
-   process_handle = process_control.launch_process("ls ./*.py",shell=True)
-   print( process_control.monitor_process(process_handle))
-   time.sleep(1)
-   print( process_control.monitor_process(process_handle))
-   print(process_control.kill_process(process_handle))
-   '''
-   '''
-   x = Manage_A_Python_Process("python3 /home/pi/new_python/eto_py3.py")
-   print(x.launch())
-   for i in range(0,10):
-      time.sleep(1)
-      print(x.monitor())
-   x.kill()
-   '''

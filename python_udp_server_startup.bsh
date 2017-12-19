@@ -1,8 +1,0 @@
-while [ 1 ]
-do
-   echo "executing python_udp_server_startup.bsh"
-   /usr/bin/python python_udp_server_startup.py 2>  /tmp/python_udp_server_startup.err 
-   mv /tmp/python_udp_server_startup.err  /tmp/python_udp_server_startup.errr
-   python3 cloud_event_queue_py3.py "reboot" "python_udp_server_startup.py"
-   sleep 5
-done

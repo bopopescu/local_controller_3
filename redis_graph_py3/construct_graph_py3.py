@@ -451,7 +451,7 @@ if __name__ == "__main__" :
    properties["command_string_list"] = []
    properties["command_string_list"].append( "linux_acquisition_py3.py")
    properties["command_string_list"].append( "eto_py3.py")
-   properties["command_string_list"].append( "modbus_server_py3.py")
+   properties["command_string_list"].append( "modbus_server_py3.py  main_remote")
    properties["command_string_list"].append( "rabbit_web_access_py3.py")
    properties["command_string_list"].append("rabbit_cloud_status_publish_py3.py")
    properties["command_string_list"].append("utilities_py3.py")

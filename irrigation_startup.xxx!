@@ -1,0 +1,20 @@
+#!/bin/bash
+sleep 5  # let redis start up
+python3 /home/pi/passwords.py
+cd /home/pi/new_python
+python3 -m redis_graph_py3.construct_graph_py3 
+python3 load_files_py3.py  
+
+#./linux_monitoring.bsh&
+##./moisture_monitoring.bsh&
+#./eto.bsh&
+#./modbus_server.bsh&
+##./rabbit_redis_access.bsh&
+#./rabbit_web_access.bsh&
+#./rabbit_cloud_status_publish.bsh&
+#./utilities.bsh&
+#./flask_web_py3.bsh&
+#sleep 20 #let io server resolve 485 buses
+#start sprinkler control
+#./irrigation_monitoring.bsh&
+#./irrigation_ctrl_startup.bsh&
