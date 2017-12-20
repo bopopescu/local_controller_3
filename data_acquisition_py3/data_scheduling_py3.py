@@ -66,8 +66,6 @@ class Data_Acquisition(object):
        self.redis_handle.lpush(redis_key,data_json)
        self.redis_handle.ltrim(redis_key,0,redis_array_length)
        #print( "print array length", self.redis_handle.llen(redis_key))
-       # send data to influxdb
-       self.status_queue_class.queue_message(store_element["routing_key"], data_dict )
 
    def execute_init_tags( self, data_list ):
         for i in data_list:
@@ -184,8 +182,7 @@ def construct_class( redis_handle,
                      fifteen_list,
                      minute_list,
                      hour_list,
-                     daily_list, 
-                     status_queue_class):
+                     daily_list ):
 
  
    #
@@ -194,9 +191,9 @@ def construct_class( redis_handle,
    #
    #
 
-   status_stores = list(gm.match_terminal_relationship("CLOUD_STATUS_STORE"))
    
-   queue_name    = status_stores[0]["queue_name"]
+   
+   #queue_name    = status_stores[0]["queue_name"]
 
    
 
@@ -221,7 +218,7 @@ def construct_class( redis_handle,
    data_acquisition.daily_store             = daily_store
    data_acquisition.instrument              = instrument
    data_acquisition.remote_classes          = remote_classes
-   data_acquisition.status_queue_class      = status_queue_class
+   #data_acquisition.status_queue_class      = status_queue_class
    data_acquisition.slave_dict              = slave_dict
    data_acquisition.fifteen_store           = fifteen_store
    data_acquisition.fifteen_list            = fifteen_list

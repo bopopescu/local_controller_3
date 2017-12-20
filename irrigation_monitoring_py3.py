@@ -19,7 +19,7 @@ from py_cf_new_py3.chain_flow_py3 import CF_Base_Interpreter
 import os
 import copy
 import load_files_py3
-import rabbit_cloud_status_publish_py3
+#import rabbit_cloud_status_publish_py3
 from   io_control_py3 import io_controller_py3
 from   io_control_py3 import construct_classes_py3
 from   io_control_py3 import new_instrument_py3
@@ -128,8 +128,8 @@ def construct_irrigation_monitoring_class( redis_handle,redis_old_handle, gm, io
                      fifteen_list,
                      minute_list,
                      hour_list,
-                     daily_list,
-                     status_queue_class ) 
+                     daily_list )
+                    
     
 if __name__ == "__main__":
 
@@ -169,7 +169,7 @@ if __name__ == "__main__":
 
 
 
-   status_queue_class = rabbit_cloud_status_publish_py3.Status_Queue(redis_handle, queue_name ) 
+   #status_queue_class = rabbit_cloud_status_publish_py3.Status_Queue(redis_handle, queue_name ) 
    
    construct_linux_acquisition_class= construct_irrigation_monitoring_class( redis_handle,redis_old_handle, gm, io_server_ip, io_server_port )
 

@@ -19,7 +19,7 @@ import json
 import os
 import copy
 import load_files_py3
-import rabbit_cloud_status_publish_py3
+#import rabbit_cloud_status_publish_py3
 from redis_graph_py3 import farm_template_py3
 import datetime
 from   irrigation_control_py3.alarm_queue_py3     import AlarmQueue
@@ -168,7 +168,7 @@ class Eto_Management(object):
                     "ETO_UPDATE_FLAG"))
             if eto_update_flag == 0:
                 #print "made it here --------------"
-                self.store_cloud_data()
+                #self.store_cloud_data()
                 self.update_all_bins(eto_data)
 
             return_value = True
@@ -305,7 +305,7 @@ class Eto_Management(object):
             return_value = 0.0
 
         return return_value
-
+    '''
     def store_cloud_data(self):
         return
         data = {}
@@ -321,7 +321,7 @@ class Eto_Management(object):
                 time.time() - 24 * 3600))  # time stamp is a day earlier
         #print "data", data
         self.status_queue_class.queue_message("eto_measurement", data)
-
+    '''
     #
     #
     #   Test support routines
@@ -717,22 +717,22 @@ def construct_eto_instance(gm, redis_handle):
     #
     #
     #
-    status_stores = gm.match_terminal_relationship("CLOUD_STATUS_STORE")
+    #status_stores = gm.match_terminal_relationship("CLOUD_STATUS_STORE")
 
     # cloud publish will be redesigned
     temp = gm.match_terminal_relationship("ETO_SITES")
-    cloud_namespace = temp[0]["namespace"]
-    eto.cloud_namespace = cloud_namespace
+    #cloud_namespace = temp[0]["namespace"]
+    #eto.cloud_namespace = cloud_namespace
     eto.eto_integrated_measurement = temp[0]["integrated_measurement"]
     eto.eto_measurement = temp[0]["measurement"]
     eto.mv_threshold_number = temp[0]["mv_threshold_number"]
     temp = gm.match_terminal_relationship("RAIN_SOURCES")
     eto.rain_measurement = temp[0]["measurement"]
 
-    queue_name = status_stores[0]["queue_name"]
+    #queue_name = status_stores[0]["queue_name"]
 
-    eto.status_queue_class = rabbit_cloud_status_publish_py3.Status_Queue(
-        redis_handle, queue_name)
+    #eto.status_queue_class = rabbit_cloud_status_publish_py3.Status_Queue(
+    #   redis_handle, queue_name)
 
     #eto.eto_default = .20
 
