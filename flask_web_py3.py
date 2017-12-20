@@ -19,6 +19,7 @@ from flask_web_modular_py3.load_configuration_py3         import Load_Configurat
 from flask_web_modular_py3.load_streaming_data_py3            import Load_Streaming_Data
 from flask_web_modular_py3.load_linux_controller_data_py3  import Load_Linux_Controller_Data
 from flask_web_modular_py3.load_statistic_data_py3  import Load_Statistic_Data
+from flask_web_modular_py3.load_process_control_py3 import Load_Process_Control
 from irrigation_control_py3.alarm_queue_py3  import  AlarmQueue
 from flask_web_modular_py3.load_modbus_data_py3  import Load_Modbus_Data
 from redis_support_py3.redis_rpc_client_py3      import Redis_Rpc_Client
@@ -41,7 +42,8 @@ class PI_Web_Server(object):
        app.template_folder       =   'flask_web_modular_py3/templates'
        app.static_folder         =   'flask_web_modular_py3/static'  
        app.config['SECRET_KEY']      = startup_dict["SECRET_KEY"]
-       app.config["DEBUG"]           = startup_dict["DEBUG"]
+
+       app.config["DEBUG"]           = int(startup_dict["DEBUG"])
        self.users                    = json.loads(startup_dict["users"])
        alarm_queue              = AlarmQueue(redis_handle)
        Load_Static_Files( app, auth )
@@ -59,7 +61,7 @@ class PI_Web_Server(object):
        Load_Linux_Controller_Data( app, auth, request,render_template ,redis_new_handle)
        
        Load_Statistic_Data(app,auth,render_template,request , app_files,sys_files, redis_handle,redis_new_handle,gm )
-       
+       Load_Process_Control(app, auth, request,render_template,redis_new_handle, redis_handle,gm )
        search_node =    gm.match_terminal_relationship("UDP_IO_SERVER")[0]
        ip = search_node[ 'redis_host']
        db = search_node["redis_rpc_db"]

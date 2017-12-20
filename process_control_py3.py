@@ -41,14 +41,16 @@ class Process_Control(object ):
        if returncode == None:
           return [ True, 0]
        else:
-          self.kill_process(process_handle)
+         
           del process_handle
           return [ False, returncode ]
        
    def kill_process(self,process_handle):
       try:
          process_handle.kill()
+         process_handle.wait()
          del process_handle
+        
       except:
          pass
     
@@ -71,34 +73,49 @@ class Manage_A_Python_Process(Process_Control):
        self.error_file = temp+".err"
        self.error_file_rollover = temp +".errr"
        self.error = False
+       self.enabled = True
+       self.active = False
        
    def get_script(self):
        return self.script_file_name
        
 
    def launch(self):
-      temp = self.launch_process(self.command_string, stderr=self.error_file)
-      return_value = temp[0]
-      self.handle = temp[1]
-      return return_value
+       if( (self.enabled == True) and (self.active == False )):
+           temp = self.launch_process(self.command_string, stderr=self.error_file)
+           return_value = temp[0]
+           self.handle = temp[1]
+           self.active = return_value
+           if self.active == False:
+               self.rollover()
+               self.error = True
+           else:
+              self.error = False
+       
+
     
    def monitor(self):
-       return_value = self.monitor_process(self.handle)
-
-       if return_value[0] == True:
-             return True
-       else:
-           self.rollover()
-           print(self.restart_flag)
-           if self.restart_flag == True:
-              self.launch()
-           return False
+       if self.enabled == True:
+          if self.active == True:
+             return_value = self.monitor_process(self.handle)
+             if return_value[0] == True:
+                  return True
+            
+          self.active = False
+          self.rollover()
+           
+          if self.restart_flag == True:
+               self.launch()
+          return False
 
 
    def rollover(self):
         os.system("mv "+self.error_file+"  " +self.error_file_rollover)
            
    def kill(self):
+       self.active = False
+       self.error = False
+       self.enabled = False
        self.kill_process(self.handle)
        self.rollover()
        
@@ -130,7 +147,6 @@ class System_Control(object):
           temp_class = Manage_A_Python_Process( command_string )
           python_script = temp_class.get_script()
           self.startup_list.append(python_script)
-          temp_class.active = False
           self.process_hash[python_script] = temp_class
           
        self.redis_handle.set(self.web_display_list_key,json.dumps(self.startup_list))
@@ -142,75 +158,64 @@ class System_Control(object):
        
    def launch_processes( self,*unused ):
  
-     for script in self.startup_list:
-        temp = self.process_hash[script]
-        if temp.active == False:
-            return_value = temp.launch()
-            if return_value == False:
-                temp.rollover()
-                temp.error = True
-                return_data = json.dumps({ "script": script, "error_file" : temp.temp.error_file_rollover})
-                self.redis_handle.publish(self.error_queue_key,return_data)
-            else:
-               temp.active = True
+       for script in self.startup_list:
+           temp = self.process_hash[script]
+           temp.launch()
+           if temp.error == True:
+               return_data = json.dumps({ "script": script, "error_file" : temp.temp.error_file_rollover})
+               self.redis_handle.publish(self.error_queue_key,return_data)
                temp.error = False
 
    
    def monitor( self, *unused ):
      
-     for script in self.startup_list:
-        temp = self.process_hash[script]
-       
-        if temp.active == True:
-           if temp.monitor() == False:
-              self.redis_handle.lpush(self.error_queue_key,{"script":script, "error_file":temp.error_file_rollover})       
-     self.update_web_display()
+       for script in self.startup_list:
+           temp = self.process_hash[script]
+           temp.monitor()
+           if temp.error == True:
+               return_data = json.dumps({ "script": script, "error_file" : temp.temp.error_file_rollover})
+               self.redis_handle.publish(self.error_queue_key,return_data)
+               temp.error = False
+      
+       self.update_web_display()
            
    def process_web_queue( self, *unused ):
      
        if self.redis_handle.llen(self.web_command_queue_key) > 0 :
-           start_list = []
-           kill_list = []
-           try:
-               data_json = redis_handle.lpop(self.web_command_queue_key)
-               self.redis_handle.ltrim(self.web_command_queue_key)
-               data = json.loads(data)
-
-               for item in data:
-                   if item["active"] == True:
-                       start_list.append(item["name"] )
+           data_json = redis_handle.lpop(self.web_command_queue_key)
+           self.redis_handle.ltrim(self.web_command_queue_key,0,-1) # empty redis queue
+           data = json.loads(data_json)
+           print("made it here")
+           for script,item in data.items():
+               temp = self.process_hash[script]
+               try:
+                   if item["enabled"] == True:
+                        if temp.enabled == False:
+                           temp.enabled = True 
+                           temp.active = False
+                           #print(script,"---------------------------launch")
+                           temp.launch()
                    else:
-                      kill_list.append(item["name"])
-               self.execute_web_queue(kill_list,start_list)
-           except:
-               pass
+                       if temp.enabled == True:
+                          temp.enabled = False
+                          #print(script,"----------------------------kill")
+                          temp.kill()
+               except:
+                   pass
+               print(self.process_hash[script].active)
+               print(self.process_hash[script].enabled)
+          
            self.update_web_display()    
                       
 
-   def execute_web_queue(self,start_list,kill_list):
-      for script in kill_list:
-         if script in self.process_hash:
-            temp_class = self.process_hash[script]
-            if temp_class.active == True:
-                self.temp_class.kill()
-      for script in start_list_list:
-         if script in self.process_hash:
-            temp_class = self.process_hash[script] 
-            if temp_class.active == False:
-                self.temp_class.launch()
-
                 
    def update_web_display(self):
-      print("update_web_display")
-      process_state = {}
-      for script in self.startup_list:
-          
-          if self.process_hash[script].active == True:
-              process_state[script] = True
-          else:
-              process_state[script] = False
      
-      self.redis_handle.set(self.web_process_data_key,json.dumps(process_state))
+       process_state = {}
+       for script in self.startup_list:
+           temp = self.process_hash[script]
+           process_state[script] = {"name":script,"enabled":temp.enabled,"active":temp.active,"error":temp.error}
+       self.redis_handle.set(self.web_process_data_key,json.dumps(process_state))
       
       
  
@@ -229,7 +234,7 @@ class System_Control(object):
    
    
        cf.define_chain("monitor_web_command_queue", False)
-       cf.insert.wait_event_count( event = "TIME_TICK", count = 10)
+       cf.insert.wait_event_count( event = "TIME_TICK", count = 1)
        cf.insert.one_step(self.process_web_queue)
        cf.insert.reset()
        

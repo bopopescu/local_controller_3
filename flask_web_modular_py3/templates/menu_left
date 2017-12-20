@@ -130,7 +130,13 @@
 
         </ul>
     </div>
+   <div data-role="collapsible" data-theme="a"  data-iconpos="right" data-collapsed="True" data-content-theme="c">
+        <h3>Manage Running Processes</h3>
+        <ul data-role="listview">
+            <li><a href ="/start_and_stop_processes" , target="_self">Start and Stop Running Processes</a></li>
 
+        </ul>
+    </div>
    <div data-role="collapsible" data-theme="a"  data-iconpos="right" data-collapsed="True" data-content-theme="c">
        <h3>Site Map</h3>
          <ul data-role="listview">
