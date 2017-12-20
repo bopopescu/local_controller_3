@@ -1,27 +1,25 @@
 #!/bin/bash
 sleep 5  # let redis start up
-###python /home/pi/new_python/system_config.py
 python3 /home/pi/passwords.py
 cd /home/pi/new_python
-#python contruct_graph.py
 python3 -m redis_graph_py3.construct_graph_py3 
 python3 load_files_py3.py  
+./process_control.bsh&
 
-./linux_monitoring.bsh&
-#./moisture_monitoring.bsh&
-./eto.bsh&
-#./python_udp_server_startup.bsh&
-./modbus_server.bsh&
-#./rabbit_redis_access.bsh&
-./rabbit_web_access.bsh&
-./rabbit_cloud_status_publish.bsh&
-./utilities.bsh&
-#./watch_dog.bsh&
-#cd flask_web
-#./flask_web.bsh&
-#cd ..
-./flask_web_py3.bsh&
-sleep 20 #let io server resolve 485 buses
+
+
+
+
+#./linux_monitoring.bsh&
+##./moisture_monitoring.bsh&
+#./eto.bsh&
+#./modbus_server.bsh&
+##./rabbit_redis_access.bsh&
+#./rabbit_web_access.bsh&
+#./rabbit_cloud_status_publish.bsh&
+#./utilities.bsh&
+#./flask_web_py3.bsh&
+#sleep 20 #let io server resolve 485 buses
 #start sprinkler control
-./irrigation_monitoring.bsh&
-./irrigation_ctrl_startup.bsh&
+#./irrigation_monitoring.bsh&
+#./irrigation_ctrl_startup.bsh&
