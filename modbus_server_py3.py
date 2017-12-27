@@ -11,7 +11,7 @@ class Statistic_Handler( object ):
     
     def __init__(self,redis_handle,redis_rpc_queue, remote_units,graph_key, rpc_queue ):
 
-        # copy instanciation parameters
+        # copy instantiation parameters
         self.redis_handle = redis_handle
         self.remote_units = remote_units
 
