@@ -43,7 +43,8 @@ class PI_Web_Server(object):
        app.static_folder         =   'flask_web_modular_py3/static'  
        app.config['SECRET_KEY']      = startup_dict["SECRET_KEY"]
 
-       app.config["DEBUG"]           = int(startup_dict["DEBUG"])
+       app.config["DEBUG"]           = False
+       app.debug  = False
        self.users                    = json.loads(startup_dict["users"])
        alarm_queue              = AlarmQueue(redis_handle)
        Load_Static_Files( app, auth )
@@ -89,7 +90,8 @@ class PI_Web_Server(object):
 
    def run_https( self ):
        startup_dict          = self.startup_dict
-       self.app.run(threaded=True , use_reloader=True, host='0.0.0.0',
+      
+       self.app.run(threaded=True , use_reloader=True, host='0.0.0.0',debug = False,
            port=int(startup_dict["PORT"]) ,ssl_context=(startup_dict["crt_file"], startup_dict["key_file"]))
        
  

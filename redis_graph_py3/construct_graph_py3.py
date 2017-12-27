@@ -455,7 +455,7 @@ if __name__ == "__main__" :
    properties["command_string_list"].append( "rabbit_web_access_py3.py")
    properties["command_string_list"].append("rabbit_cloud_status_publish_py3.py")
    properties["command_string_list"].append("utilities_py3.py")
-   properties["command_string_list"].append("flask_web_py3.py")
+   #properties["command_string_list"].append("flask_web_py3.py")
    properties["command_string_list"].append("irrigation_monitoring_py3.py")
    properties["command_string_list"].append("irrigation_ctrl_startup_py3.py")
 

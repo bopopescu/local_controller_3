@@ -18,37 +18,20 @@ This module is a standalone processs which does the following actions.
 '''
 
 
-class Monitoring_Object(object):
-'''
-  This object is responsible for managing a single information points
-'''
-
-   def __init__(self,gm,redis_key):
-        self.gm = gm
-        self.redis_key = redis_key
-        self.monitor_key()
-       
-       
-   def monitor_key():
-      # get redis key 
-      # assert key is not None
-      #
-       
-       pass
+from redis_graph_py3.construct_system_monitoring_graph_py3 import Error_Object
 
 
 class Modbus_Monitor(object):
 
-   def __init__(self,cf,redis_handle):
-        self.cf = cf
+   def __init__(self,redis_handle):
         self.redis_handle = redis_handle
         
    def get_statistics(self,*values):
          pass
        
-   def construct_chains(self):
+   def construct_chains(self,cf):
        cf.define_chain("init", True)
-       cf.insert.enable_chains(["minute_interval"])
+       cf.insert.enable_chains(["modbus_minute_interval","modbus_hour_interval"])
        cf.insert.terminate()
 
        cf.define_chain("minute_interval", True)
@@ -56,7 +39,14 @@ class Modbus_Monitor(object):
        cf.insert.wait_event_count( event = "MINUTE_TICK")
        cf.insert.one_step(self.get_statistics)
        cf.insert.reset()
-        
+       
+       cf.define_chain("hour_interval", True)
+       cf.insert.log("minute interval")
+       cf.insert.wait_event_count( event = "MINUTE_TICK")
+       cf.insert.one_step(self.get_statistics)
+       cf.insert.reset()   
+
+       
 class Process_Termination(object):
  
    def __init__(self,cf,redis_handle):
