@@ -42,7 +42,7 @@
    <button type="button" id="refresh_b">Refresh</button>
    <h4>Edit Managed Processes</h4>
    <button type="button" id="change_state">Click to Change State</button> 
-   <h4>Toggle Check Box to Change State</h4>
+   <h4>Toggle Check Box to Change State  -- Check to Enable  Uncheck to Disable</h4>
    <div id="queue_elements">
    </div>
 
