@@ -123,7 +123,7 @@ class Eto_Management(object):
         return "DISABLE"
 
     def make_measurement(self, chainFlowHandle, chainOjb, parameters, event):
-
+        print("make measurement")
         if event["name"] == "INIT":
             return "CONTINUE"
         if int(self.redis_handle.hget("ETO_VARIABLES", "ETO_UPDATE_FLAG")) == 1:
@@ -761,7 +761,7 @@ def add_eto_chains(eto, cf):
     cf.define_chain("eto_make_measurements", False)
     cf.insert.log("starting make measurement")
     cf.insert.one_step( eto.make_measurement )
-    cf.insert.wait_event_count( event = "HOUR_TICK" )
+    cf.insert.wait_event_count( event = "MINUTE_TICK",count = 15 )
     cf.insert.log("Receiving Hour tick")
     cf.insert.reset()
 
