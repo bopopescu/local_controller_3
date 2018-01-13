@@ -117,7 +117,8 @@
             <li><a href="/list_reboot_files"  target="_self">View Python Reboot Time Stamps</a></li>
             <li><a href="/list_reboot_file_data"  target="_self">View Python Reboot Error Logs</a></li>
             <li><a href='/list_linux_time_history/0'  target="_self">Linux Time History</a></li>
-            
+            <li><a href='/linux_process_time_history_RSS/0'  target="_self">Linux Process Memory History RSS</a></li>
+            <li><a href='/linux_process_time_history_VSZ/0'  target="_self">Linux Process Memory History VSZ</a></li>           
         </ul>
     </div>
    <div data-role="collapsible" data-theme="a"  data-iconpos="right" data-collapsed="True" data-content-theme="c">
