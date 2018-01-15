@@ -66,7 +66,7 @@ class PI_Web_Server(object):
        
        Load_Statistic_Data(app,auth,render_template,request , app_files,sys_files, redis_handle,redis_new_handle,gm )
        Load_Process_Control(app, auth, request,render_template,redis_new_handle, redis_handle,gm )
-       Load_Web_Socket_Handler(app,render_template)
+       Load_Web_Socket_Handler(app,auth,render_template)
        search_node =    gm.match_terminal_relationship("UDP_IO_SERVER")[0]
        ip = search_node[ 'redis_host']
        db = search_node["redis_rpc_db"]

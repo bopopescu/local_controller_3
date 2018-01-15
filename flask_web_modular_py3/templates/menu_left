@@ -147,6 +147,13 @@
             
         </ul>
    </div>
+      <div data-role="collapsible" data-theme="a"  data-iconpos="right" data-collapsed="True" data-content-theme="c">
+       <h3>Web Socket Test</h3>
+         <ul data-role="listview">
+            <li><a href="/socket_test"    target="_self">Socket Test</a></li>
+            
+        </ul>
+   </div>
 
 </div>
  
