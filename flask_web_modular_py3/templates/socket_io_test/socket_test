@@ -1,51 +1,18 @@
-<head>
-	 <meta charset="utf-8">
-	 <meta name="viewport" content="width=device-width, minimum-scale=1, maximum-scale=1">
-  <!link rel="icon" type="image/png" href="/static/favicon.ico"!>
-  <link rel="shortcut icon" href="/static/favicon.ico">
-  
-  <style>
-        /*this block should go in the styles.css file*/
-        .ui-panel-inner {
-            padding:7px; /*make the buttons flush edge to edge*/
-        }
-        .ui-controlgroup {
-            margin:7px; /*make the buttons flush to the top*/
-        }
-        #header {
-            height:60px;
-        }
-        #bars-button {
-            margin:5px;
-        }
-    </style>
-	
-        
-  {% include 'common_setup' %}
 
+{% extends "base_template" %}
 
-	  <script type="text/javascript" >
-       {% include "js/ajax_functions.js" %}
-       {% include "js/redis_functions.js" %}
-  </script>
-
-
-
-
+{% block custom_javascript %}
 	<script type="text/javascript" >
      {% include '/js/socket_io/socket.io.js' %}
      {% include '/js/socket_io/socket_io_test.js' %}
  </script>
 
-</head> 
-<body> 
+{% endblock %}
 
-   <div data-role="page"> 
 
-   {% include 'menu' %}
-   <!-- /header -->
-    
-   
+
+{% block application %}
+  
    <button type="button" id="connect_button">Connect </button>
    <button type="button" id="disconnect_button">Disconnect </button>
    <button type="button" id="ping_button">Ping </button>
@@ -58,17 +25,7 @@
    <label for="ping_result">Ping Results:</label>
    <input type="text" name="ping_result" id="ping_result" value=""  />
    </div>	
- 
-    
-
-   
- 
-    
-
- </div>
-
-</div><!-- /page -->
 
 
-</html>
+{% endblock %}
 
