@@ -101,7 +101,7 @@ class IO_Control(object):
               
  
    def turn_on_master_valves( self,*arg ):
-       
+       print("turn on master valve")
        self.redis_old_handle.hset("CONTROL_VARIABLES","MASTER_VALVE_SETUP","ON")
 
        redis_dict = self.ir_data["MASTER_VALVE"]["dict"]
@@ -113,7 +113,7 @@ class IO_Control(object):
            action_class.turn_on_valves( controller["modbus_address"], [item["master_valve"]] )
             
    def turn_off_master_valves( self,*arg ):
-       
+       print("turn off master valve")
        self.redis_old_handle.hset("CONTROL_VARIABLES", "MASTER_VALVE_SETUP","OFF")
        redis_dict = self.ir_data["MASTER_VALVE"]["dict"]
        redis_key = self.ir_data["MASTER_VALVE"]["key"]
@@ -127,12 +127,14 @@ class IO_Control(object):
 
 
    def turn_on_cleaning_valves( self,*arg ):
+       print("turn on cleaning values")
        for item in self.mv_list:
             controller = self.irrigation_controllers[item["remote"]]
             action_class = self.find_class( controller["type"] )
             action_class.turn_on_valves(  controller["modbus_address"], [item["cleaning_valve"]] )
             
    def turn_off_cleaning_valves( self,*arg ):
+       print("turn off cleaning valves")
        for item in self.mv_list:
             
             controller = self.irrigation_controllers[item["remote"]]

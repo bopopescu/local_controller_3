@@ -190,6 +190,8 @@ class Modbus_Server( object ):
         
    def process_modbus_message( self,input_msg ):
        input_msg = base64.b64decode(input_msg)
+       #if input_msg[0] == 100:
+       #   print(":".join("{:02x}".format(c) for c in input_msg))
        address = input_msg[0]
        
        self.statistic_handler.process_start_message( address )

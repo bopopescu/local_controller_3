@@ -109,7 +109,7 @@ class Click_Controller_Base_Class(object):
 
 
    def turn_on_valves( self, modbus_address, input_list ):
-
+      
        for valve in input_list:  
           valve           = valve -1
           bit_symbol      = self.click_io[ valve ]
@@ -117,6 +117,7 @@ class Click_Controller_Base_Class(object):
           self.instrument.write_bits( modbus_address, bit_address,[1])
 
    def turn_off_valves( self,  modbus_address, input_list  ):
+          
        for valve in input_list:  
           valve           = valve -1
           bit_symbol      = self.click_io[ valve ]
