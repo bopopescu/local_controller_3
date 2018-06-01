@@ -12,8 +12,10 @@ import msgpack
 global connection
 
 import msgpack
-import gzip
+import zlib
 import io
+import pickle
+import msgpack
 from web_access_py3 import *
 
 class Remote_Interface_server():
@@ -40,14 +42,6 @@ class Remote_Interface_server():
       pass
 
           
-   def gzip_str(self,string_):
-       out = io.BytesIO()
-
-       with gzip.GzipFile(fileobj=out, mode='w') as fo:
-           fo.write(string_.encode())
-
-       bytes_obj = out.getvalue()
-       return bytes_obj
 
 
    def process_commands( self, command_data ):
@@ -59,16 +53,16 @@ class Remote_Interface_server():
            
            if  command in self.cmds:
                result = self.cmds[command]( command_data)
-               result["results" ] = self.gzip_str(json.dumps(result["results"]))
-               result["results"] = base64.b64encode( result["results"]).decode()
-               return json.dumps(result)
+               result["results" ] = zlib.compress(msgpack.packb(result["results"]))
+               
+               return msgpack.packb(result)
                
                
            else:
            
               object_data = {}
               object_data["reply"] = "BAD_COMMAND_1"
-              return json.dumps(object_data)
+              return msgpack.packb(object_data)
       
        except:
 
@@ -76,33 +70,36 @@ class Remote_Interface_server():
            object_data = {}
            object_data["reply"] = "BAD_COMMAND_2"
            object_data["results"] = None
-           return json.dumps(object_data)                  
+           return msgpack.packb(object_data)                  
 
 def on_request(ch, method, props, body):
-    global rt
+    
    
     try:
-       #print("madie it here",body)
-       output_data  = rt.process_commands( json.loads(body.decode()))
-       #print("ouput data",output_data) 
+      
+       temp = msgpack.unpackb(body)
+      
+       output_data  = rt.process_commands( json.loads(temp.decode()))
+       
        
     except:
        raise
        output_data = {} 
        output_data["reply"] = "BAD_COMMAND_3"
        output_data["results"] = None
-       output_data = json.dumps(output_data)
+       output_data = msgpack.packb(output_data)
 
     
-    #response     = base64.b64encode(  output_data )
+   
     response   = output_data
-    ch.basic_publish(exchange='',
+
+    x = ch.basic_publish(exchange='',
                      routing_key=props.reply_to,
                      properties=pika.BasicProperties(correlation_id = \
                                                      props.correlation_id),
-                     body= str(response) )
-    ch.basic_ack(delivery_tag = method.delivery_tag)
-
+                     body= response )
+    y = ch.basic_ack(delivery_tag = method.delivery_tag)
+   
   
 if __name__ == "__main__":
    
@@ -136,9 +133,10 @@ if __name__ == "__main__":
    web_client = Web_Client_Interface( )
    logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.CRITICAL)
    
-   
+
    rt = Remote_Interface_server()
    credentials = pika.PlainCredentials( user_name, password )
+   vhost = "LaCima"
    parameters = pika.ConnectionParameters(server,
                                            port,  #ssl port
                                            vhost,
@@ -150,6 +148,7 @@ if __name__ == "__main__":
    #connection.socket.settimeout(10000)
    #channel.queue_delete(queue=queue)
    #time.sleep(20)
+   queue="_web_rpc_queue"
    channel.queue_declare(queue=queue)
    channel.basic_qos(prefetch_count=1)
    channel.basic_consume(on_request, queue=queue)
