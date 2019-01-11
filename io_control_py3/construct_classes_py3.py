@@ -8,6 +8,7 @@
 from  .psoc_4m_devices_py3 import PSOC_4M_MOISTURE_UNIT
 from  .click_controller_class_py3 import Click_Controller_Base_Class_44
 from  .click_controller_class_py3 import Click_Controller_Base_Class_22
+from  .esp32_controller_class_py3 import Esp32_Controller_Base_Class
 from  .io_controller_py3 import IO_Controller
 from  .new_instrument_py3 import Modbus_Instrument
 
@@ -25,6 +26,7 @@ class Construct_Access_Classes(object):
        self.type_classes["click_44"]        = Click_Controller_Base_Class_44( instrument )
        self.type_classes["click_22"]        = Click_Controller_Base_Class_22( instrument )
        self.type_classes["io_controller"]   = IO_Controller( instrument )
+       self.type_classes["esp32_relay"]     = Esp32_Controller_Base_Class(instrument)
    
    def find_class( self, type ):
        return self.type_classes[type]  
@@ -32,5 +34,5 @@ class Construct_Access_Classes(object):
              
 if __name__ == "__main__":
    
-   access_class = Construct_Access_Classes( "192.168.1.84" , 3400 ) ### dummy values
-   print (access_class.find_class("PSOC_4_Moisture"))
+   access_class = Construct_Access_Classes( "127.0.0.1" , 6379 ) ### dummy values
+   print (access_class.find_class("esp32_relay"))

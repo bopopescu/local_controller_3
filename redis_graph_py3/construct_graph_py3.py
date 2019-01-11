@@ -435,6 +435,13 @@ if __name__ == "__main__" :
    properties["parameters"]     =  { "address":40 , "search_register":1,"register_number":10 }
    cf.add_info_node( "REMOTE_UNIT","moisture_1", properties =properties,  json_flag= True )
 
+   properties                   = {}
+   properties["modbus_address"] = 121
+   properties["type"]           = "esp32_relay"
+   properties["function"]       = ["irrigation"]
+   properties["parameters"]     =  { "address":121 , "search_register":1,"register_number":1 }
+   cf.add_info_node( "REMOTE_UNIT","satellite_4", properties =properties,  json_flag= True )   
+   
    cf.end_header_node("SERIAL_LINK")
    cf.end_header_node("UDP_IO_SERVER")
   

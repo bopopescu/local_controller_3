@@ -78,11 +78,11 @@
          "valve_group:NC valve:NC ", 
          "valve_group:NC valve:NC ",    
 
-         "valve_group:6 valve:1 Avocado Block #4",  
-         "valve_group:6 valve:2 Avocado Block #10", 
-         "valve_group:NC valve:NC ",
+         "valve_group:6 valve:1 Avocado Block #4 Top", 
+         "valve_group:6 valve:2 Avocado Block #10",     
+         "valve_group:6 valve:Avocado Block #4 Bottom",    
   
-         "valve_group:NC valve:NC ", 
+         "valve_group:6 valve:Avocado Block #3 Right",    
          "valve_group:6 valve:4 Drip Line and Sprayers along Road", 
          "valve_group:NC valve:NC ",
  
@@ -133,9 +133,34 @@
 			
      
       ]
+    },  
+
+    { "name":"satellite_4", "pins":
+      [
+         "valve_group:9 valve:NC ",   
+         "valve_group:9 valve:NC ",    
+         "valve_group:9 valve:NC ",   
+         "valve_group:9 valve:NC ",   
+
+         "valve_group:9 valve:NC ",   
+         "valve_group:9 valve:NC ",    
+         "valve_group:9 valve:NC ",   
+         "valve_group:9 valve:NC ",   
+ 
+         "valve_group:9 valve:NC ",   
+         "valve_group:9 valve:NC ",    
+         "valve_group:9 valve:NC ",   
+         "valve_group:9 valve:NC ",   
+ 
+         "valve_group:9 valve:NC ",   
+         "valve_group:9 valve:NC ",    
+         "valve_group:9 valve:NC ",   
+         "valve_group:9 valve:NC "   
+  
+			
+     
+      ]
     }  
-
-
    
 
 

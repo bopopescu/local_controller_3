@@ -250,7 +250,7 @@ class Click_Controller_Base_Class_22(Click_Controller_Base_Class):
 if __name__ == "__main__":  
    from  .new_instrument_py3 import Modbus_Instrument
    instrument  =  Modbus_Instrument()
-   instrument.set_ip("192.168.1.84", 5005 )     
+     
 
    x = Click_Controller_Base_Class_44( instrument )
    y = Click_Controller_Base_Class_22( instrument )  

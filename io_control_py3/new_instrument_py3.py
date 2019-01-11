@@ -53,9 +53,9 @@ class Redis_Rpc_Client(object):
 
 class Modbus_Instrument:
     
-    def __init__(self ):
+    def __init__(self ,ip ="127.0.0.1", port = 6379  ):
     
-        redis_handle = redis.StrictRedis("127.0.0.1", 6379 ,5,decode_responses = True )
+        redis_handle = redis.StrictRedis(ip, port ,5,decode_responses = True )
         self.redis_rpc_client = Redis_Rpc_Client( redis_handle = redis_handle, redis_rpc_queue = "#_RPC_QUEUE_"   )
         self.precalculate_read_size = True
                           
@@ -67,9 +67,8 @@ class Modbus_Instrument:
 
 
     #sets the ip and port of udp server
-    def set_ip( self,ip ="127.0.0.1", port = 5005 ):
-         self.ip    = ip
-         self.port  = port
+    def set_ip( self,ip ="127.0.0.1", port = 6379 ):
+         pass
 
 #read_bits
 #Request
@@ -612,7 +611,7 @@ if __name__ == "__main__":
     # Remove window fire wall before running this test
     #
     instrument = Modbus_Instrument()
-    #instrument.set_ip("192.168.1.84",5005)
+    instrument.set_ip("192.168.1.84",5005)
     for i in range(0,1):
         print( instrument.read_bits( 100, 0x4063, 50 ,  functioncode=1))
     
@@ -624,11 +623,13 @@ if __name__ == "__main__":
     for i in range(0,1):
          #
          print( instrument.write_registers( modbus_address=100, registeraddress = 20, functioncode = 16,value=[ 10,20,30,40,50,60,70,80,90,100] ))
+         time.sleep(1)
          print( instrument.read_registers( modbus_address=100, registeraddress=20, register_number=10, functioncode = 3))
-         print( instrument.write_registers( modbus_address=100, registeraddress = 20, functioncode = 16,value=[ 0,0,0,0,0,0,0,0,0,0] ))
+         #print( instrument.write_registers( modbus_address=100, registeraddress = 20, functioncode = 16,value=[ 0,0,0,0,0,0,0,0,0,0] ))
          print( instrument.read_registers( modbus_address=100, registeraddress=1, register_number=10, functioncode=3, signed=False))
     print( instrument.read_bits( 100, 61449, 10, functioncode = 2 ))
     print( instrument.read_floats(100, 0x7000, 2, functioncode=3) )
-    print( instrument.read_registers( modbus_address=40, registeraddress = 0, register_number=10, functioncode = 3 ))
+    
+    print( instrument.read_registers( modbus_address=121, registeraddress = 0, register_number=1, functioncode = 3 ))
 
     quit()
