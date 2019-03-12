@@ -194,6 +194,7 @@ class Eto_Management(object):
         pass
 
     def update_sprinklers_time_bins_old(self, eto_data):
+        
         keys = self.redis_old.hkeys("ETO_RESOURCE")
         #print "keys", keys
         for j in keys:
@@ -201,10 +202,10 @@ class Eto_Management(object):
                 temp = self.redis_old.hget("ETO_RESOURCE", j)
                 temp = float(temp)
             except BaseException:
-                #print "exception"
+                print( "exception" , j)
                 temp = 0
             temp = temp + float(eto_data)
-            #print "j===========", j, temp
+            print( "j===========", j, temp)
             self.redis_old.hset("ETO_RESOURCE", j, temp)
 
     #

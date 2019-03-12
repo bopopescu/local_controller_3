@@ -28,9 +28,10 @@ class Manage_Eto(object):
      
 
    def setup_sprinkler( self, sprinkler_object ):
-       
+       print("made it here $$$$$$$$$$$$$$$$$$$$")
        return_value = True  # let sprinkler operation go thru
        self.json_object = sprinkler_object.json_object
+      
        if ( self.json_object["restart"] == True) and ("eto_active" in self.json_object):
            return return_value  # all ready setup in previous pass       
 
@@ -38,6 +39,7 @@ class Manage_Eto(object):
              self.json_object["eto_active"] = False
            
        elif self.get_manage_flag() == True:
+          
            return_value = self.eto_run_time_correction() 
        else:
            self.json_object["eto_enabled"] = False #eto manage flag set to zero or False
@@ -104,6 +106,7 @@ class Manage_Eto(object):
 
 
    def find_queue_names( self, io_list ):
+       print("io_list ",io_list)
        eto_values = []
        for j in io_list:
            controller = j["remote"]
@@ -111,9 +114,14 @@ class Manage_Eto(object):
            bit        = bits[0] 
            index = 0
            for m in self.eto_site_data:
-               if (m["controller"] == controller) and (m["pin"] == bit): 
+               
+
+               if (m["controller"] == controller) and (int(m["pin"]) in bits): 
                    queue_name = controller+"|"+str(bit)
                    data = self.redis_handle.hget( "ETO_RESOURCE", queue_name )
+                   if data == None :
+                        self.redis_handle.hset( "ETO_RESOURCE", queue_name,0.0 )
+                        data = 0.0
                    eto_values.append( [index, data, queue_name ] )
                index = index +1
        
@@ -122,6 +130,7 @@ class Manage_Eto(object):
 
    def find_largest_runtime( self, run_time, sensor_list ):
        runtime = 0
+       print("sensor list $$$$$$$$$$$$$$$$$$$ ",sensor_list)
        for j in sensor_list:
            index = j[0]
            deficient = float(j[1])
