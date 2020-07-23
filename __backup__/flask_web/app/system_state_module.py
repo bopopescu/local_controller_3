@@ -132,7 +132,7 @@ class System_state_modules:
       return_data["coil_current"]           = redis_handle.get( "coil_current" )
       return_data["eto_yesterday"]          = redis_handle.get( "YESTERDAY_ETO" )
       return_data["eto_current"]            = redis_handle.get( "CURRENT_ETO" )
-      return_data["eto_master_valve"]       = redis_handle.get("MASTER_VALVE_SETUP")
+      return_data["eto_main_valve"]       = redis_handle.get("MASTER_VALVE_SETUP")
       return_data["eto_managment_flag"]     = redis_handle.get("ETO_MANAGE_FLAG")
       temp = json.dumps(return_data)
       return temp
